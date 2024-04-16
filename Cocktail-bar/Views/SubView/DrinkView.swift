@@ -96,6 +96,7 @@ struct DrinkView: View {
                 .padding(.bottom, 20)
                 .padding(.horizontal, 40)
             }
+            
         }
     }
 }
