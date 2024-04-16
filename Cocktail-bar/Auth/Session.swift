@@ -75,7 +75,9 @@ class SessionStore: ObservableObject {
         isLoggedIn = false
         username = ""
         userSession?.isLoggedIn = false
-        LocalStorageManager.shared.saveUser(userSession!)
+        if(userSession != nil){
+            LocalStorageManager.shared.saveUser(userSession!)
+        }
     }
     
     func deleteUser() {

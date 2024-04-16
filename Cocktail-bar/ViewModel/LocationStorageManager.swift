@@ -70,6 +70,7 @@ class LocalStorageManager {
             UserDefaults.standard.set(encodedData, forKey: favoritesKey)
         }
         DrinkManager.shared.onlyYourIngredients() //reset drinks
+        DrinkManager.shared.signatureCocktails = LocalStorageManager.shared.retrieveFavoriteItems()
     }
     
     func addFavoriteItem(newItem: Ingredient) {

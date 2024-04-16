@@ -20,11 +20,11 @@ struct AboutView: View {
                     .padding(.leading, 40)
                 ScrollView {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Welcome to Cocktail Curator, the innovative iOS app designed to transform your home bartending experience. Whether you're a cocktail aficionado or a newcomer eager to explore the world of mixology, our app is your personal guide to crafting delightful drinks with ingredients you already have at home or even those you're looking to experiment with.")
+                        Text("Welcome to Cabinet Cocktails, the innovative iOS app designed to transform your home bartending experience. Whether you're a cocktail aficionado or a newcomer eager to explore the world of mixology, our app is your personal guide to crafting delightful drinks with ingredients you already have at home or even those you're looking to experiment with.")
                         
                         SectionHeader(title: "Discover New Cocktails")
                         
-                        Text("Cocktail Curator is built on the idea that making cocktails should be fun, accessible, and creative. Our extensive database features a wide range of cocktail recipes from classic favorites to modern concoctions, ensuring there's something for every taste and occasion.")
+                        Text("Cabinet Cocktails is built on the idea that making cocktails should be fun, accessible, and creative. Our extensive database features a wide range of cocktail recipes from classic favorites to modern concoctions, ensuring there's something for every taste and occasion.")
                         
                         SectionHeader(title: "Personalized Recommendations")
                         
@@ -44,7 +44,7 @@ struct AboutView: View {
                             FeaturePoint(text: "Learn and Experiment: Learn about new ingredients, cocktail history, and mixing techniques.")
                         }
                         
-                        Text("Thanks for downloading the Cocktail Curator today and start mixing like a pro! Cheers to your next unforgettable cocktail.")
+                        Text("Thanks for downloading the Cabinet Cocktails today and start mixing like a pro! Cheers to your next unforgettable cocktail.")
                             .font(.footnote)
                             .foregroundColor(.secondary)
                     }
