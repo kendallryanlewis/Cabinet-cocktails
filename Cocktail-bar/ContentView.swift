@@ -14,7 +14,7 @@ struct ContentView: View {
     var body: some View {
         ZStack{
             LoadingScreen()
-            NavigationView {
+            Group {
                 if(session.isLoggedIn){
                     MainView()
                 }else{
@@ -30,6 +30,34 @@ struct ContentView: View {
                 }
                 .onAppear(){
                 session.verifyUser()
+            }
+        }
+    }
+}
+struct ContentView2: View {
+    @EnvironmentObject var session: SessionStore
+    @State private var opacity = 0.0
+
+    var body: some View {
+        ZStack{
+            LoadingScreen()
+            
+            Group {
+                if session.isLoggedIn {
+                    MainView()
+                } else {
+                    LoginView()
+                }
+            }
+        }
+        .opacity(opacity) // Apply the opacity
+        .onAppear {
+            // Combine session verification and opacity animation
+            session.verifyUser()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+                withAnimation(.easeInOut(duration: 2)) {
+                    opacity = 1.0
+                }
             }
         }
     }

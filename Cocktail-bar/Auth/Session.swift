@@ -17,19 +17,28 @@ enum loginStatus: String, Codable {
 }
 
 class SessionStore: ObservableObject {
-    var userSession: User?
+    @Published var userSession: User?
     @Published var isLoggedIn: Bool = false // Example: Session state, change as needed
     @Published var loading = false
     @Published var username: String = ""    // Example: User data, change as needed
     @Published var tutorial: Bool = true
     
-    func verifyUser(){
+    func verifyUser2(){
         let user = LocalStorageManager.shared.retrieveUser()
         print(user)
         if(user.isLoggedIn){
             userSession = LocalStorageManager.shared.retrieveUser()
             print(userSession)
             isLoggedIn = true
+        }
+    }
+    func verifyUser(completion: (() -> Void)? = nil) {
+        if let user = LocalStorageManager.shared.retrieveUser() ?? nil{
+            DispatchQueue.main.async { [weak self] in
+                self?.userSession = user
+                self?.isLoggedIn = user.isLoggedIn
+                completion?()
+            }
         }
     }
 
