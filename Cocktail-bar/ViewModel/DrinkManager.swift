@@ -101,23 +101,53 @@ class DrinkManager: ObservableObject {
         //print(matchingDrinks.map { $0.strDrink }) // Print drink names for readability
     }
     
+    func getQuickDrinkPossibilities(ingredients: [Ingredient]) -> [DrinkDetails]? {
+        // Ensure that there are drinks to search through
+        guard let allDrinks = DrinkManager.shared.allDrinks, !allDrinks.isEmpty else { return nil }
+        
+        // Prepare the set of target ingredients with the desired capitalization
+        let targetIngredientsSet = Set(ingredients.map { $0.name.lowercased() })
+
+        // Debugging: Print the target ingredients to the console
+        print(targetIngredientsSet)
+        
+        // Initialize an array to store matching drinks
+        var matchingDrinks: [DrinkDetails] = []
+
+        // Iterate through all drinks
+        for drink in allDrinks {
+            // Prepare the set of the drink's ingredients with the same capitalization rules
+            let drinkIngredientsSet = Set(drink.getIngredients().map { $0.lowercased() })
+            
+            // Check if the drink's ingredients are a subset of the target ingredients
+            if drinkIngredientsSet.isSubset(of: targetIngredientsSet) {
+                matchingDrinks.append(drink)
+            }
+        }
+
+        // Debugging: Print the matching drinks to the console
+        print(matchingDrinks)
+        
+        // Return the matching drinks if any, or nil if there are none
+        return matchingDrinks.isEmpty ? nil : matchingDrinks
+    }
+
+    
     // Function to get get drink that can be made with your ingredients
     func searchIngredients(ingredients: [Ingredient]) -> [DrinkDetails]? {
         guard let allDrinks = DrinkManager.shared.allDrinks else { return nil }
         
-        // Convert the [Ingredient] to [String] for comparison
-        let searchIngredientNames = ingredients.map { $0.name.lowercased() }
+        let searchIngredientNames = Set(ingredients.map { $0.name.lowercased() })
         
         let filteredDrinks = allDrinks.filter { drink in
-            let drinkIngredients = drink.getIngredients().map { $0.lowercased() }
+            let drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
             // Check if all search ingredients are contained within a drink's ingredients
-            return searchIngredientNames.allSatisfy { searchIngredient in
-                drinkIngredients.contains(where: { $0.contains(searchIngredient) })
-            }
+            return searchIngredientNames.isSubset(of: drinkIngredients)
         }
         
-        return filteredDrinks
+        return filteredDrinks.isEmpty ? nil : filteredDrinks
     }
+
 
 
     // Assuming IngredientType and DrinkDetails are defined elsewhere

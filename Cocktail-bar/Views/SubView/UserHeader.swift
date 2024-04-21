@@ -17,7 +17,7 @@ struct UserHeader: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text("Hello, \(user.username)!")
                     .font(.title2)
-                    .fontWeight(.bold)
+                    .bold()
                 Text(user.email)
                     .font(.caption)
             }.foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : .white)

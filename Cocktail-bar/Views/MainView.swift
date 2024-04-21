@@ -22,6 +22,7 @@ struct MainView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var session: SessionStore
     @State private var isMenuOpen = true
+    @State var newUser = LocalStorageManager.shared.getWelcome()
     @State var openPopover = false
     @State var viewPage: pages = .home
     
@@ -38,9 +39,10 @@ struct MainView: View {
                     case .cabinet:
                         TopShelfView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
                     case .signatures:
-                        SignaturesView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
+                        SignaturesView(isMenuOpen: $isMenuOpen, viewPage: $viewPage).opacity(isMenuOpen ? 0 : 1)
                     case .mixology:
-                        MixologyView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
+                        MixologyView(isMenuOpen: $isMenuOpen)
+                            .opacity(isMenuOpen ? 0 : 1)
                     case .quick:
                         SearchView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
                     case .contact:
@@ -111,6 +113,10 @@ struct MainView: View {
         }.onAppear(){
             // set all drinks in intial set up
             DrinkManager.shared.setUp()
+            LocalStorageManager.shared.showWelcome(show: false)
+         }
+        .sheet(isPresented: $newUser) {
+            WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
         }
     }
 }

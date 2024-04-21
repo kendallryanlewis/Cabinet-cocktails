@@ -92,11 +92,11 @@ struct DrinkView: View {
                     .background(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
                     .foregroundColor(colorScheme == .dark ? .darkGray : COLOR_PRIMARY)
                     .cornerRadius(8)
+                    .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
                 }
                 .padding(.bottom, 20)
                 .padding(.horizontal, 40)
             }
-            
         }
     }
 }

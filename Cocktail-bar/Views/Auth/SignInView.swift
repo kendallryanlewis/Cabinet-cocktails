@@ -19,19 +19,15 @@ struct SignInView: View {
     var body: some View {
         ZStack{
             VStack(){
-                /*Spacer()
-                Image(IMAGE_LOGO)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width:300)*/
                 Spacer()
                 HStack(){
-                    Text(TEXT_SIGN_IN).font(.largeTitle).bold().foregroundStyle(.white)
+                    Text(TEXT_SIGN_IN)
+                        .font(.largeTitle).bold()
+                        .foregroundStyle(colorScheme == .dark ? .white : .darkGray)
                     Spacer()
                 }.padding(.horizontal, 30)
                 RoundedRectangle(cornerRadius: 15)
                 .fill(Color.white.opacity(0.0))
-                //.blurBackground(style: (colorScheme == .light ? .systemUltraThinMaterialLight : .systemThickMaterialLight))
                 .overlay(
                     VStack(alignment: .leading){
                         GenericTextField(text: $email, placeholder: TEXT_EMAIL, isSecure: false)

@@ -15,6 +15,23 @@ class LocalStorageManager {
     private let UserKey = "User" // Key for UserDefaults
     private let topShelfKey = "TopShelf" // Key for UserDefaults
     private let favoritesKey = "Favorites" // Key for UserDefaults
+    private let showHomeWeb = "ShowHomeWeb" // Key for UserDefaults
+    
+    func showWelcome(show: Bool) {
+        print("Setting show to:", show)
+        UserDefaults.standard.set(show, forKey: showHomeWeb)
+    }
+
+    func getWelcome() -> Bool {
+        // Check if the key exists in UserDefaults
+        if UserDefaults.standard.object(forKey: showHomeWeb) != nil {
+            // If exists, return the stored Boolean value
+            return UserDefaults.standard.bool(forKey: showHomeWeb)
+        } else {
+            // If not exists, return default value as true
+            return true
+        }
+    }
     
     // Function to retrieve items from local storage
     func retrieveTopShelfItems() -> [String] {
@@ -110,7 +127,7 @@ class LocalStorageManager {
     func deleteUser() {
         // Remove a value for a specific key from UserDefaults
         UserDefaults.standard.removeObject(forKey: UserKey)
-
+        
         // To remove all values from UserDefaults, you can reset it
         if let appDomain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: appDomain)

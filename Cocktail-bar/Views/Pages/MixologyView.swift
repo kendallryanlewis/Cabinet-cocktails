@@ -32,8 +32,8 @@ struct MixologyView: View {
             tabView
         }
         .onAppear(perform: DrinkManager.shared.onlyYourIngredients)
-        .popover(isPresented: $showSlider, content: sliderPopover)
-        .popover(isPresented: $showMyPossibilities, content: possibilitiesPopover)
+        .sheet(isPresented: $showSlider, content: sliderPopover)
+        .sheet(isPresented: $showMyPossibilities, content: possibilitiesPopover)
     }
 
     private var backgroundGradient: some View {
@@ -55,21 +55,26 @@ struct MixologyView: View {
     }
 
     private var mixologyHeader: some View {
-        VStack(alignment: .center) {
-            Text(MIXOLOGY_TEXT).bold().font(.title)
-                .foregroundColor(colorScheme == .dark ? .white : .darkGray)
-            Text(MIXOLOGY_DESCRIPTION_TEXT)
-                .foregroundColor(colorScheme == .dark ? COLOR_SECONDARY : .darkGray).multilineTextAlignment(.center)
+        HStack{
+            Spacer()
+            VStack(alignment: .center) {
+                Text(MIXOLOGY_TEXT).bold().font(.title)
+                    .foregroundColor(colorScheme == .dark ? .white : .white)
+                Text(MIXOLOGY_DESCRIPTION_TEXT)
+                    .foregroundColor(colorScheme == .dark ? COLOR_SECONDARY : .white).multilineTextAlignment(.center)
+            }
+            Spacer()
         }
     }
 
     private var cartButton: some View {
         Button(action: {
-            showMyPossibilities = DrinkManager.shared.myDrinkPossibilities != nil
+            showMyPossibilities = DrinkManager.shared.myDrinkPossibilities != []
+            print(showMyPossibilities)
         }) {
             HStack {
                 Spacer()
-                Text(DrinkManager.shared.myDrinkPossibilities != nil ? VIEW_CART : COMBINATION_ERROR).padding()
+                Text(VIEW_CART).padding()
                 Spacer()
             }
         }
@@ -80,12 +85,16 @@ struct MixologyView: View {
 
     private var tabView: some View {
         TabView(selection: $selection) {
-            VStack(alignment: .leading, spacing: 20) {
-                Spacer()
-                mixologyHeader
-                cartButton
+            if(DrinkManager.shared.myDrinkPossibilities != []){
+                VStack(alignment: .leading, spacing: 20) {
+                    Spacer()
+                    mixologyHeader
+                        .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
+                    cartButton
+                        .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
+                }
+                .padding(40)
             }
-            .padding(40)
             ForEach(LocalStorageManager.shared.retrieveTopShelfItems().indices, id: \.self) { index in
                 DrinkView(category: LocalStorageManager.shared.retrieveTopShelfItems()[index], drinksByCategory: [:], showMore: $showMore, showSlider: $showSlider, selection: $selection, popoverSelection: $popoverSelection, cocktailList: $cocktailList)
                     .tag(index + 1)

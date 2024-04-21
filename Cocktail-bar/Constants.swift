@@ -42,7 +42,7 @@ let SEARCH_TEXT = "Search All Drinks"
 
 //Mixology Page
 let MIXOLOGY_TEXT = "Mixology"
-let MIXOLOGY_DESCRIPTION_TEXT = "View customizations that you can make with your drinks only!"
+let MIXOLOGY_DESCRIPTION_TEXT = "It appears you have multiple cocktail options available. Click to view the complete list."
 let VIEW_CART = "View Cabinet"
 let COMBINATION_ERROR = "No Options available"
 
@@ -52,6 +52,7 @@ let CABINET_TEXT = "Cabinet"
 let ADD_REMOVE_CABINET = "Add and remove spirits to your collection."
 let SEARCH_SHELF = "Add to cabinet"
 let SEARCH_SHELF_RESULTS = "View Results"
+
 //Logos
 let IMAGE_LOGO = "AppIcon"
 let IMAGE_USER_PLACEHOLDER = "user-placeholder"
@@ -59,6 +60,12 @@ let IMAGE_PHOTO = "plus.circle"
 
 //Search / Quick mix
 let QUICK_MIX_TEXT = "Quick Mix"
-let QUICK_MIX_DESCRIPTION_TEXT = "Add the ingredients and begin to mix your drinks."
+let QUICK_MIX_DESCRIPTION_TEXT = "Add the ingredients to see what drinks can be made with your selections."
 let VIEW_MIXES = "View Mixes"
-let VIEW_CABINET = "Update Cabinet"
+let VIEW_CABINET = "Add more to Cabinet"
+
+
+let NO_COCKTAILS_FOUND = "Unfortunately, there are no options available for these items. Please try adding some different ingredients."
+let COCKTAILS_TEXT = "Cocktails"
+
+let WEBSITE_URL = "https://kendallryanlewis.github.io"

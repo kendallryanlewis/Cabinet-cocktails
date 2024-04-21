@@ -89,7 +89,8 @@ struct MenuView: View {
                     .onTapGesture {
                         session.signOut()
                     }
-            }.foregroundColor(colorScheme == .dark ? .white : COLOR_GOLD)
+            }.foregroundColor(colorScheme == .dark ? .white : .white)
+                .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
         }.padding(EdgeInsets.mainBorder)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }

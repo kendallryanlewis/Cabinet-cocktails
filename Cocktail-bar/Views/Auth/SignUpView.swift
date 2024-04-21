@@ -11,12 +11,12 @@ struct SignUpView: View {
     @EnvironmentObject var session: SessionStore
     @Environment(\.colorScheme) private var colorScheme
     @Binding var newUserRegistration: Bool
+    @State private var showingWebView = false
     @State private var username = ""
     @State private var email = ""
     @State private var password = ""
     @State private var confirmPassword = ""
 
-    
     var body: some View {
         VStack(){
             HStack(){
@@ -27,35 +27,46 @@ struct SignUpView: View {
                         Image(systemName: "chevron.backward")
                             .font(.headline).bold()
                         Text("Sign Up!")
-                    }.foregroundColor(.white)
+                    }
                 })
                 Spacer()
             }.padding()
             Spacer()
             HStack(){
                 Text(TEXT_SIGN_UP)
-                    .font(.largeTitle).bold().foregroundStyle(.white)
+                    .font(.largeTitle).bold()
+                    .foregroundStyle(colorScheme == .dark ? .white : .darkGray)
                 Spacer()
             }.padding(.horizontal, 30)
             RoundedRectangle(cornerRadius: 15)
             .fill(Color.black.opacity(0.0))
             //.blurBackground(style: (colorScheme == .light ? .systemThinMaterialLight : .systemThickMaterialLight))
             .overlay(
-                VStack(alignment: .leading){
+                VStack(alignment: .center){
                     GenericTextField(text: $username,placeholder: TEXT_USERNAME, isSecure: false)
                     GenericTextField(text: $email, placeholder: TEXT_EMAIL, isSecure: false)
                     GenericTextField(text: $password, placeholder: TEXT_PASSWORD, isSecure: true)
                     GenericTextField(text: $confirmPassword, placeholder: TEXT_CONFRIM_PASSWORD, isSecure: true)
-                    Text(TEXT_TERMS_APPLY_TAG)
-                        .font(.footnote)
-                        .foregroundColor(colorScheme == .light ? .white : .gray)
-                        .padding()
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                        .lineSpacing(10)
+                    
+                    Button(action: {
+                        showingWebView = true
+                    }, label: {
+                        Text(TEXT_TERMS_APPLY_TAG)
+                            .font(.footnote)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .padding()
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .lineSpacing(10)
+                    })
+                    .sheet(isPresented: $showingWebView) {
+                        WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails/Terms.html")!)
+                    }
+                    
                     GenericButton(title: TEXT_CONSENT) {
                         if session.signUp(username: username, email: email,  password: password, confirmPassword: confirmPassword) {
                             newUserRegistration = true
+                            LocalStorageManager.shared.showWelcome(show: true)
                         } else {
                             print("KNDL - Error 1")
                         }

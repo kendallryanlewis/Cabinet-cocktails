@@ -12,6 +12,7 @@ struct ContactView: View {
     @Environment(\.colorScheme) var colorScheme
     @Binding var isMenuOpen: Bool
     @State private var showingMailView = false
+    @State private var showingWebView = false
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var message: String = ""
@@ -77,11 +78,29 @@ struct ContactView: View {
                 .background(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
                 .cornerRadius(8)
                 .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
+                HStack{
+                    Spacer()
+                    Button(action: {
+                        showingWebView = true
+                    }, label: {
+                        Text("View More")
+                            .font(.footnote)
+                            .foregroundColor(colorScheme == .dark ? .white : .black)
+                            .padding()
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            .lineSpacing(10)
+                    })
+                    Spacer()
+                }
             }
             .padding(40)
         }
         .sheet(isPresented: $showingMailView) {
             MailView(subject: "Contact from \(name)", messageBody: "Name: \(name)\nEmail: \(email)\nMessage: \(message)")
+        }
+        .sheet(isPresented: $showingWebView) {
+            WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
         }
     }
 }
@@ -112,7 +131,7 @@ struct TransparentTextEditor: UIViewRepresentable {
 struct MailView: UIViewControllerRepresentable {
     @Environment(\.presentationMode) var presentationMode
     var subject: String = ""
-    var recipients: [String] = ["support@gmail.com"] // Default recipient
+    var recipients: [String] = ["kndl.inc@gmail.com"] // Default recipient
     var messageBody: String = ""
     
     class Coordinator: NSObject, MFMailComposeViewControllerDelegate {

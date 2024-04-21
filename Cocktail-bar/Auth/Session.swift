@@ -23,19 +23,11 @@ class SessionStore: ObservableObject {
     @Published var username: String = ""    // Example: User data, change as needed
     @Published var tutorial: Bool = true
     
-    func verifyUser2(){
-        let user = LocalStorageManager.shared.retrieveUser()
-        print(user)
-        if(user.isLoggedIn){
-            userSession = LocalStorageManager.shared.retrieveUser()
-            print(userSession)
-            isLoggedIn = true
-        }
-    }
     func verifyUser(completion: (() -> Void)? = nil) {
         if let user = LocalStorageManager.shared.retrieveUser() ?? nil{
             DispatchQueue.main.async { [weak self] in
                 self?.userSession = user
+                self?.username = user.username
                 self?.isLoggedIn = user.isLoggedIn
                 completion?()
             }
@@ -69,12 +61,16 @@ class SessionStore: ObservableObject {
     
     // Method to handle sign-up
     func signUp(username: String, email: String, password: String, confirmPassword: String) -> Bool {
+        deleteUser()
         if username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || password != confirmPassword {
             return false // Sign-up failed
         }
+        let newUser = User(uid: "", email: email, profileImageUrl: "", username: username, password: password, isLoggedIn: true)
         // If the sign-up is successful, update the session state
-        LocalStorageManager.shared.saveUser(User(uid: "", email: email, profileImageUrl: "", username: username, password: password, isLoggedIn: true))
+        LocalStorageManager.shared.saveUser(newUser)
+        userSession = newUser
         isLoggedIn = true
+        LocalStorageManager.shared.showWelcome(show: true)
         return true
     }
 
@@ -84,19 +80,13 @@ class SessionStore: ObservableObject {
         isLoggedIn = false
         username = ""
         userSession?.isLoggedIn = false
-        if(userSession != nil){
-            LocalStorageManager.shared.saveUser(userSession!)
-        }
     }
     
     func deleteUser() {
         // Implement your sign-out logic here
         LocalStorageManager.shared.deleteUser()
         isLoggedIn = false
+        userSession = nil
         username = ""
     }
-    
-    /*func listenAuthenticationState() -> User {
-        return User(uid: "klanfajfkamsdf", email: "kendall.ryan.lewis@gmail.com", profileImageUrl: "", username: "Kendallryanlewis", tutorial: false, userAgreement: false, keywords: [], privileges: [])
-    }*/
 }

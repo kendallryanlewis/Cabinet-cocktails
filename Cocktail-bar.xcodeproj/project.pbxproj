@@ -47,6 +47,7 @@
 		5C3097512BA91F10006DD90D /* LocationStorageManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3097502BA91F10006DD90D /* LocationStorageManager.swift */; };
 		5C3097552BAD354C006DD90D /* DrinkTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C3097542BAD354C006DD90D /* DrinkTabView.swift */; };
 		5C55464F2BB3AA080044615F /* SystemSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C55464E2BB3AA080044615F /* SystemSettingsManager.swift */; };
+		5C63B4702BD2C8EB00D93580 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C63B46F2BD2C8EB00D93580 /* WebView.swift */; };
 		5C6B12CE2BB8C24300DBE149 /* DrinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6B12CD2BB8C24300DBE149 /* DrinkManager.swift */; };
 		5CB12FA52BBB4C390035DF02 /* DrinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB12FA42BBB4C390035DF02 /* DrinkView.swift */; };
 		5CB12FA72BBB4C580035DF02 /* SubDrinkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB12FA62BBB4C580035DF02 /* SubDrinkListView.swift */; };
@@ -114,6 +115,7 @@
 		5C3097502BA91F10006DD90D /* LocationStorageManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationStorageManager.swift; sourceTree = "<group>"; };
 		5C3097542BAD354C006DD90D /* DrinkTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkTabView.swift; sourceTree = "<group>"; };
 		5C55464E2BB3AA080044615F /* SystemSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemSettingsManager.swift; sourceTree = "<group>"; };
+		5C63B46F2BD2C8EB00D93580 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		5C6B12CD2BB8C24300DBE149 /* DrinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkManager.swift; sourceTree = "<group>"; };
 		5CB12FA42BBB4C390035DF02 /* DrinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkView.swift; sourceTree = "<group>"; };
 		5CB12FA62BBB4C580035DF02 /* SubDrinkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubDrinkListView.swift; sourceTree = "<group>"; };
@@ -257,6 +259,7 @@
 				5C3097502BA91F10006DD90D /* LocationStorageManager.swift */,
 				5C55464E2BB3AA080044615F /* SystemSettingsManager.swift */,
 				5C6B12CD2BB8C24300DBE149 /* DrinkManager.swift */,
+				5C63B46F2BD2C8EB00D93580 /* WebView.swift */,
 			);
 			path = ViewModel;
 			sourceTree = "<group>";
@@ -453,6 +456,7 @@
 				5C3097362BA2A12B006DD90D /* SignUpView.swift in Sources */,
 				5C1811BF2BC5C0B900B9BE95 /* SearchView.swift in Sources */,
 				5C55464F2BB3AA080044615F /* SystemSettingsManager.swift in Sources */,
+				5C63B4702BD2C8EB00D93580 /* WebView.swift in Sources */,
 				5C3097492BA7CDAA006DD90D /* SearchBar.swift in Sources */,
 				5C30972A2BA2A12B006DD90D /* Session.swift in Sources */,
 				5C30974D2BA919CE006DD90D /* MixologyView.swift in Sources */,
@@ -653,6 +657,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -687,6 +692,7 @@
 				INFOPLIST_KEY_UIStatusBarHidden = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

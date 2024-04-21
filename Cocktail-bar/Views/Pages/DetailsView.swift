@@ -249,12 +249,11 @@ struct DetailsView: View {
         }.ignoresSafeArea()
         .onAppear() {
             self.cocktailDetails = DrinkManager.shared.findDrinkByName(name: cocktail)
-            dump(cocktailDetails)
             if LocalStorageManager.shared.retrieveFavoriteItems().contains(where: { $0.name == cocktail }) {
                 isFilled = true
             }
         }
-        .popover(isPresented: $showDetails) {
+        .sheet(isPresented: $showDetails) {
             DetailsSubView(cocktailDetails: cocktailDetails!, tagArray: tagArray ?? [])
         }
     }
@@ -278,22 +277,7 @@ struct DetailsSubView: View {
     @State var tagArray: [String]
     var body: some View {
         if cocktailDetails.strVideo != nil {
-            WebView(urlString: cocktailDetails.strVideo!).frame(height: .infinity)
-        }
-    }
-}
-
-struct WebView: UIViewRepresentable {
-    let urlString: String
-
-    func makeUIView(context: Context) -> WKWebView {
-        return WKWebView()
-    }
-
-    func updateUIView(_ uiView: WKWebView, context: Context) {
-        if let url = URL(string: urlString) {
-            let request = URLRequest(url: url)
-            uiView.load(request)
+            WebVideoView(urlString: cocktailDetails.strVideo!).frame(height: .infinity)
         }
     }
 }
