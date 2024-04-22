@@ -39,8 +39,8 @@ class SessionStore: ObservableObject {
         // Implement your sign-in logic here
         // For example, check username and password, and update the session state accordingly
         var user = LocalStorageManager.shared.retrieveUser()
-        if email.lowercased() == user.email.lowercased() && password == user.password
-            || username.lowercased() == user.username.lowercased() && password == user.password {
+        if (email.lowercased() == user.email.lowercased() && password == user.password
+            || username.lowercased() == user.username.lowercased() && password == user.password) && email != "" && password != "" {
             isLoggedIn = true
             userSession = user
             user.isLoggedIn = true
