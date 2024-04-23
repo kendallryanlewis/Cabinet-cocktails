@@ -8,6 +8,7 @@
 import SwiftUI
 
 let API_URL = "https://www.thecocktaildb.com/api/json/v2/9973533/"
+let WEBSITE_URL = "https://www.kndl-inc.com/"
 
 // Default App
 let COMPANY_NAME = "KNDL"
@@ -68,4 +69,3 @@ let VIEW_CABINET = "Add more to Cabinet"
 let NO_COCKTAILS_FOUND = "Unfortunately, there are no options available for these items. Please try adding some different ingredients."
 let COCKTAILS_TEXT = "Cocktails"
 
-let WEBSITE_URL = "https://kendallryanlewis.github.io"

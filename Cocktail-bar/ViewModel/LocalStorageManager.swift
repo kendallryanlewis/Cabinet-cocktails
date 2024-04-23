@@ -11,14 +11,25 @@ import SwiftUI
 class LocalStorageManager {
     static let shared = LocalStorageManager() // Singleton instance
     
-    private let activeUser = "true" // Key for UserDefaults
+    private let activeKey = "ActiveUser" // Key for UserDefaults
     private let UserKey = "User" // Key for UserDefaults
     private let topShelfKey = "TopShelf" // Key for UserDefaults
     private let favoritesKey = "Favorites" // Key for UserDefaults
     private let showHomeWeb = "ShowHomeWeb" // Key for UserDefaults
     
+    func setActiveUser(isLoggedIn: Bool){
+        UserDefaults.standard.set(isLoggedIn, forKey: activeKey)
+    }
+    func getActiveUser() -> Bool{
+        if UserDefaults.standard.object(forKey: activeKey) != nil {
+            return UserDefaults.standard.bool(forKey: activeKey)
+        } else {
+            // If not exists, return default value as true
+            return false
+        }
+    }
+    
     func showWelcome(show: Bool) {
-        print("Setting show to:", show)
         UserDefaults.standard.set(show, forKey: showHomeWeb)
     }
 
@@ -121,6 +132,7 @@ class LocalStorageManager {
         if let encodedData = try? JSONEncoder().encode(user) {
             // Save Data to UserDefaults
             UserDefaults.standard.set(encodedData, forKey: UserKey)
+            setActiveUser(isLoggedIn: true)
         }
     }
     
@@ -132,5 +144,6 @@ class LocalStorageManager {
         if let appDomain = Bundle.main.bundleIdentifier {
             UserDefaults.standard.removePersistentDomain(forName: appDomain)
         }
+        setActiveUser(isLoggedIn: false)
     }
 }
