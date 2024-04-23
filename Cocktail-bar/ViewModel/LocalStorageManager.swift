@@ -1,5 +1,5 @@
 //
-//  LocationStorageManager.swift
+//  LocalStorageManager.swift
 //  Cocktail-bar
 //
 //  Created by Kendall Lewis on 3/18/24.

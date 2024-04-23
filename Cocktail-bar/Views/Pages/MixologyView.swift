@@ -21,6 +21,7 @@ struct MixologyView: View {
     @State private var showSlider = false
     @State private var showMyPossibilities = false
     @State private var cocktailDetails: DrinkDetails?
+    @Binding var viewPage: pages
     
     var filteredAlcoholTypes: [Ingredient] {
         DrinkManager.shared.allIngredients?.filter { $0.name.lowercased().contains(searchTextSpirits.lowercased()) } ?? []
@@ -28,8 +29,43 @@ struct MixologyView: View {
 
     var body: some View {
         ZStack {
-            backgroundGradient
-            tabView
+            if(LocalStorageManager.shared.retrieveTopShelfItems() != []){
+                backgroundGradient
+                tabView
+            }else{
+                ZStack{
+                    GeometryReader { geometry in
+                        Image("emptyBar")
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: geometry.size.width, height: geometry.size.height)
+                            .clipped()
+                            .ignoresSafeArea()
+                    }
+                    .ignoresSafeArea()
+                    VStack{
+                        Spacer()
+                        Text("You currently have no ingredients selected.")
+                            .foregroundColor(.white).font(.headline)
+                        Button(action: {
+                            withAnimation {
+                                viewPage = .cabinet
+                            }
+                        }) {
+                            HStack {
+                                Spacer()
+                                Text("View Mixology")
+                                    .padding()
+                                Spacer()
+                            }
+                        }
+                        .background(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
+                        .foregroundColor(colorScheme == .dark ? .darkGray : COLOR_PRIMARY)
+                        .cornerRadius(8)
+                    }.padding(40)
+                        .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
+                }
+            }
         }
         .onAppear(perform: DrinkManager.shared.onlyYourIngredients)
         .sheet(isPresented: $showSlider, content: sliderPopover)

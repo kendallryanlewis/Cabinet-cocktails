@@ -41,7 +41,7 @@ struct MainView: View {
                     case .signatures:
                         SignaturesView(isMenuOpen: $isMenuOpen, viewPage: $viewPage).opacity(isMenuOpen ? 0 : 1)
                     case .mixology:
-                        MixologyView(isMenuOpen: $isMenuOpen)
+                    MixologyView(isMenuOpen: $isMenuOpen, viewPage: $viewPage)
                             .opacity(isMenuOpen ? 0 : 1)
                     case .quick:
                         SearchView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)

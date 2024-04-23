@@ -10,9 +10,12 @@ import MessageUI
 
 struct ContactView: View {
     @Environment(\.colorScheme) var colorScheme
+    @EnvironmentObject var session: SessionStore
     @Binding var isMenuOpen: Bool
     @State private var showingMailView = false
     @State private var showingWebView = false
+    @State private var showingConfirmation = false
+    @State private var actionConfirmed = false
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var message: String = ""
@@ -23,10 +26,18 @@ struct ContactView: View {
                 // Title and description
                 HStack{
                     VStack(alignment: .leading){
-                        Text("Contact Us")
+                        Text("Contact & Help")
                             .bold()
                             .font(.title)
                             .foregroundColor(colorScheme == .dark ? .white : .darkGray)
+                        HStack(spacing:3){
+                            Button(action: {
+                                showingWebView = true
+                            }, label: {
+                                Text("Need more help click to view the help page: Cabinet Cocktails")
+                                    .foregroundColor(colorScheme == .dark ? .white : .black).bold()
+                            })
+                        }
                     }
                     Spacer().frame(width: 100)
                 }.padding(.bottom)
@@ -80,18 +91,19 @@ struct ContactView: View {
                 .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
                 HStack{
                     Spacer()
-                    Button(action: {
-                        showingWebView = true
-                    }, label: {
-                        Text("View More")
-                            .font(.footnote)
-                            .foregroundColor(colorScheme == .dark ? .white : .black)
-                            .padding()
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal)
-                            .lineSpacing(10)
-                    })
+                    Button("Delete Account") {
+                        showingConfirmation = true
+                    }.foregroundColor(.red)
                     Spacer()
+                }.padding(.top, 40)
+                .alert("Are you sure you want to delete your account?", isPresented: $showingConfirmation) {
+                    Button("Delete", role: .destructive) {
+                        LocalStorageManager.shared.deleteUser()
+                        session.signOut()
+                    }
+                    Button("Cancel", role: .cancel) {}
+                } message: {
+                    Text("This action cannot be undone and information will be lost")
                 }
             }
             .padding(40)
