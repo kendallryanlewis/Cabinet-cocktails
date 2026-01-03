@@ -14,22 +14,14 @@ struct ContentView: View {
     var body: some View {
         ZStack{
             LoadingScreen()
-            Group {
-                if(session.isLoggedIn){
-                    MainView()
-                }else{
-                    LoginView()
-                }
-            } .opacity(opacity) // Apply the opacity
-                .onAppear {
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
-                        withAnimation(.easeInOut(duration: 2)) {
-                            opacity = opacity == 0.0 ? 1.0 : 0.0
-                        }
-                    }
-                }
-                .onAppear(){
-                session.verifyUser()
+            MainView()
+                .opacity(opacity)
+        }
+        .task {
+            // Animate opacity after 2 seconds
+            try? await Task.sleep(nanoseconds: 2_000_000_000)
+            withAnimation(.easeInOut(duration: 1.5)) {
+                opacity = 1.0
             }
         }
     }

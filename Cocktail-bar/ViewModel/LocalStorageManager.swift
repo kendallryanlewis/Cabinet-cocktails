@@ -17,50 +17,71 @@ class LocalStorageManager {
     private let favoritesKey = "Favorites" // Key for UserDefaults
     private let showHomeWeb = "ShowHomeWeb" // Key for UserDefaults
     
+    // In-memory caches to reduce UserDefaults access
+    private var topShelfCache: [String]?
+    private var favoritesCache: [Ingredient]?
+    private var userCache: User?
+    private var activeUserCache: Bool?
+    private var welcomeCache: Bool?
+    
     func setActiveUser(isLoggedIn: Bool){
+        activeUserCache = isLoggedIn
         UserDefaults.standard.set(isLoggedIn, forKey: activeKey)
     }
+    
     func getActiveUser() -> Bool{
+        if let cached = activeUserCache {
+            return cached
+        }
         if UserDefaults.standard.object(forKey: activeKey) != nil {
-            return UserDefaults.standard.bool(forKey: activeKey)
+            let value = UserDefaults.standard.bool(forKey: activeKey)
+            activeUserCache = value
+            return value
         } else {
-            // If not exists, return default value as true
+            activeUserCache = false
             return false
         }
     }
     
     func showWelcome(show: Bool) {
+        welcomeCache = show
         UserDefaults.standard.set(show, forKey: showHomeWeb)
     }
 
     func getWelcome() -> Bool {
-        // Check if the key exists in UserDefaults
+        if let cached = welcomeCache {
+            return cached
+        }
         if UserDefaults.standard.object(forKey: showHomeWeb) != nil {
-            // If exists, return the stored Boolean value
-            return UserDefaults.standard.bool(forKey: showHomeWeb)
+            let value = UserDefaults.standard.bool(forKey: showHomeWeb)
+            welcomeCache = value
+            return value
         } else {
-            // If not exists, return default value as true
+            welcomeCache = true
             return true
         }
     }
     
-    // Function to retrieve items from local storage
+    // Function to retrieve items from local storage with caching
     func retrieveTopShelfItems() -> [String] {
-        // Retrieve Data from UserDefaults
+        if let cached = topShelfCache {
+            return cached
+        }
+        
         if let data = UserDefaults.standard.data(forKey: topShelfKey) {
-            // Decode Data to [Item]
             if let decodedItems = try? JSONDecoder().decode([String].self, from: data) {
+                topShelfCache = decodedItems
                 return decodedItems
             }
         }
-        return [] // Return an empty array if no data found
+        topShelfCache = []
+        return []
     }
     
     // Function to save items to local storage
     func saveTopShelfItems(_ items: [String]) {
-        // Convert items to Data
+        topShelfCache = items
         if let encodedData = try? JSONEncoder().encode(items) {
-            // Save Data to UserDefaults
             UserDefaults.standard.set(encodedData, forKey: topShelfKey)
         }
     }
@@ -80,25 +101,32 @@ class LocalStorageManager {
     
     /* Drink Favorites*/
     func retrieveFavoriteItems() -> [Ingredient] {
-        // Retrieve Data from UserDefaults
+        // Performance: Return cached value immediately if available
+        if let cached = favoritesCache {
+            return cached
+        }
+        
+        // Performance: Decode in background if possible
         if let data = UserDefaults.standard.data(forKey: favoritesKey) {
-            // Decode Data to [Item]
             if let decodedItems = try? JSONDecoder().decode([Ingredient].self, from: data) {
+                favoritesCache = decodedItems
                 return decodedItems
             }
         }
-        return [] // Return an empty array if no data found
+        favoritesCache = []
+        return []
     }
     
     // Function to save items to local storage
     func saveFavoriteItems(_ items: [Ingredient]) {
-        // Convert items to Data
+        favoritesCache = items
         if let encodedData = try? JSONEncoder().encode(items) {
-            // Save Data to UserDefaults
             UserDefaults.standard.set(encodedData, forKey: favoritesKey)
         }
-        DrinkManager.shared.onlyYourIngredients() //reset drinks
-        DrinkManager.shared.signatureCocktails = LocalStorageManager.shared.retrieveFavoriteItems()
+        Task { @MainActor in
+            DrinkManager.shared.onlyYourIngredients() //reset drinks
+            DrinkManager.shared.signatureCocktails = LocalStorageManager.shared.retrieveFavoriteItems()
+        }
     }
     
     func addFavoriteItem(newItem: Ingredient) {
@@ -115,28 +143,38 @@ class LocalStorageManager {
     }
     
     /* Login system */
-    // Function to retrieve items from local storage
+    // Function to retrieve items from local storage with caching
     func retrieveUser() -> User {
-        // Retrieve Data from UserDefaults
+        if let cached = userCache {
+            return cached
+        }
+        
         if let data = UserDefaults.standard.data(forKey: UserKey) {
             if let decodedItems = try? JSONDecoder().decode(User.self, from: data) {
+                userCache = decodedItems
                 return decodedItems
             }
         }
-        return User(uid: "", email: "", profileImageUrl: "", username: "", password: "", isLoggedIn: false)
+        let defaultUser = User(uid: "", email: "", profileImageUrl: "", username: "", password: "", isLoggedIn: false)
+        userCache = defaultUser
+        return defaultUser
     }
     
     // Function to save items to local storage
     func saveUser(_ user: User) {
-        // Convert items to Data
+        userCache = user
         if let encodedData = try? JSONEncoder().encode(user) {
-            // Save Data to UserDefaults
             UserDefaults.standard.set(encodedData, forKey: UserKey)
             setActiveUser(isLoggedIn: true)
         }
     }
     
     func deleteUser() {
+        userCache = nil
+        topShelfCache = nil
+        favoritesCache = nil
+        activeUserCache = nil
+        
         // Remove a value for a specific key from UserDefaults
         UserDefaults.standard.removeObject(forKey: UserKey)
         

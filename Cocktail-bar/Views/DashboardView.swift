@@ -141,18 +141,20 @@ struct itemView: View {
             ZStack {
                 VStack {
                     if let imageURL = cocktail.image {
-                        AsyncImage(url: URL(string: imageURL)) { phase in
-                            switch phase {
-                            case .success(let image):
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .ignoresSafeArea(.all)
-                                    .frame(width: 150, height: 200)
-                                    .clipped()
-                            default:
-                                Color.gray
+                        CachedAsyncImage(url: URL(string: imageURL)) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: ContentMode.fill)
+                                .ignoresSafeArea(edges: Edge.Set.all)
+                                .frame(width: 150, height: 200)
+                                .clipped()
+                        } placeholder: {
+                            ZStack {
+                                Color.gray.opacity(0.3)
+                                SwiftUI.ProgressView()
+                                    .tint(COLOR_WARM_AMBER)
                             }
+                            .frame(width: 150, height: 200)
                         }
                     }
                 }.frame(width: 150, height: 200)
@@ -169,7 +171,7 @@ struct itemView: View {
                                 Text(cocktail.name)
                                     .font(.headline)
                                     .bold().multilineTextAlignment(.leading)
-                                Text("\(cocktail.type)")
+                                Text(cocktail.type.rawValue)
                                     .font(.subheadline)
                                     .foregroundColor(colorScheme == .dark ? .darkGray : .white)
                             }

@@ -11,38 +11,55 @@ struct DrinkTabView: View {
     @State var cocktail: Ingredient
     
     var body: some View {
-        ZStack(){
-            HStack {
+        ZStack {
+            // Card background
+            RoundedRectangle(cornerRadius: 12)
+                .fill(COLOR_CHARCOAL_LIGHT)
+                .shadow(color: Color.black.opacity(0.2), radius: 6, x: 0, y: 3)
+            
+            HStack(spacing: 16) {
+                // Image
                 if let imageURL = cocktail.image {
-                    AsyncImage(url: URL(string: imageURL)) { phase in
-                        switch phase {
-                        case .success(let image):
-                            image
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 100, height: 100)
-                                .clipped()
-                        default:
-                            Color.black
+                    CachedAsyncImage(url: URL(string: imageURL)) { image in
+                        image
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                    } placeholder: {
+                        ZStack {
+                            RoundedRectangle(cornerRadius: 8)
+                                .fill(COLOR_CHARCOAL)
+                            SwiftUI.ProgressView()
+                                .tint(COLOR_WARM_AMBER)
                         }
+                        .frame(width: 80, height: 80)
                     }
                 }
-                Spacer()
-            }
-            LinearGradient(gradient: Gradient(colors: [.clear, .black.opacity(0.25), .black, .black, .black, .black.opacity(0.75), .black.opacity(0.5), .black.opacity(0.25), .clear]), startPoint: .leading, endPoint: .trailing)
-            HStack{
-                VStack(alignment:.leading){
-                    Spacer()
+                
+                // Content
+                VStack(alignment: .leading, spacing: 6) {
                     Text(cocktail.name)
                         .font(.headline)
-                        .bold()
-                    Text("\(cocktail.type)")
-                        .font(.subheadline)
-                        .foregroundColor(COLOR_PRIMARY)
-                }.foregroundColor(.white)
+                        .fontWeight(.semibold)
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .lineLimit(2)
+                    
+                    Text(cocktail.type.rawValue)
+                        .font(.caption)
+                        .foregroundColor(COLOR_WARM_AMBER)
+                }
+                
                 Spacer()
-            }.padding()
-        }.clipShape(RoundedRectangle(cornerRadius: 8))
+                
+                // Chevron
+                Image(systemName: "chevron.right")
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.system(size: 14))
+            }
+            .padding(12)
+        }
+        .frame(height: 104)
     }
 }
 
@@ -53,39 +70,55 @@ struct HeadlinerTabView: View {
     
     var body: some View {
         ZStack {
-            VStack {
-                AsyncImage(url: URL(string:cocktail.image!) ) { phase in
-                    switch phase {
-                    case .success(let image):
-                        image
-                            .resizable()
-                            .aspectRatio(contentMode: .fill)
-                            .ignoresSafeArea(.all)
-                            .frame(width: 150, height: 200)
-                            .clipped()
-                    default:
-                        Color.gray
+            // Card background
+            RoundedRectangle(cornerRadius: 12)
+                .fill(COLOR_CHARCOAL_LIGHT)
+                .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
+            
+            VStack(spacing: 0) {
+                // Image
+                CachedAsyncImage(url: URL(string: cocktail.image!)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(width: 150, height: 150)
+                        .clipped()
+                } placeholder: {
+                    ZStack {
+                        Color.gray.opacity(0.3)
+                        SwiftUI.ProgressView()
+                            .tint(COLOR_WARM_AMBER)
                     }
+                    .frame(width: 150, height: 150)
                 }
-            }.frame(width: 150, height: 200)
-            ZStack {
-                LinearGradient(gradient: Gradient(colors: [.clear, .black.opacity(0.5), .black.opacity(0.75), COLOR_SECONDARY]), startPoint: .topTrailing, endPoint: .bottomLeading)
-                VStack {
-                    Spacer()
-                    HStack() {
-                        VStack(alignment:.leading){
-                            Text(cocktail.name)
-                                .font(.headline)
-                                .bold()
-                        }
+                
+                // Text overlay with gradient
+                ZStack {
+                    LinearGradient(
+                        gradient: Gradient(colors: [
+                            .clear,
+                            COLOR_CHARCOAL.opacity(0.6),
+                            COLOR_CHARCOAL.opacity(0.95)
+                        ]),
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    
+                    VStack(alignment: .leading, spacing: 4) {
                         Spacer()
+                        Text(cocktail.name)
+                            .font(.headline)
+                            .fontWeight(.bold)
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .lineLimit(2)
                     }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                 }
-                .padding()
+                .frame(height: 50)
             }
-            .frame(width: 150, height: 200)
-            .foregroundColor(.white)
+            .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .clipShape(RoundedRectangle(cornerRadius: 8))
+        .frame(width: 150, height: 200)
     }
 }

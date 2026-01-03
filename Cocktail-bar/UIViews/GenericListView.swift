@@ -10,65 +10,79 @@ import SwiftUI
 struct GenericListView: View {
     var list: [DrinkDetails]
     @Binding var showPopover: Bool
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
-        LazyVGrid(columns: [GridItem(.flexible(), spacing: 30), GridItem(.flexible())], spacing: 30) {
+        LazyVGrid(columns: [GridItem(.flexible(), spacing: 20), GridItem(.flexible())], spacing: 20) {
             ForEach(list, id: \.id) { cocktail in
                 GeometryReader { geometry in
                     ZStack {
-                        VStack {
-                            if let imageURL = cocktail.strDrinkThumb, let url = URL(string: imageURL) {
-                                AsyncImage(url: url) { phase in
-                                    switch phase {
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: geometry.size.width, height: 200) // Half of the parent width
-                                            .clipped()
-                                    default:
-                                        Image("GenericAlcohol")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: geometry.size.width, height: 200) // Half of the parent width
-                                            .clipped()
-                                    }
-                                }
-                            }
-                        }
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
-                        .frame(width: geometry.size.width, height: 200) // Half of the parent width
+                        // Background card
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(COLOR_CHARCOAL_LIGHT)
+                            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
                         
-                        ZStack {
-                            LinearGradient(gradient: Gradient(colors: [.clear, .clear, .clear, COLOR_PRIMARY.opacity(0.5), COLOR_PRIMARY]), startPoint: .topTrailing, endPoint: .bottomLeading)
-                            VStack {
-                                Spacer()
-                                HStack {
-                                    VStack(alignment: .leading) {
-                                        Text(cocktail.strDrink)
-                                            .font(.headline)
-                                            .bold()
-                                        Text(cocktail.strCategory ?? "Drink")
-                                            .font(.subheadline)
-                                            .foregroundColor(LINEAR_BOTTOM)
+                        VStack(spacing: 0) {
+                            // Image with cached loading
+                            if let imageURL = cocktail.strDrinkThumb, let url = URL(string: imageURL) {
+                                CachedAsyncImage(url: url) { image in
+                                    image
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(width: geometry.size.width, height: 150)
+                                        .clipped()
+                                } placeholder: {
+                                    ZStack {
+                                        Color.gray.opacity(0.2)
+                                        SwiftUI.ProgressView()
+                                            .tint(COLOR_WARM_AMBER)
                                     }
-                                    Spacer()
+                                    .frame(width: geometry.size.width, height: 150)
                                 }
+                                .frame(height: 150)
                             }
-                            .padding()
+                            
+                            // Content overlay with gradient
+                            ZStack {
+                                LinearGradient(
+                                    gradient: Gradient(colors: [
+                                        .clear,
+                                        .clear,
+                                        COLOR_CHARCOAL.opacity(0.7),
+                                        COLOR_CHARCOAL.opacity(0.95)
+                                    ]),
+                                    startPoint: .top,
+                                    endPoint: .bottom
+                                )
+                                
+                                VStack(alignment: .leading, spacing: 4) {
+                                    Spacer()
+                                    Text(cocktail.strDrink)
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .lineLimit(2)
+                                    
+                                    Text(cocktail.strCategory ?? "Cocktail")
+                                        .font(.caption)
+                                        .foregroundColor(COLOR_WARM_AMBER)
+                                }
+                                .padding(12)
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                            }
+                            .frame(height: 80)
                         }
-                        .frame(width: geometry.size.width, height: 200) // Ensure the overlay fits the same dimensions
-                        .foregroundColor(.white)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
                 }
-                .frame(height: 200)
+                .frame(height: 230)
                 .onTapGesture {
                     DrinkManager.shared.selectedCocktail = Ingredient(name: cocktail.strDrink, image: cocktail.strDrinkThumb, type: .alcohol)
                     showPopover = true
                 }
             }
         }
+        .padding(.horizontal, 16)
     }
 }
 

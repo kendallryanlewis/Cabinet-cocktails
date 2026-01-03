@@ -16,77 +16,44 @@ enum loginStatus: String, Codable {
     case fail
 }
 
+@MainActor
 class SessionStore: ObservableObject {
-    @Published var userSession: User?
-    @Published var isLoggedIn: Bool = false // Example: Session state, change as needed
+    @Published var isLoggedIn: Bool = true // Always logged in - no authentication needed
     @Published var loading = false
-    @Published var username: String = ""    // Example: User data, change as needed
+    @Published var username: String = "Guest"
+    @Published var email: String = ""
     @Published var tutorial: Bool = true
     
+    private let usernameKey = "AppUsername"
+    private let emailKey = "AppEmail"
+    private let hasCompletedWelcomeKey = "HasCompletedWelcome"
+    
+    init() {
+        // Always logged in by default
+        self.isLoggedIn = true
+        // Load saved username and email
+        self.username = UserDefaults.standard.string(forKey: usernameKey) ?? "Guest"
+        self.email = UserDefaults.standard.string(forKey: emailKey) ?? ""
+    }
+    
     func verifyUser(completion: (() -> Void)? = nil) {
-        if(LocalStorageManager.shared.getActiveUser()){
-            if let user = LocalStorageManager.shared.retrieveUser() ?? nil{
-                DispatchQueue.main.async { [weak self] in
-                    self?.userSession = user
-                    self?.username = user.username
-                    self?.isLoggedIn = user.isLoggedIn
-                    completion?()
-                }
-            }
-        }
-    }
-
-    // Method to handle sign-in
-    func signIn(email: String, password: String) -> loginStatus {
-        var user = LocalStorageManager.shared.retrieveUser()
-        if (email.lowercased() == user.email.lowercased() && password == user.password
-            || username.lowercased() == user.username.lowercased() && password == user.password) && email != "" && password != "" {
-            LocalStorageManager.shared.saveUser(user)
-            isLoggedIn = true
-            userSession = user
-            user.isLoggedIn = true
-            return .success
-        } else {
-            isLoggedIn = false
-            if(email.lowercased() != user.email.lowercased()){
-                return .email
-            }else if(password != user.password){
-                return .password
-            }else if(username.lowercased() != user.username.lowercased()){
-                return .username
-            }
-        }
-        return .fail
+        // Always verified - no authentication needed
+        self.isLoggedIn = true
+        completion?()
     }
     
-    // Method to handle sign-up
-    func signUp(username: String, email: String, password: String, confirmPassword: String) -> Bool {
-        if username.isEmpty || email.isEmpty || password.isEmpty || confirmPassword.isEmpty || password != confirmPassword {
-            return false // Sign-up failed
-        }
-        let newUser = User(uid: "", email: email, profileImageUrl: "", username: username, password: password, isLoggedIn: true)
-        LocalStorageManager.shared.saveUser(newUser)
-        deleteUser()// remove later
-        userSession = newUser
-        isLoggedIn = true
-        LocalStorageManager.shared.showWelcome(show: true)
-        return true
-    }
-
-    // Method to handle sign-out
-    func signOut() {
-        // Implement your sign-out logic here
-        LocalStorageManager.shared.setActiveUser(isLoggedIn: false)
-        isLoggedIn = false
-        username = ""
-        userSession?.isLoggedIn = false
+    func saveProfile(username: String, email: String) {
+        self.username = username.isEmpty ? "Guest" : username
+        self.email = email
+        UserDefaults.standard.set(self.username, forKey: usernameKey)
+        UserDefaults.standard.set(email, forKey: emailKey)
     }
     
-    func deleteUser() {
-        // Implement your sign-out logic here
-        LocalStorageManager.shared.deleteUser()
-        isLoggedIn = false
-        userSession = nil
-        username = ""
+    func hasCompletedWelcome() -> Bool {
+        return UserDefaults.standard.bool(forKey: hasCompletedWelcomeKey)
+    }
+    
+    func setWelcomeCompleted() {
+        UserDefaults.standard.set(true, forKey: hasCompletedWelcomeKey)
     }
 }

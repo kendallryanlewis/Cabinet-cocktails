@@ -16,10 +16,10 @@ struct GenericButton: View {
         Button(action: action) {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(colorScheme == .dark ? .darkGray : .white)
+                .foregroundColor(colorScheme == .dark ? Color.darkGray : .white)
                 .padding()
                 .frame(maxWidth: .infinity)
-                .background(colorScheme == .dark ? COLOR_PRIMARY : .darkGray)
+                .background(colorScheme == .dark ? COLOR_PRIMARY : Color.darkGray)
                 .cornerRadius(3).bold()
         }
     }

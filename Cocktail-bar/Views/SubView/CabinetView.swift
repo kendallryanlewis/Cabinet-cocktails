@@ -13,52 +13,74 @@ struct CabinetView: View {
     @Binding var searchTextSpirits: String
     @Binding var selectedAlcoholTypes: [Ingredient]
     var item: Ingredient
+    
+    private var isInCabinet: Bool {
+        selectedAlcoholTypes.contains(where: { $0.name == item.name })
+    }
      
     var body: some View {
-        if(!selectedAlcoholTypes.contains(where: { $0.name == item.name })){
-            Button(action: {
-                onTapped()
-            }) {
-                VStack(alignment:.leading){
+        Button(action: {
+            onTapped()
+        }) {
+            VStack(alignment: .leading, spacing: 8) {
+                // Image with overlay indicator
+                ZStack(alignment: .topTrailing) {
                     if UIImage(named: item.name) != nil {
                         Image(item.name)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .ignoresSafeArea(.all)
                             .frame(width: 150, height: 200)
                             .clipped()
-                            .cornerRadius(5)
-                    }else{
+                            .cornerRadius(12)
+                    } else {
                         Image("GenericAlcohol")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .ignoresSafeArea(.all)
                             .frame(width: 150, height: 200)
                             .clipped()
-                            .cornerRadius(5)
+                            .cornerRadius(12)
                     }
-                    HStack {
-                        VStack(alignment: .leading) { // Align text to the leading edge
-                            Text(item.name)
-                                .font(.footnote)
-                                .bold()
-                                .foregroundColor(colorScheme == .dark ? .white : .darkGray)
+                    
+                    // Cabinet status indicator
+                    if isInCabinet {
+                        ZStack {
+                            Circle()
+                                .fill(COLOR_CHARCOAL_LIGHT)
+                                .frame(width: 32, height: 32)
+                            
+                            Image(systemName: "checkmark.circle.fill")
+                                .foregroundColor(COLOR_WARM_AMBER)
+                                .font(.system(size: 28))
                         }
-                        Spacer()
-                        if selectedAlcoholTypes.contains(where: { $0.name == item.name }) {
-                            Image(systemName: "minus.circle.fill")
-                                .foregroundColor(.red)
-                        } else {
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundColor(colorScheme == .dark ? .white : COLOR_SECONDARY)
-                        }
+                        .padding(8)
                     }
-                    Text("\(item.type)")
-                        .font(.caption2)
-                        .foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
-                }.foregroundColor(.white)
-                    .frame(width: 150)
+                }
+                
+                // Text info
+                HStack(alignment: .top, spacing: 8) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(item.name)
+                            .font(.ingredientText)
+                            .fontWeight(.semibold)
+                            .foregroundColor(isInCabinet ? COLOR_TEXT_PRIMARY : COLOR_TEXT_SECONDARY)
+                            .lineLimit(2)
+                        
+                        Text("\(item.type)")
+                            .font(.caption)
+                            .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    }
+                    
+                    Spacer()
+                    
+                    // Action indicator
+                    if !isInCabinet {
+                        Image(systemName: "plus.circle")
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .font(.system(size: 20))
+                    }
+                }
             }
+            .frame(width: 150)
         }
     }
 }

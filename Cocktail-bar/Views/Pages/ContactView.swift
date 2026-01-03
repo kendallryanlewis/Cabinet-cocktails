@@ -22,97 +22,168 @@ struct ContactView: View {
 
     var body: some View {
         ZStack {
-            VStack(alignment: .leading) {
-                // Title and description
-                HStack{
-                    VStack(alignment: .leading){
-                        Text("Contact & Help")
-                            .bold()
-                            .font(.title)
-                            .foregroundColor(colorScheme == .dark ? .white : .darkGray)
-                        HStack(spacing:3){
-                            Button(action: {
-                                showingWebView = true
-                            }, label: {
-                                Text("Need more help click to view the help page: Cabinet Cocktails")
-                                    .foregroundColor(colorScheme == .dark ? .white : .black).bold()
-                            })
+            LinearGradient(
+                gradient: colorScheme == .dark ?
+                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
+                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
+                startPoint: .topTrailing,
+                endPoint: .leading
+            )
+            .edgesIgnoringSafeArea(.all)
+            
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 32) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 12) {
+                        HStack(spacing: 12) {
+                            Image(systemName: "envelope.circle.fill")
+                                .font(.system(size: 32))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                            Text("Contact & Help")
+                                .font(.cocktailTitle)
+                                .foregroundColor(COLOR_TEXT_PRIMARY)
                         }
+                        Text("We'd love to hear from you")
+                            .font(.bodyText)
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
                     }
-                    Spacer().frame(width: 100)
-                }.padding(.bottom)
-                Text("Name").bold()
-                TextField("Enter your name", text: $name)
-                    .padding()
-                    .background(colorScheme == .dark ? Color.white.opacity(0.3) : .darkGray.opacity(0.5))
-                    .cornerRadius(10)
-                    .padding(.bottom, 20)
-                Text("Email").bold()
-                TextField("Enter your email", text: $email)
-                    .padding()
-                    .background(colorScheme == .dark ? Color.white.opacity(0.3) : .darkGray.opacity(0.5))
-                    .cornerRadius(10)
-                    .padding(.bottom, 20)
-
-                Text("Message").bold()
-                ZStack{
-                    if message.isEmpty {
-                          Text("")
-                              .foregroundColor(.gray)
-                              .padding(.horizontal, 5)
-                              .padding(.vertical, 8)
-                      }
-                      TextEditor(text: $message)
-                          .padding(4)
-                          .background(Color.clear) // Attempt to set background to transparent
-                  }
-                .frame(minHeight: 150)
-                .padding(5)
-                .background(colorScheme == .dark ? Color.white.opacity(0.3) : .darkGray.opacity(0.5))
-                .cornerRadius(10)
-                .padding(.bottom, 20)
-
-                Button(action: {
-                    if MFMailComposeViewController.canSendMail() {
-                        showingMailView = true
-                    } else {
-                        // Alert the user that mail services are not available
-                        print("Cannot send mail")
-                        // Consider providing an alternative like copying the email address to the clipboard
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 20)
+                    .padding(.horizontal)
+                    
+                    // Help Link Card
+                    Button(action: {
+                        showingWebView = true
+                    }) {
+                        HStack(spacing: 16) {
+                            Image(systemName: "questionmark.circle.fill")
+                                .font(.system(size: 24))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                            
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Need Help?")
+                                    .font(.cardTitle)
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                Text("Visit our help page for FAQs and guides")
+                                    .font(.ingredientText)
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                            }
+                            
+                            Spacer()
+                            
+                            Image(systemName: "arrow.right.circle.fill")
+                                .font(.system(size: 20))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
+                        .padding(20)
+                        .background(COLOR_CHARCOAL)
+                        .cornerRadius(12)
                     }
-                }) {
-                    Spacer()
-                    Text("Submit").padding()
-                    Spacer()
-                }
-                .foregroundColor(colorScheme == .dark ? .darkGray : COLOR_PRIMARY)
-                .background(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
-                .cornerRadius(8)
-                .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
-                HStack{
-                    Spacer()
-                    Button("Delete Account") {
-                        showingConfirmation = true
-                    }.foregroundColor(.red)
-                    Spacer()
-                }.padding(.top, 40)
-                .alert("Are you sure you want to delete your account?", isPresented: $showingConfirmation) {
-                    Button("Delete", role: .destructive) {
-                        LocalStorageManager.shared.deleteUser()
-                        session.signOut()
+                    .padding(.horizontal)
+                    
+                    // Contact Form
+                    VStack(alignment: .leading, spacing: 20) {
+                        Text("Send us a message")
+                            .font(.sectionHeader)
+                            .foregroundColor(COLOR_WARM_AMBER)
+                        
+                        VStack(spacing: 16) {
+                            // Name field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Name")
+                                    .font(.ingredientText)
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                TextField("Enter your name", text: $name)
+                                    .font(.bodyText)
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .padding(12)
+                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .cornerRadius(8)
+                                    .autocapitalization(.words)
+                            }
+                            
+                            // Email field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Email")
+                                    .font(.ingredientText)
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                TextField("your@email.com", text: $email)
+                                    .font(.bodyText)
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .padding(12)
+                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .cornerRadius(8)
+                                    .autocapitalization(.none)
+                                    .keyboardType(.emailAddress)
+                            }
+                            
+                            // Message field
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("Message")
+                                    .font(.ingredientText)
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                ZStack(alignment: .topLeading) {
+                                    if message.isEmpty {
+                                        Text("Tell us what's on your mind...")
+                                            .font(.bodyText)
+                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 20)
+                                    }
+                                    TextEditor(text: $message)
+                                        .font(.bodyText)
+                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .padding(8)
+                                        .scrollContentBackground(.hidden)
+                                        .background(Color.clear)
+                                }
+                                .frame(minHeight: 150)
+                                .background(COLOR_CHARCOAL_LIGHT)
+                                .cornerRadius(8)
+                            }
+                        }
+                        .padding(20)
+                        .background(COLOR_CHARCOAL)
+                        .cornerRadius(12)
+                        
+                        // Submit button
+                        Button(action: {
+                            if MFMailComposeViewController.canSendMail() {
+                                showingMailView = true
+                            } else {
+                                showingConfirmation = true
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "paperplane.fill")
+                                Text("Send Message")
+                            }
+                            .font(.bodyText)
+                            .fontWeight(.semibold)
+                            .foregroundColor(COLOR_CHARCOAL)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .background(name.isEmpty || email.isEmpty || message.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_WARM_AMBER)
+                            .cornerRadius(12)
+                        }
+                        .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
                     }
-                    Button("Cancel", role: .cancel) {}
-                } message: {
-                    Text("This action cannot be undone and information will be lost")
+                    .padding(.horizontal)
+                    
+                    Spacer(minLength: 60)
                 }
             }
-            .padding(40)
         }
         .sheet(isPresented: $showingMailView) {
             MailView(subject: "Contact from \(name)", messageBody: "Name: \(name)\nEmail: \(email)\nMessage: \(message)")
         }
         .sheet(isPresented: $showingWebView) {
             WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
+        }
+        .alert("Mail Not Available", isPresented: $showingConfirmation) {
+            Button("OK", role: .cancel) { }
+        } message: {
+            Text("Please configure your email app to send messages.")
         }
     }
 }

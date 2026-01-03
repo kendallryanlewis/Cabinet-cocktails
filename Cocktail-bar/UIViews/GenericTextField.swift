@@ -35,8 +35,3 @@ struct GenericTextField: View {
         .padding(.bottom, 10)
     }
 }
-
-
-#Preview{
- LoginView()
-}

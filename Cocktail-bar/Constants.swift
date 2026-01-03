@@ -14,15 +14,39 @@ let WEBSITE_URL = "https://www.kndl-inc.com/"
 let COMPANY_NAME = "KNDL"
 let APP_NAME = "Cabinet Cocktails"
 
-//Default Colors
-let COLOR_PRIMARY = Color(hex: "#e8dcc9")
-let COLOR_SECONDARY = Color(hex:"#8dada9")
+//Default Colors - Modern Dark Theme
+let COLOR_WARM_AMBER = Color(hex: "#D4A574") // Warm accent for buttons, active states, highlights
+let COLOR_CHARCOAL = Color(hex: "#1C1C1E") // Primary dark background
+let COLOR_CHARCOAL_LIGHT = Color(hex: "#2C2C2E") // Cards, panels, elevated surfaces
+let COLOR_TEXT_PRIMARY = Color(hex: "#FFFFFF") // Primary text
+let COLOR_TEXT_SECONDARY = Color(hex: "#8E8E93") // Secondary text, captions
+
+// Legacy colors (kept for backward compatibility during transition)
+let COLOR_PRIMARY = COLOR_WARM_AMBER // Map old to new
+let COLOR_SECONDARY = COLOR_WARM_AMBER // Map old to new
 let COLOR_GOLD = Color(hex:"#8c5c29")
-let LINEAR_TOP = Color(hex: "#383838")
-let LINEAR_BOTTOM = Color(hex: "#0E0E0E")
+let LINEAR_TOP = COLOR_CHARCOAL
+let LINEAR_BOTTOM = COLOR_CHARCOAL
 let LIGHT_LINEAR_TOP = Color(hex: "FBF4E9")
 let LIGHT_LINEAR_BOTTOM = Color(hex: "#DFD8CC")
 let LOGO_FULL = "VM-graphiclogo-circle"
+
+// Typography System - Modern Editorial Style
+extension Font {
+    // Serif fonts for cocktail names and section headers (editorial feel)
+    static let cocktailTitle = Font.system(size: 32, weight: .bold, design: .serif)
+    static let sectionHeader = Font.system(size: 24, weight: .semibold, design: .serif)
+    static let cardTitle = Font.system(size: 16, weight: .semibold, design: .serif)
+    
+    // Sans-serif for UI and body text (clarity and precision)
+    static let bodyText = Font.system(size: 16, weight: .regular, design: .rounded)
+    static let ingredientText = Font.system(size: 14, weight: .medium, design: .rounded)
+    static let caption = Font.system(size: 12, weight: .regular, design: .rounded)
+    
+    // UI elements
+    static let buttonText = Font.system(size: 16, weight: .semibold, design: .rounded)
+    static let navTitle = Font.system(size: 20, weight: .bold, design: .rounded)
+}
 
 // Login | Registration Page
 let TEXT_CREATE_AN_ACCOUNT = "Create an Account"

@@ -15,16 +15,52 @@ enum pages: String, Codable {
     case mixology
     case contact
     case about
+    case settings
+    case shoppingList
+    case history
+    case recommendations
+    case educational
+    case seasonal
+    case preferences
+    case customRecipes
+    case costTracking
+    case barEquipment
+    case help
+    case premium
     case logout
 }
 
 struct MainView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var session: SessionStore
+    @EnvironmentObject var premiumManager: PremiumManager
     @State private var isMenuOpen = true
-    @State var newUser = LocalStorageManager.shared.getWelcome()
+    @State var showWelcomePopup = false
+    @State var showFirstTimeCabinet = false
     @State var openPopover = false
     @State var viewPage: pages = .home
+    
+    // Sheet presentation states
+    @State private var showCabinet = false
+    @State private var showSignatures = false
+    @State private var showMixology = false
+    @State private var showQuick = false
+    @State private var showSettings = false
+    @State private var showAbout = false
+    @State private var showContact = false
+    @State private var showShoppingList = false
+    @State private var showHistory = false
+    @State private var showRecommendations = false
+    @State private var showEducational = false
+    @State private var showSeasonal = false
+    @State private var showPreferences = false
+    @State private var showCustomRecipes = false
+    @State private var showCostTracking = false
+    @State private var showBarEquipment = false
+    @State private var showHelp = false
+    @State private var showTutorial = false
+    @State private var showPremium = false
+    @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
     
     var body: some View {
         ZStack {
@@ -32,91 +68,235 @@ struct MainView: View {
                 .edgesIgnoringSafeArea(.all)
                 .ignoresSafeArea()
             GenericBackground()
-                .opacity(!isMenuOpen && viewPage != .mixology ? 0.05 : 1)
+                .opacity(!isMenuOpen ? 0.05 : 1)
             // Main content view
-            ZStack {
-                switch viewPage {
-                    case .cabinet:
-                        TopShelfView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
-                    case .signatures:
-                        SignaturesView(isMenuOpen: $isMenuOpen, viewPage: $viewPage).opacity(isMenuOpen ? 0 : 1)
-                    case .mixology:
-                    MixologyView(isMenuOpen: $isMenuOpen, viewPage: $viewPage)
-                            .opacity(isMenuOpen ? 0 : 1)
-                    case .quick:
-                        SearchView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
-                    case .contact:
-                        ContactView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
-                    case .about:
-                        AboutView(isMenuOpen: $isMenuOpen).opacity(isMenuOpen ? 0 : 1)
-                    case .home:
-                        MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
-                            .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
-                            .zIndex(1)
-                            .opacity(isMenuOpen ? 1 : 0)
-                            .onTapGesture {
-                                withAnimation {
-                                    isMenuOpen.toggle()
-                                }
+            switch viewPage {
+                case .home, .cabinet, .signatures, .mixology, .quick, .contact, .about, .settings, .shoppingList, .history, .recommendations, .educational, .seasonal, .preferences, .customRecipes, .costTracking, .barEquipment, .help, .premium:
+                    MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
+                        .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
+                        .zIndex(1)
+                        .opacity(isMenuOpen ? 1 : 0)
+                        .onTapGesture {
+                            withAnimation {
+                                isMenuOpen.toggle()
                             }
-                    default:
-                        MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
-                            .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
-                            .zIndex(1)
-                            .opacity(isMenuOpen ? 1 : 0)
-                            //.background(Color.white.opacity(isMenuOpen ? 0.6 : 0))
-                            .onTapGesture {
-                                withAnimation {
-                                    isMenuOpen.toggle()
-                                }
-                            }
-                }
-                VStack{
-                    if(session.userSession != nil){
-                        if(!isMenuOpen){
-                            Button(action: {
-                                withAnimation {
-                                    if(!isMenuOpen){
-                                        viewPage = .home
-                                    }
-                                    isMenuOpen.toggle()
-                                }
-                            }) {
-                                HStack{
-                                    Spacer()
-                                    ZStack {
-                                        Circle()
-                                            .fill(Color.white)
-                                            .frame(width: 30, height: 30)
-                                            .shadow(color: Color.darkGray, radius: 5, x: 0, y: 2)
-                                        Image(systemName: isMenuOpen ? "xmark.circle" : "house.circle")
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fit)
-                                            .foregroundColor(colorScheme == .dark ? .gray : COLOR_SECONDARY)
-                                            .padding(5)
-                                            .frame(width: 50, height: 50)
-                                    }
-                                }
-                            }
-                        }else{
-                            UserHeader(isMenuOpen: $isMenuOpen, user: session.userSession!)
-                                .padding(.horizontal)
                         }
-                    }else{
-                        Text(APP_NAME)
-                    }
-                    Spacer()
-                }.padding(40)
+                default:
+                    MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
+                        .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
+                        .zIndex(1)
+                        .opacity(isMenuOpen ? 1 : 0)
+                        .onTapGesture {
+                            withAnimation {
+                                isMenuOpen.toggle()
+                            }
+                        }
             }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .offset(x: 0)
-        }.onAppear(){
-            // set all drinks in intial set up
+        }
+        .onAppear(){
+            // set all drinks in initial set up
             DrinkManager.shared.setUp()
-            LocalStorageManager.shared.showWelcome(show: false)
+            // Show welcome popup for new users
+            if !session.hasCompletedWelcome() {
+                showWelcomePopup = true
+            }
+            // Show first-time cabinet prompt if cabinet is empty
+            if LocalStorageManager.shared.retrieveTopShelfItems().isEmpty && session.hasCompletedWelcome() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
+                    showFirstTimeCabinet = true
+                }
+            }
+            // Show tutorial for first-time users
+            if !hasCompletedTutorial && session.hasCompletedWelcome() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
+                    showTutorial = true
+                }
+            }
          }
-        .sheet(isPresented: $newUser) {
-            WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
+        .onChange(of: viewPage) { newPage in
+            // Handle page changes and trigger sheet presentations
+            switch newPage {
+            case .cabinet:
+                showCabinet = true
+                viewPage = .home
+                isMenuOpen = true
+            case .signatures:
+                showSignatures = true
+                viewPage = .home
+                isMenuOpen = true
+            case .mixology:
+                showMixology = true
+                viewPage = .home
+                isMenuOpen = true
+            case .quick:
+                showQuick = true
+                viewPage = .home
+                isMenuOpen = true
+            case .settings:
+                showSettings = true
+                viewPage = .home
+                isMenuOpen = true
+            case .about:
+                showAbout = true
+                viewPage = .home
+                isMenuOpen = true
+            case .contact:
+                showContact = true
+                viewPage = .home
+                isMenuOpen = true
+            case .shoppingList:
+                showShoppingList = true
+                viewPage = .home
+                isMenuOpen = true
+            case .history:
+                showHistory = true
+                viewPage = .home
+                isMenuOpen = true
+            case .recommendations:
+                showRecommendations = true
+                viewPage = .home
+                isMenuOpen = true
+            case .educational:
+                showEducational = true
+                viewPage = .home
+                isMenuOpen = true
+            case .seasonal:
+                showSeasonal = true
+                viewPage = .home
+                isMenuOpen = true
+            case .preferences:
+                showPreferences = true
+                viewPage = .home
+                isMenuOpen = true
+            case .customRecipes:
+                showCustomRecipes = true
+                viewPage = .home
+                isMenuOpen = true
+            case .costTracking:
+                showCostTracking = true
+                viewPage = .home
+                isMenuOpen = true
+            case .barEquipment:
+                showBarEquipment = true
+                viewPage = .home
+                isMenuOpen = true
+            case .help:
+                showHelp = true
+                viewPage = .home
+                isMenuOpen = true
+            case .premium:
+                showPremium = true
+                viewPage = .home
+                isMenuOpen = true
+            default:
+                break
+            }
+        }
+        .sheet(isPresented: $showCabinet) {
+            TopShelfView(isMenuOpen: .constant(false))
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showSignatures) {
+            SignaturesView(isMenuOpen: .constant(false), viewPage: $viewPage)
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showMixology) {
+            MixologyView(isMenuOpen: .constant(false), viewPage: $viewPage)
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showQuick) {
+            SearchView(isMenuOpen: .constant(false))
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showSettings) {
+            SettingsView(isMenuOpen: .constant(false))
+        }
+        .sheet(isPresented: $showAbout) {
+            AboutView(isMenuOpen: .constant(false))
+        }
+        .sheet(isPresented: $showContact) {
+            ContactView(isMenuOpen: .constant(false))
+        }
+        .sheet(isPresented: $showShoppingList) {
+            ShoppingListView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showHistory) {
+            HistoryView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showRecommendations) {
+            RecommendationsView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showEducational) {
+            EducationalContentView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showSeasonal) {
+            SeasonalCocktailsView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showPreferences) {
+            UserPreferencesView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showCustomRecipes) {
+            CustomRecipesListView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showCostTracking) {
+            CostTrackingView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showBarEquipment) {
+            BarEquipmentView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showHelp) {
+            HelpView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showTutorial) {
+            TutorialView()
+        }
+        .sheet(isPresented: $showPremium) {
+            SubscriptionManagementView()
+                .presentationDragIndicator(.visible)
+                .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .sheet(isPresented: $showWelcomePopup) {
+            WelcomePopupView(isPresented: $showWelcomePopup)
+        }
+        .sheet(isPresented: $showFirstTimeCabinet) {
+            ZStack {
+                Color.black.opacity(0.4)
+                    .ignoresSafeArea()
+                
+                FirstTimeCabinetPrompt(
+                    onOpenCabinet: {
+                        showFirstTimeCabinet = false
+                        showCabinet = true
+                    },
+                    onSkip: {
+                        showFirstTimeCabinet = false
+                    }
+                )
+            }
         }
     }
 }

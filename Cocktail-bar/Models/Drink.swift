@@ -12,11 +12,13 @@ struct Ingredient: Identifiable, Encodable, Decodable, Hashable {
     let name: String
     let type: IngredientType
     var image: String?
+    var category: String?
     
-    init(name: String, image: String?, type: IngredientType) {
+    init(name: String, image: String?, type: IngredientType, category: String? = nil) {
         self.name = name
         self.type = type
         self.image = image
+        self.category = category
     }
 }
 
@@ -71,7 +73,7 @@ struct Drink: Decodable {
     }
 }
 
-struct DrinkDetails: Decodable, Identifiable, Hashable{
+struct DrinkDetails: Codable, Identifiable, Hashable{
     var id = UUID() // Using UUID for unique identification
     
     let idDrink: String

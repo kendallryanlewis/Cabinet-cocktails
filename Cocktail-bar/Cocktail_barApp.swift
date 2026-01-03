@@ -11,12 +11,14 @@ import SwiftUI
 struct Cocktail_barApp: App {
     let session = SessionStore() // Create an instance of SessionStore
     let systemSettings = SystemSettingsManager() // Create an instance of SystemSettingsManager
+    @StateObject private var premiumManager = PremiumManager() // Premium features manager
     
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .environmentObject(session)
                 .environmentObject(systemSettings)
+                .environmentObject(premiumManager)
         }
     }
 }

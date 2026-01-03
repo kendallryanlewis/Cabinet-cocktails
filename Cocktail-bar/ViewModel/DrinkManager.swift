@@ -7,6 +7,7 @@
 
 import Foundation
 
+@MainActor
 class DrinkManager: ObservableObject {
     static let shared = DrinkManager()
     
@@ -21,15 +22,26 @@ class DrinkManager: ObservableObject {
     var selectedCocktail: Ingredient?
     var showPopover: Bool = false
     
-    //Inital set up
-    func setUp(){
-        fetchAllDrinks() //get all drinks
-        getAllUniqueIngredients() //get all ingredients
-        onlyYourIngredients() //get intial drinks
+    // Cache for expensive operations
+    private var ingredientSetCache: [String: Set<String>] = [:]
+    private var isDrinksLoading = false
+    private var cachedCategories: Set<String>?
+    
+    //Initial set up
+    func setUp() {
+        Task {
+            await fetchAllDrinks() //get all drinks
+            getAllUniqueIngredients() //get all ingredients
+            onlyYourIngredients() //get initial drinks
+        }
     }
     
-    // Function to fetch all drinks from the API and store them locally
-    func fetchAllDrinks() {
+    // Function to fetch all drinks from the API and store them locally with async/await
+    func fetchAllDrinks() async {
+        guard !isDrinksLoading else { return }
+        isDrinksLoading = true
+        defer { isDrinksLoading = false }
+        
         let urlString = "\(API_URL)/search.php?s="
         
         guard let url = URL(string: urlString) else {
@@ -37,27 +49,30 @@ class DrinkManager: ObservableObject {
             return
         }
         
-        let task = URLSession.shared.dataTask(with: url) { [weak self] data, response, error in
-            DispatchQueue.main.async { // Ensure UI updates are performed on the main thread.
-                guard let data = data, error == nil else {
-                    print("Error fetching data: \(error?.localizedDescription ?? "Unknown error")")
-                    return
-                }
-                
-                do {
-                    let decoder = JSONDecoder()
-                    let result = try decoder.decode([String: [DrinkDetails]].self, from: data)
-                    let drinks = result["drinks"] ?? []
-                    
-                    // Update the allDrinks variable with the fetched drinks
-                    self?.allDrinks = drinks
-                } catch {
-                    print("Error decoding JSON: \(error)")
-                }
-            }
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            let decoder = JSONDecoder()
+            let result = try decoder.decode([String: [DrinkDetails]].self, from: data)
+            let drinks = result["drinks"] ?? []
+            
+            // Update the allDrinks variable with the fetched drinks
+            self.allDrinks = drinks
+            
+            // Pre-cache ingredient sets for performance
+            precomputeIngredientSets()
+        } catch {
+            print("Error fetching/decoding drinks: \(error.localizedDescription)")
         }
-        
-        task.resume()
+    }
+    
+    // Precompute ingredient sets for faster lookups
+    private func precomputeIngredientSets() {
+        guard let drinks = allDrinks else { return }
+        ingredientSetCache.removeAll()
+        for drink in drinks {
+            let ingredients = Set(drink.getIngredients().map { $0.lowercased() })
+            ingredientSetCache[drink.idDrink] = ingredients
+        }
     }
 
     // Function to filter drinks based on ingredients
@@ -74,74 +89,67 @@ class DrinkManager: ObservableObject {
        return filteredDrinks
     }
     
-    // Function to get get drink that can be made with your ingredients
+    // Function to get drinks that can be made with your ingredients - optimized
     func onlyYourIngredients() {
         let ingredients = LocalStorageManager.shared.retrieveTopShelfItems()
         
-        guard let allDrinks = DrinkManager.shared.allDrinks else {
-            self.allIngredients = nil // Assuming this is meant to clear some state
+        // Performance: Early return if no ingredients or drinks
+        guard !ingredients.isEmpty, let allDrinks = DrinkManager.shared.allDrinks, !allDrinks.isEmpty else {
+            self.myDrinkPossibilities = nil
             return
         }
         
-        // Convert the target ingredients to a Set for efficient subset checks
-        let targetIngredientsSet = Set(capitalizeFirstWordOnly(in: ingredients).filter { !$0.isEmpty })
+        // Convert to lowercase set for efficient comparison
+        let targetIngredientsSet = Set(ingredients.map { $0.lowercased().trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty })
         
-        var matchingDrinks: [DrinkDetails] = []
-
-        for drink in allDrinks {
-            // Convert the drink's ingredients to a Set
-            let drinkIngredientsSet = Set(capitalizeFirstWordOnly(in: drink.getIngredients()))
-            
-            // Check if all of the drink's ingredients are in the set of target ingredients
-            if drinkIngredientsSet.isSubset(of: targetIngredientsSet) {
-                matchingDrinks.append(drink) // Append the whole drink object, not just its name
+        // Use cached ingredient sets if available, otherwise compute
+        let matchingDrinks = allDrinks.filter { drink in
+            let drinkIngredients: Set<String>
+            if let cached = ingredientSetCache[drink.idDrink] {
+                drinkIngredients = cached
+            } else {
+                drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
             }
+            return drinkIngredients.isSubset(of: targetIngredientsSet)
         }
-        myDrinkPossibilities = matchingDrinks // Ensure this variable is correctly typed to [DrinkDetails]
+        
+        myDrinkPossibilities = matchingDrinks
         //print(matchingDrinks.map { $0.strDrink }) // Print drink names for readability
     }
     
     func getQuickDrinkPossibilities(ingredients: [Ingredient]) -> [DrinkDetails]? {
-        // Ensure that there are drinks to search through
         guard let allDrinks = DrinkManager.shared.allDrinks, !allDrinks.isEmpty else { return nil }
         
-        // Prepare the set of target ingredients with the desired capitalization
         let targetIngredientsSet = Set(ingredients.map { $0.name.lowercased() })
-
-        // Debugging: Print the target ingredients to the console
-        print(targetIngredientsSet)
         
-        // Initialize an array to store matching drinks
-        var matchingDrinks: [DrinkDetails] = []
-
-        // Iterate through all drinks
-        for drink in allDrinks {
-            // Prepare the set of the drink's ingredients with the same capitalization rules
-            let drinkIngredientsSet = Set(drink.getIngredients().map { $0.lowercased() })
-            
-            // Check if the drink's ingredients are a subset of the target ingredients
-            if drinkIngredientsSet.isSubset(of: targetIngredientsSet) {
-                matchingDrinks.append(drink)
+        // Use cached ingredient sets and filter efficiently
+        let matchingDrinks = allDrinks.filter { drink in
+            let drinkIngredients: Set<String>
+            if let cached = ingredientSetCache[drink.idDrink] {
+                drinkIngredients = cached
+            } else {
+                drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
             }
+            return drinkIngredients.isSubset(of: targetIngredientsSet)
         }
-
-        // Debugging: Print the matching drinks to the console
-        print(matchingDrinks)
         
-        // Return the matching drinks if any, or nil if there are none
         return matchingDrinks.isEmpty ? nil : matchingDrinks
     }
 
     
-    // Function to get get drink that can be made with your ingredients
+    // Function to search drinks by ingredients - optimized with cache
     func searchIngredients(ingredients: [Ingredient]) -> [DrinkDetails]? {
         guard let allDrinks = DrinkManager.shared.allDrinks else { return nil }
         
         let searchIngredientNames = Set(ingredients.map { $0.name.lowercased() })
         
         let filteredDrinks = allDrinks.filter { drink in
-            let drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
-            // Check if all search ingredients are contained within a drink's ingredients
+            let drinkIngredients: Set<String>
+            if let cached = ingredientSetCache[drink.idDrink] {
+                drinkIngredients = cached
+            } else {
+                drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
+            }
             return searchIngredientNames.isSubset(of: drinkIngredients)
         }
         
@@ -152,23 +160,32 @@ class DrinkManager: ObservableObject {
 
     // Assuming IngredientType and DrinkDetails are defined elsewhere
     func getAllUniqueIngredients() {
+         // Performance: Return early if already cached
+         if allIngredients != nil { return }
+         
          guard let allDrinks = allDrinks else {
-             self.allIngredients = nil // or [] if you prefer an empty array over nil
+             self.allIngredients = nil
              return
          }
          
+         // Use Set directly instead of intermediate arrays for better performance
          var uniqueIngredientNames = Set<String>()
          
          for drink in allDrinks {
              let ingredients = drink.getIngredients()
-             let transformedString = capitalizeFirstWordOnly(in: ingredients).filter { !$0.isEmpty }
-             uniqueIngredientNames.formUnion(transformedString)
+             for ingredient in ingredients where !ingredient.isEmpty {
+                 // Normalize: trim whitespace and capitalize first letter only
+                 let normalized = ingredient.trimmingCharacters(in: .whitespaces)
+                 if !normalized.isEmpty {
+                     let capitalized = normalized.prefix(1).uppercased() + normalized.dropFirst().lowercased()
+                     uniqueIngredientNames.insert(capitalized)
+                 }
+             }
          }
          
-         // Assuming a method to determine the type and optionally an image URL for each ingredient name
-         // For simplicity, default values are used for type and image here
+         // Convert to Ingredient objects
          let uniqueIngredients = uniqueIngredientNames.map { name -> Ingredient in
-             Ingredient(name: name, image: nil, type: .alcohol) // Adjust .someDefaultType as needed
+             Ingredient(name: name, image: nil, type: .alcohol)
          }
          
          self.allIngredients = uniqueIngredients.sorted { $0.name < $1.name }
@@ -229,7 +246,7 @@ class DrinkManager: ObservableObject {
         // Filter out duplicates by ensuring drinks only appear in their max ingredient count combination
         for (drinkID, info) in drinkAppearanceTracker {
             for (combinationKey, categories) in tempDrinkList {
-                for (category, drinks) in categories {
+                for (category, _) in categories {
                     if combinationKey != info.combinationKey,
                        let index = tempDrinkList[combinationKey]?[category]?.firstIndex(where: { $0.idDrink == drinkID }) {
                         tempDrinkList[combinationKey]?[category]?.remove(at: index)
