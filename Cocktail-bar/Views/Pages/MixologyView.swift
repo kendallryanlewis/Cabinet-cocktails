@@ -78,14 +78,7 @@ struct MixologyView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             if LocalStorageManager.shared.retrieveTopShelfItems().isEmpty {
                 EmptyMixologyView(viewPage: $viewPage, colorScheme: colorScheme)
@@ -98,8 +91,8 @@ struct MixologyView: View {
                             almostCount: almostThereMatches.count,
                             cabinetCount: LocalStorageManager.shared.retrieveTopShelfItems().count
                         )
-                        .padding(.top, 20)
-                        .padding(.horizontal)
+                        .padding(.top, 24)
+                        .padding(.horizontal, 20)
                         
                         // Toggle: Perfect vs Almost There
                         if !almostThereMatches.isEmpty {
@@ -118,36 +111,36 @@ struct MixologyView: View {
                                     action: { showAlmostThere = true }
                                 )
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                         
                         // Search Bar
                         if !perfectMatches.isEmpty || !almostThereMatches.isEmpty {
                             HStack {
                                 Image(systemName: "magnifyingglass")
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 TextField("Search cocktails", text: $searchText)
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     .tint(COLOR_WARM_AMBER)
                                     .placeholder(when: searchText.isEmpty) {
                                         Text("Search cocktails")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                 
                                 if !searchText.isEmpty {
                                     Button(action: { searchText = "" }) {
                                         Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                 }
                             }
                             .padding(12)
                             .background(COLOR_CHARCOAL_LIGHT)
                             .cornerRadius(12)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                         
                         // Category Filter
@@ -168,7 +161,7 @@ struct MixologyView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                         
@@ -180,16 +173,16 @@ struct MixologyView: View {
                             // Filtered out all results
                             VStack(spacing: 12) {
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .font(.iconMedium)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Text("No cocktails found")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 Text("Try adjusting your search or filters")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Button(action: {
                                     searchText = ""
@@ -217,7 +210,7 @@ struct MixologyView: View {
                                     )
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                         
                         Spacer(minLength: 40)
@@ -236,6 +229,7 @@ struct MixologyView: View {
 
 // MARK: - Hero Section
 struct MixologyHeroSection: View {
+    @Environment(\.colorScheme) var colorScheme
     let perfectCount: Int
     let almostCount: Int
     let cabinetCount: Int
@@ -244,18 +238,18 @@ struct MixologyHeroSection: View {
         VStack(alignment: .leading, spacing: 16) {
             Text("Your Mixology")
                 .font(.cocktailTitle)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             if perfectCount > 0 {
                 HStack(spacing: 8) {
                     Text("\(perfectCount)")
-                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                        .font(.displayLarge)
                         .foregroundColor(COLOR_WARM_AMBER)
                     
                     VStack(alignment: .leading, spacing: 2) {
                         Text("cocktail\(perfectCount == 1 ? "" : "s")")
                             .font(.sectionHeader)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         Text("you can make right now")
                             .font(.bodyText)
                             .foregroundColor(COLOR_TEXT_SECONDARY)
@@ -267,7 +261,7 @@ struct MixologyHeroSection: View {
                 HStack(spacing: 8) {
                     Image(systemName: "sparkles")
                         .foregroundColor(COLOR_WARM_AMBER)
-                        .font(.system(size: 16))
+                        .font(.bodyText)
                     
                     Text("\(almostCount) more with 1-2 ingredients")
                         .font(.bodyText)
@@ -278,7 +272,7 @@ struct MixologyHeroSection: View {
             HStack(spacing: 8) {
                 Image(systemName: "cabinet")
                     .foregroundColor(COLOR_TEXT_SECONDARY)
-                    .font(.system(size: 14))
+                    .font(.bodySmall)
                 
                 Text("\(cabinetCount) ingredients in your cabinet")
                     .font(.caption)
@@ -290,6 +284,7 @@ struct MixologyHeroSection: View {
 
 // MARK: - Toggle Button
 struct ToggleButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let count: Int
     let isSelected: Bool
@@ -299,17 +294,17 @@ struct ToggleButton: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Text("\(count)")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-                    .foregroundColor(isSelected ? .black : COLOR_TEXT_PRIMARY)
+                    .font(.sectionHeader)
+                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text(title)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(isSelected ? .black : COLOR_TEXT_SECONDARY)
+                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textSecondary(for: colorScheme))
             }
             .frame(maxWidth: .infinity)
             .padding(.vertical, 16)
-            .background(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
+            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
         }
     }
@@ -361,11 +356,11 @@ struct MixologyCocktailCard: View {
                     if showMissing && !missingIngredients.isEmpty {
                         HStack(spacing: 4) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 10))
+                                .font(.captionSmall)
                             Text("\(missingIngredients.count)")
-                                .font(.system(size: 11, weight: .bold))
+                                .font(.caption).fontWeight(.bold)
                         }
-                        .foregroundColor(.black)
+                        .foregroundColor(COLOR_CHARCOAL)
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
                         .background(COLOR_WARM_AMBER)
@@ -378,14 +373,14 @@ struct MixologyCocktailCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(cocktail.strDrink)
                         .font(.cardTitle)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
                     if let category = cocktail.strCategory {
                         Text(category)
                             .font(.caption)
-                            .foregroundColor(showMissing ? COLOR_TEXT_SECONDARY : COLOR_WARM_AMBER)
+                            .foregroundColor(showMissing ? AdaptiveColors.textSecondary(for: colorScheme) : COLOR_WARM_AMBER)
                             .textCase(.uppercase)
                     }
                     
@@ -393,13 +388,13 @@ struct MixologyCocktailCard: View {
                     if showMissing && !missingIngredients.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Need:")
-                                .font(.system(size: 10, weight: .semibold))
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .font(.captionSmall).fontWeight(.semibold)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             
                             ForEach(missingIngredients.prefix(2), id: \.self) { ingredient in
                                 Text("• \(ingredient.capitalized)")
-                                    .font(.system(size: 10))
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .font(.captionSmall)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     .lineLimit(1)
                             }
                         }
@@ -408,7 +403,7 @@ struct MixologyCocktailCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
@@ -419,20 +414,21 @@ struct MixologyCocktailCard: View {
 
 // MARK: - No Matches Yet
 struct NoMatchesYetView: View {
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "questionmark.circle")
-                .font(.system(size: 48))
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .font(.iconMedium)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             VStack(spacing: 8) {
                 Text("No matches yet")
                     .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("Add a few more ingredients to unlock cocktail recipes")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -452,22 +448,22 @@ struct EmptyMixologyView: View {
             
             ZStack {
                 Circle()
-                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: "cabinet")
-                    .font(.system(size: 40))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.displayMedium)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             VStack(spacing: 8) {
                 Text("Your Cabinet is Empty")
                     .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("Add ingredients to discover what cocktails you can make")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -482,7 +478,7 @@ struct EmptyMixologyView: View {
                     Text("Stock Your Cabinet")
                 }
                 .font(.buttonText)
-                .foregroundColor(.white)
+                .foregroundColor(COLOR_CHARCOAL)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 14)
                 .background(COLOR_WARM_AMBER)
@@ -491,6 +487,6 @@ struct EmptyMixologyView: View {
             
             Spacer()
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 }

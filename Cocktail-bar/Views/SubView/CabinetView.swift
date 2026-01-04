@@ -50,7 +50,7 @@ struct CabinetView: View {
                             
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(COLOR_WARM_AMBER)
-                                .font(.system(size: 28))
+                                .font(.cocktailTitle)
                         }
                         .padding(8)
                     }
@@ -76,7 +76,7 @@ struct CabinetView: View {
                     if !isInCabinet {
                         Image(systemName: "plus.circle")
                             .foregroundColor(COLOR_TEXT_SECONDARY)
-                            .font(.system(size: 20))
+                            .font(.navTitle)
                     }
                 }
             }

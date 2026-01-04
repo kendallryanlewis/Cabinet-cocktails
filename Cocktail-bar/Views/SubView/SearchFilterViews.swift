@@ -200,7 +200,7 @@ struct SearchHistoryView: View {
                 if filterManager.searchHistory.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "clock.arrow.circlepath")
-                            .font(.system(size: 60))
+                            .font(.iconLarge)
                             .foregroundColor(.gray)
                         
                         Text("No Search History")
@@ -294,7 +294,7 @@ struct SavedSearchesView: View {
                 if filterManager.savedSearches.isEmpty {
                     VStack(spacing: 16) {
                         Image(systemName: "bookmark")
-                            .font(.system(size: 60))
+                            .font(.iconLarge)
                             .foregroundColor(.gray)
                         
                         Text("No Saved Searches")

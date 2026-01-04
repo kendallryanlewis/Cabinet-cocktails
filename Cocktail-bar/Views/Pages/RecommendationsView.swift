@@ -8,16 +8,15 @@
 import SwiftUI
 
 struct RecommendationsView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var recommendationEngine = RecommendationEngine.shared
     @State private var selectedMode: RecommendationMode = .basedOnCabinet
     @State private var isRefreshing = false
     @State private var selectedDrink: String?
-    @State private var showDetails = false
     
     var body: some View {
         ZStack {
-            COLOR_CHARCOAL
-                .ignoresSafeArea()
+            AppBackground()
             
             VStack(spacing: 0) {
                 // Header
@@ -37,10 +36,10 @@ struct RecommendationsView: View {
                 }
             }
         }
-        .sheet(isPresented: $showDetails) {
+        .sheet(isPresented: .constant(selectedDrink != nil), onDismiss: { selectedDrink = nil }) {
             if let drinkName = selectedDrink {
                 DetailsView(cocktail: drinkName, hideCloseButton: false) {
-                    showDetails = false
+                    selectedDrink = nil
                 }
             }
         }
@@ -57,13 +56,13 @@ struct RecommendationsView: View {
             HStack {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("For You")
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(.white)
+                        .font(.cocktailTitle)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     if let lastRefresh = recommendationEngine.lastRefreshDate {
                         Text("Updated \(lastRefresh, style: .relative) ago")
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.caption)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                 }
                 
@@ -78,7 +77,7 @@ struct RecommendationsView: View {
                     }
                 }) {
                     Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 20, weight: .semibold))
+                        .font(.cardTitle)
                         .foregroundColor(COLOR_WARM_AMBER)
                         .rotationEffect(.degrees(isRefreshing ? 360 : 0))
                         .animation(isRefreshing ? .linear(duration: 1).repeatForever(autoreverses: false) : .default, value: isRefreshing)
@@ -86,7 +85,7 @@ struct RecommendationsView: View {
                 .disabled(isRefreshing)
             }
             .padding(.horizontal, 20)
-            .padding(.top, 20)
+            .padding(.top, 24)
         }
     }
     
@@ -109,7 +108,7 @@ struct RecommendationsView: View {
             .padding(.horizontal, 20)
             .padding(.vertical, 16)
         }
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
     }
     
     // MARK: - Recommendations List
@@ -119,7 +118,6 @@ struct RecommendationsView: View {
                 ForEach(recommendations) { recommendation in
                     RecommendationCard(recommendation: recommendation) {
                         selectedDrink = recommendation.drink.strDrink
-                        showDetails = true
                     }
                 }
             }
@@ -135,8 +133,8 @@ struct RecommendationsView: View {
                 .accentColor(COLOR_WARM_AMBER)
             
             Text("Analyzing your preferences...")
-                .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .font(.bodyText)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -145,16 +143,16 @@ struct RecommendationsView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: selectedMode.icon)
-                .font(.system(size: 60))
-                .foregroundColor(.gray)
+                .font(.iconLarge)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             Text("No Recommendations Yet")
-                .font(.system(size: 24, weight: .bold))
-                .foregroundColor(.white)
+                .font(.sectionHeader)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Text(emptyStateMessage)
-                .font(.system(size: 16))
-                .foregroundColor(.gray)
+                .font(.bodyText)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
         }
@@ -177,6 +175,7 @@ struct RecommendationsView: View {
 
 // MARK: - Mode Filter Button
 struct ModeFilterButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let mode: RecommendationMode
     let isSelected: Bool
     let count: Int
@@ -186,29 +185,29 @@ struct ModeFilterButton: View {
         Button(action: action) {
             HStack(spacing: 6) {
                 Image(systemName: mode.icon)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.buttonSmall)
                 
                 Text(mode.rawValue)
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.buttonSmall)
                 
                 if count > 0 {
                     Text("\(count)")
-                        .font(.system(size: 12, weight: .bold))
-                        .foregroundColor(isSelected ? COLOR_CHARCOAL : COLOR_WARM_AMBER)
+                        .font(.caption)
+                        .foregroundColor(isSelected ? AdaptiveColors.cardBackground(for: colorScheme) : COLOR_WARM_AMBER)
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(
                             Capsule()
-                                .fill(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL)
+                                .fill(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.background(for: colorScheme))
                         )
                 }
             }
-            .foregroundColor(isSelected ? COLOR_CHARCOAL : .white)
+            .foregroundColor(isSelected ? AdaptiveColors.cardBackground(for: colorScheme) : AdaptiveColors.textPrimary(for: colorScheme))
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
             .background(
                 Capsule()
-                    .fill(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
+                    .fill(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.cardBackground(for: colorScheme))
             )
         }
     }
@@ -216,6 +215,7 @@ struct ModeFilterButton: View {
 
 // MARK: - Recommendation Card
 struct RecommendationCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let recommendation: CocktailRecommendation
     let action: () -> Void
     
@@ -251,24 +251,24 @@ struct RecommendationCard: View {
                 // Content
                 VStack(alignment: .leading, spacing: 8) {
                     Text(recommendation.drink.strDrink)
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundColor(.white)
+                        .font(.cardTitle)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                     
                     HStack(spacing: 4) {
                         Image(systemName: "star.fill")
-                            .font(.system(size: 12))
+                            .font(.caption)
                             .foregroundColor(COLOR_WARM_AMBER)
                         
                         Text(recommendation.reason)
-                            .font(.system(size: 14))
-                            .foregroundColor(.gray)
+                            .font(.bodySmall)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             .lineLimit(1)
                     }
                     
                     if let category = recommendation.drink.strCategory {
                         Text(category)
-                            .font(.system(size: 12, weight: .medium))
+                            .font(.caption)
                             .foregroundColor(COLOR_WARM_AMBER)
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
@@ -281,25 +281,25 @@ struct RecommendationCard: View {
                     // Score Indicator
                     HStack(spacing: 4) {
                         Text("\(Int(recommendation.score))%")
-                            .font(.system(size: 14, weight: .bold))
+                            .font(.buttonSmall)
                             .foregroundColor(scoreColor(for: recommendation.score))
                         
                         Text("match")
-                            .font(.system(size: 12))
-                            .foregroundColor(.gray)
+                            .font(.caption)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                 }
                 
                 Spacer()
                 
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(.gray)
+                    .font(.buttonSmall)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
             )
         }
         .buttonStyle(PlainButtonStyle())

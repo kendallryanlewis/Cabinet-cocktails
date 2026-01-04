@@ -21,6 +21,16 @@ let COLOR_CHARCOAL_LIGHT = Color(hex: "#2C2C2E") // Cards, panels, elevated surf
 let COLOR_TEXT_PRIMARY = Color(hex: "#FFFFFF") // Primary text
 let COLOR_TEXT_SECONDARY = Color(hex: "#8E8E93") // Secondary text, captions
 
+// Light Mode Colors
+let COLOR_LIGHT_BACKGROUND = Color(hex: "#F5F0E8") // Light warm cream background
+let COLOR_LIGHT_CARD = Color(hex: "#F5F0E8") // Tanish cards for light mode
+let COLOR_LIGHT_TEXT_PRIMARY = Color(hex: "#1C1C1E") // Dark text for light mode
+let COLOR_LIGHT_TEXT_SECONDARY = Color(hex: "#6B6B6B") // Secondary text for light mode
+
+// Menu Background Colors (optimized for text readability)
+let COLOR_MENU_DARK = Color(hex: "#1A1A1C") // Slightly darker charcoal for dark mode menu
+let COLOR_MENU_LIGHT = Color(hex: "#3A3530") // Warm medium-dark brown for light mode menu
+
 // Legacy colors (kept for backward compatibility during transition)
 let COLOR_PRIMARY = COLOR_WARM_AMBER // Map old to new
 let COLOR_SECONDARY = COLOR_WARM_AMBER // Map old to new
@@ -31,21 +41,73 @@ let LIGHT_LINEAR_TOP = Color(hex: "FBF4E9")
 let LIGHT_LINEAR_BOTTOM = Color(hex: "#DFD8CC")
 let LOGO_FULL = "VM-graphiclogo-circle"
 
-// Typography System - Modern Editorial Style
-extension Font {
-    // Serif fonts for cocktail names and section headers (editorial feel)
-    static let cocktailTitle = Font.system(size: 32, weight: .bold, design: .serif)
-    static let sectionHeader = Font.system(size: 24, weight: .semibold, design: .serif)
-    static let cardTitle = Font.system(size: 16, weight: .semibold, design: .serif)
+// MARK: - Layout Constants
+// Standard padding values for consistent spacing throughout the app
+struct LayoutConstants {
+    static let screenHorizontalPadding: CGFloat = 20 // Standard horizontal padding from screen edges
+    static let sectionSpacing: CGFloat = 32 // Space between major sections
+    static let cardPadding: CGFloat = 20 // Padding inside cards
+    static let elementSpacing: CGFloat = 16 // Space between related elements
+    static let minimumBottomPadding: CGFloat = 80 // Bottom padding for scrollable content
+}
+
+// MARK: - Adaptive Color Helpers
+// These provide automatic dark/light mode adaptation
+struct AdaptiveColors {
+    static func background(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? COLOR_CHARCOAL : COLOR_LIGHT_BACKGROUND
+    }
     
-    // Sans-serif for UI and body text (clarity and precision)
-    static let bodyText = Font.system(size: 16, weight: .regular, design: .rounded)
-    static let ingredientText = Font.system(size: 14, weight: .medium, design: .rounded)
-    static let caption = Font.system(size: 12, weight: .regular, design: .rounded)
+    static func cardBackground(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? COLOR_CHARCOAL_LIGHT : COLOR_LIGHT_CARD
+    }
+    
+    static func textPrimary(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? COLOR_TEXT_PRIMARY : COLOR_LIGHT_TEXT_PRIMARY
+    }
+    
+    static func textSecondary(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? COLOR_TEXT_SECONDARY : COLOR_LIGHT_TEXT_SECONDARY
+    }
+    
+    // Helper for secondary card backgrounds (e.g., input fields, inner containers)
+    static func secondaryCardBackground(for colorScheme: ColorScheme) -> Color {
+        colorScheme == .dark ? COLOR_CHARCOAL_LIGHT : Color(hex: "#E8E1D5") // Slightly darker tan for light mode
+    }
+}
+
+// Typography System - Modern Style (Unified)
+extension Font {
+    // Large display titles
+    static let displayLarge = Font.system(size: 48, weight: .bold, design: .default)
+    static let displayMedium = Font.system(size: 40, weight: .bold, design: .default)
+    static let displaySmall = Font.system(size: 32, weight: .bold, design: .default)
+    
+    // Titles and headers
+    static let cocktailTitle = Font.system(size: 32, weight: .bold, design: .default)
+    static let sectionHeader = Font.system(size: 24, weight: .semibold, design: .default)
+    static let cardTitle = Font.system(size: 18, weight: .semibold, design: .default)
+    static let navTitle = Font.system(size: 20, weight: .bold, design: .default)
+    
+    // Body and content text
+    static let bodyLarge = Font.system(size: 18, weight: .regular, design: .default)
+    static let bodyText = Font.system(size: 16, weight: .regular, design: .default)
+    static let bodySmall = Font.system(size: 14, weight: .regular, design: .default)
+    
+    // Supporting text
+    static let ingredientText = Font.system(size: 14, weight: .medium, design: .default)
+    static let caption = Font.system(size: 12, weight: .regular, design: .default)
+    static let captionSmall = Font.system(size: 10, weight: .regular, design: .default)
     
     // UI elements
-    static let buttonText = Font.system(size: 16, weight: .semibold, design: .rounded)
-    static let navTitle = Font.system(size: 20, weight: .bold, design: .rounded)
+    static let buttonText = Font.system(size: 16, weight: .semibold, design: .default)
+    static let buttonSmall = Font.system(size: 14, weight: .semibold, design: .default)
+    
+    // Icons and special elements
+    static let iconLarge = Font.system(size: 60, weight: .regular, design: .default)
+    static let iconMedium = Font.system(size: 48, weight: .regular, design: .default)
+    static let iconSmall = Font.system(size: 32, weight: .regular, design: .default)
+    static let iconMini = Font.system(size: 24, weight: .regular, design: .default)
 }
 
 // Login | Registration Page

@@ -8,37 +8,43 @@
 import SwiftUI
 
 struct EducationalContentView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var contentManager = EducationalContentManager.shared
     @State private var selectedCategory: BartendingTip.TipCategory?
     @State private var selectedTab = 0
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Tab Selector
-                Picker("Content Type", selection: $selectedTab) {
-                    Text("Tips").tag(0)
-                    Text("Ingredients").tag(1)
-                    Text("Stories").tag(2)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+            ZStack {
+                AppBackground()
                 
-                // Content
-                TabView(selection: $selectedTab) {
-                    TipsListView(selectedCategory: $selectedCategory)
-                        .tag(0)
+                VStack(spacing: 0) {
+                    // Tab Selector
+                    Picker("Content Type", selection: $selectedTab) {
+                        Text("Tips").tag(0)
+                        Text("Ingredients").tag(1)
+                        Text("Stories").tag(2)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
                     
-                    IngredientGuidesView()
-                        .tag(1)
-                    
-                    CocktailStoriesView()
-                        .tag(2)
+                    // Content
+                    TabView(selection: $selectedTab) {
+                        TipsListView(selectedCategory: $selectedCategory)
+                            .tag(0)
+                        
+                        IngredientGuidesView()
+                            .tag(1)
+                        
+                        CocktailStoriesView()
+                            .tag(2)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
             .navigationTitle("Learn Bartending")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
         }
     }
 }
@@ -107,7 +113,7 @@ struct TipCard: View {
                 
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
-                    .font(.system(size: 12))
+                    .font(.caption)
             }
             
             Text(tip.description)
@@ -275,7 +281,7 @@ struct IngredientGuideCard: View {
                 
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
-                    .font(.system(size: 12))
+                    .font(.caption)
             }
             
             Text(guide.description)
@@ -405,7 +411,7 @@ struct CocktailStoryCard: View {
                 
                 Image(systemName: "chevron.right")
                     .foregroundColor(.gray)
-                    .font(.system(size: 12))
+                    .font(.caption)
             }
             
             Text(story.origin)

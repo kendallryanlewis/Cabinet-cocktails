@@ -8,6 +8,7 @@
 import SwiftUI
 
 struct BarEquipmentView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var equipmentManager = BarEquipmentManager.shared
     @State private var selectedCategory: EquipmentCategory?
     @State private var showingAddEquipment = false
@@ -15,35 +16,40 @@ struct BarEquipmentView: View {
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Tab Selector
-                Picker("View Mode", selection: $selectedTab) {
-                    Text("All").tag(0)
-                    Text("Owned").tag(1)
-                    Text("Essentials").tag(2)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+            ZStack {
+                AppBackground()
                 
-                // Progress Bar
-                EquipmentProgressBar()
-                    .padding(.horizontal)
-                
-                // Content
-                TabView(selection: $selectedTab) {
-                    AllEquipmentView(selectedCategory: $selectedCategory)
-                        .tag(0)
+                VStack(spacing: 0) {
+                    // Tab Selector
+                    Picker("View Mode", selection: $selectedTab) {
+                        Text("All").tag(0)
+                        Text("Owned").tag(1)
+                        Text("Essentials").tag(2)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
                     
-                    OwnedEquipmentView()
-                        .tag(1)
+                    // Progress Bar
+                    EquipmentProgressBar()
+                        .padding(.horizontal, 20)
                     
-                    EssentialsChecklistView()
-                        .tag(2)
+                    // Content
+                    TabView(selection: $selectedTab) {
+                        AllEquipmentView(selectedCategory: $selectedCategory)
+                            .tag(0)
+                        
+                        OwnedEquipmentView()
+                            .tag(1)
+                        
+                        EssentialsChecklistView()
+                            .tag(2)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
             .navigationTitle("Bar Equipment")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showingAddEquipment = true }) {
@@ -271,7 +277,7 @@ struct OwnedEquipmentView: View {
         if ownedEquipment.isEmpty {
             VStack(spacing: 20) {
                 Image(systemName: "tray")
-                    .font(.system(size: 60))
+                    .font(.iconLarge)
                     .foregroundColor(.gray)
                 
                 Text("No Equipment Owned")

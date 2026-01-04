@@ -92,13 +92,13 @@ struct BatchCalculatorView: View {
     private var headerSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text(drink.strDrink)
-                .font(.system(size: 28, weight: .bold))
-                .foregroundColor(.white)
+                .font(.cocktailTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             if let category = drink.strCategory {
                 Text(category)
-                    .font(.system(size: 16))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.bodyText)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             HStack(spacing: 16) {
@@ -133,8 +133,8 @@ struct BatchCalculatorView: View {
     private var multiplierSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Servings")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .font(.cardTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             // Quick multipliers
             ScrollView(.horizontal, showsIndicators: false) {
@@ -153,13 +153,13 @@ struct BatchCalculatorView: View {
             VStack(spacing: 8) {
                 HStack {
                     Text("Custom")
-                        .font(.system(size: 14))
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .font(.bodySmall)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     
                     Spacer()
                     
                     Text(String(format: "%.1fx", selectedMultiplier))
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.buttonText)
                         .foregroundColor(COLOR_WARM_AMBER)
                 }
                 
@@ -167,7 +167,7 @@ struct BatchCalculatorView: View {
                     .accentColor(COLOR_WARM_AMBER)
             }
             .padding(12)
-            .background(COLOR_CHARCOAL_LIGHT)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
         }
     }
@@ -176,8 +176,8 @@ struct BatchCalculatorView: View {
     private var unitSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Units")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .font(.cardTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(spacing: 12) {
@@ -200,8 +200,8 @@ struct BatchCalculatorView: View {
     private var ingredientsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Ingredients")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .font(.cardTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             VStack(spacing: 8) {
                 ForEach(scaledIngredients) { ingredient in
@@ -219,7 +219,7 @@ struct BatchCalculatorView: View {
                     Image(systemName: "chart.bar.fill")
                     Text("Party Mode (Running Tally)")
                 }
-                .font(.system(size: 16, weight: .semibold))
+                .font(.buttonText)
                 .foregroundColor(.white)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
@@ -232,7 +232,7 @@ struct BatchCalculatorView: View {
                     Image(systemName: "bookmark.fill")
                     Text("Save as Preset")
                 }
-                .font(.system(size: 16, weight: .semibold))
+                .font(.buttonText)
                 .foregroundColor(COLOR_WARM_AMBER)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
@@ -245,11 +245,11 @@ struct BatchCalculatorView: View {
                     Image(systemName: "square.and.arrow.up")
                     Text("Share Recipe")
                 }
-                .font(.system(size: 16, weight: .semibold))
+                .font(.buttonText)
                 .foregroundColor(COLOR_WARM_AMBER)
                 .frame(maxWidth: .infinity)
                 .padding(.vertical, 14)
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
                 .cornerRadius(12)
             }
         }
@@ -259,8 +259,8 @@ struct BatchCalculatorView: View {
     private var presetsSection: some View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Saved Presets")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundColor(.white)
+                .font(.cardTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             ForEach(calculator.savedPresets.filter { $0.drinkId == drink.idDrink }) { preset in
                 PresetRow(
@@ -306,9 +306,9 @@ struct InfoPill: View {
     var body: some View {
         HStack(spacing: 6) {
             Image(systemName: icon)
-                .font(.system(size: 12))
+                .font(.caption)
             Text(text)
-                .font(.system(size: 14, weight: .medium))
+                .font(.ingredientText)
         }
         .foregroundColor(color)
         .padding(.horizontal, 12)
@@ -319,6 +319,7 @@ struct InfoPill: View {
 }
 
 struct MultiplierButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let multiplier: Double
     let isSelected: Bool
     let action: () -> Void
@@ -327,13 +328,13 @@ struct MultiplierButton: View {
         Button(action: action) {
             VStack(spacing: 4) {
                 Text("\(Int(multiplier))")
-                    .font(.system(size: 24, weight: .bold))
+                    .font(.sectionHeader)
                 Text("serving\(Int(multiplier) == 1 ? "" : "s")")
-                    .font(.system(size: 12))
+                    .font(.caption)
             }
             .foregroundColor(isSelected ? COLOR_CHARCOAL : .white)
             .frame(width: 80, height: 70)
-            .background(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
+            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
         }
     }
@@ -347,7 +348,7 @@ struct UnitButton: View {
     var body: some View {
         Button(action: action) {
             Text(unit.rawValue)
-                .font(.system(size: 14, weight: .semibold))
+                .font(.buttonSmall)
                 .foregroundColor(isSelected ? COLOR_CHARCOAL : .white)
                 .padding(.horizontal, 16)
                 .padding(.vertical, 10)
@@ -358,33 +359,35 @@ struct UnitButton: View {
 }
 
 struct IngredientRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let ingredient: ScaledIngredient
     
     var body: some View {
         HStack {
             Text(ingredient.name)
-                .font(.system(size: 16))
-                .foregroundColor(.white)
+                .font(.bodyText)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Spacer()
             
             if let _ = ingredient.parsedOriginalAmount {
                 Text(ingredient.displayAmount)
-                    .font(.system(size: 16, weight: .semibold))
+                    .font(.buttonText)
                     .foregroundColor(COLOR_WARM_AMBER)
             } else {
                 Text(ingredient.originalAmount)
-                    .font(.system(size: 14))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.bodySmall)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
         }
         .padding(12)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(8)
     }
 }
 
 struct PresetRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let preset: BatchPreset
     let onLoad: () -> Void
     let onDelete: () -> Void
@@ -393,19 +396,19 @@ struct PresetRow: View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
                 Text(preset.name)
-                    .font(.system(size: 16, weight: .semibold))
-                    .foregroundColor(.white)
+                    .font(.buttonText)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("\(Int(preset.multiplier))x servings")
-                    .font(.system(size: 14))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.bodySmall)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             Spacer()
             
             Button(action: onLoad) {
                 Text("Load")
-                    .font(.system(size: 14, weight: .semibold))
+                    .font(.buttonSmall)
                     .foregroundColor(COLOR_WARM_AMBER)
                     .padding(.horizontal, 12)
                     .padding(.vertical, 6)
@@ -419,12 +422,13 @@ struct PresetRow: View {
             }
         }
         .padding(12)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(8)
     }
 }
 
 struct SavePresetSheet: View {
+    @Environment(\.colorScheme) var colorScheme
     @Binding var presetName: String
     let onSave: () -> Void
     @Environment(\.dismiss) var dismiss
@@ -436,8 +440,8 @@ struct SavePresetSheet: View {
                 
                 VStack(spacing: 20) {
                     TextField("Preset name (e.g., 'Party Mix')", text: $presetName)
-                        .font(.system(size: 16))
-                        .foregroundColor(.white)
+                        .font(.bodyText)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .padding(16)
                         .background(COLOR_CHARCOAL_LIGHT)
                         .cornerRadius(12)
@@ -453,7 +457,7 @@ struct SavePresetSheet: View {
                     Button("Cancel") {
                         dismiss()
                     }
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -471,6 +475,7 @@ struct SavePresetSheet: View {
 
 // MARK: - Party Mode View
 struct PartyModeView: View {
+    @Environment(\.colorScheme) var colorScheme
     let drink: DrinkDetails
     let initialMultiplier: Double
     let initialUnit: VolumeUnit
@@ -494,21 +499,21 @@ struct PartyModeView: View {
                     // Counter Display
                     VStack(spacing: 16) {
                         Text(drink.strDrink)
-                            .font(.system(size: 24, weight: .bold))
-                            .foregroundColor(.white)
+                            .font(.sectionHeader)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .multilineTextAlignment(.center)
                         
                         Text("\(batchesMade)")
-                            .font(.system(size: 80, weight: .bold))
+                            .font(.system(size: 80, weight: .bold, design: .rounded))
                             .foregroundColor(COLOR_WARM_AMBER)
                         
                         Text("batches made")
-                            .font(.system(size: 18))
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .font(.bodyLarge)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         
                         Text("\(totalServings) total servings")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(.buttonText)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     }
                     
                     Spacer()
@@ -521,7 +526,7 @@ struct PartyModeView: View {
                             }
                         }) {
                             Image(systemName: "minus.circle.fill")
-                                .font(.system(size: 60))
+                                .font(.iconLarge)
                                 .foregroundColor(batchesMade > 0 ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
                         }
                         .disabled(batchesMade == 0)
@@ -530,7 +535,7 @@ struct PartyModeView: View {
                             batchesMade += 1
                         }) {
                             Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 60))
+                                .font(.iconLarge)
                                 .foregroundColor(COLOR_WARM_AMBER)
                         }
                     }
@@ -539,8 +544,8 @@ struct PartyModeView: View {
                         batchesMade = 0
                     }) {
                         Text("Reset")
-                            .font(.system(size: 16, weight: .semibold))
-                            .foregroundColor(.white)
+                            .font(.buttonText)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 14)
                             .background(COLOR_CHARCOAL_LIGHT)

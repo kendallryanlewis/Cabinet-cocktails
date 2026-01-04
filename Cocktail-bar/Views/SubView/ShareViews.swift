@@ -50,7 +50,7 @@ struct ExportFormatSelector: View {
                     // Header
                     VStack(spacing: 8) {
                         Image(systemName: "square.and.arrow.up")
-                            .font(.system(size: 44))
+                            .font(.displayLarge)
                             .foregroundColor(COLOR_WARM_AMBER)
                         
                         Text("Choose Export Format")
@@ -79,7 +79,7 @@ struct ExportFormatSelector: View {
                                 )
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     }
                     
                     Spacer()
@@ -143,7 +143,7 @@ struct FormatOptionButton: View {
                         .frame(width: 56, height: 56)
                     
                     Image(systemName: format.icon)
-                        .font(.system(size: 24))
+                        .font(.iconMini)
                         .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
                 }
                 
@@ -164,7 +164,7 @@ struct FormatOptionButton: View {
                 // Checkmark
                 if isSelected {
                     Image(systemName: "checkmark.circle.fill")
-                        .font(.system(size: 24))
+                        .font(.iconMini)
                         .foregroundColor(COLOR_WARM_AMBER)
                 }
             }
@@ -192,7 +192,7 @@ struct QuickShareButton: View {
             showFormatSelector = true
         }) {
             Image(systemName: "square.and.arrow.up")
-                .font(.system(size: 18))
+                .font(.bodyLarge)
                 .foregroundColor(COLOR_WARM_AMBER)
         }
         .sheet(isPresented: $showFormatSelector) {
@@ -216,7 +216,7 @@ struct ShareSuccessToast: View {
             
             HStack(spacing: 12) {
                 Image(systemName: "checkmark.circle.fill")
-                    .font(.system(size: 20))
+                    .font(.navTitle)
                     .foregroundColor(.green)
                 
                 Text(message)
@@ -232,7 +232,7 @@ struct ShareSuccessToast: View {
                     .fill(COLOR_CHARCOAL_LIGHT)
                     .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
             )
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
             .padding(.bottom, 20)
         }
         .transition(.move(edge: .bottom).combined(with: .opacity))
@@ -263,7 +263,7 @@ struct BatchShareView: View {
                     // Header
                     VStack(spacing: 8) {
                         Image(systemName: "square.and.arrow.up.on.square")
-                            .font(.system(size: 44))
+                            .font(.displayLarge)
                             .foregroundColor(COLOR_WARM_AMBER)
                         
                         Text("Share Multiple Recipes")
@@ -275,7 +275,7 @@ struct BatchShareView: View {
                             .font(.subheadline)
                             .foregroundColor(COLOR_TEXT_SECONDARY)
                     }
-                    .padding(.top, 20)
+                    .padding(.top, 24)
                     .padding(.bottom, 30)
                     
                     // Selection Controls
@@ -304,7 +304,7 @@ struct BatchShareView: View {
                                 .foregroundColor(COLOR_TEXT_SECONDARY)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     .padding(.bottom, 16)
                     
                     // Cocktail List
@@ -324,7 +324,7 @@ struct BatchShareView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     }
                 }
             }
@@ -369,7 +369,7 @@ struct CocktailSelectRow: View {
             HStack(spacing: 12) {
                 // Selection Indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24))
+                    .font(.iconMini)
                     .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
                 
                 // Cocktail Info

@@ -9,6 +9,7 @@ import SwiftUI
 import StoreKit
 
 struct SubscriptionManagementView: View {
+    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var premiumManager: PremiumManager
     @Environment(\.dismiss) var dismiss
     @State private var showPaywall = false
@@ -16,12 +17,7 @@ struct SubscriptionManagementView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(
-                    gradient: Gradient(colors: [COLOR_CHARCOAL, COLOR_CHARCOAL_LIGHT]),
-                    startPoint: .topLeading,
-                    endPoint: .bottomTrailing
-                )
-                .ignoresSafeArea()
+                AppBackground()
                 
                 ScrollView {
                     VStack(spacing: 24) {
@@ -52,6 +48,7 @@ struct SubscriptionManagementView: View {
             }
             .navigationTitle("Premium Status")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Done") {
@@ -72,35 +69,35 @@ struct SubscriptionManagementView: View {
         VStack(spacing: 16) {
             // Icon
             Image(systemName: premiumManager.isPremium ? "crown.fill" : "lock.fill")
-                .font(.system(size: 50))
+                .font(.iconMedium)
                 .foregroundColor(COLOR_WARM_AMBER)
             
             // Status
             Text(premiumManager.isPremium ? "Premium Active" : "Free Plan")
                 .font(.title2.bold())
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             // Details
             if premiumManager.isPremium {
                 if let statusText = premiumManager.subscriptionStatusText() {
                     Text(statusText)
                         .font(.caption)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 
                 Text("You have access to all premium features")
                     .font(.body)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
             } else {
                 Text("Upgrade to unlock all features")
                     .font(.body)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
         }
         .frame(maxWidth: .infinity)
         .padding()
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(16)
     }
     
@@ -109,7 +106,7 @@ struct SubscriptionManagementView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Features")
                 .font(.headline)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             VStack(spacing: 8) {
                 FeatureAccessRow(
@@ -161,7 +158,7 @@ struct SubscriptionManagementView: View {
                 )
             }
             .padding()
-            .background(COLOR_CHARCOAL_LIGHT)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
         }
     }
@@ -171,7 +168,7 @@ struct SubscriptionManagementView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Manage")
                 .font(.headline)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Button {
                 if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
@@ -185,15 +182,15 @@ struct SubscriptionManagementView: View {
                         .foregroundColor(COLOR_WARM_AMBER)
                     
                     Text("Manage Subscription")
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     Spacer()
                     
                     Image(systemName: "chevron.right")
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 .padding()
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
                 .cornerRadius(12)
             }
         }
@@ -219,7 +216,7 @@ struct SubscriptionManagementView: View {
             
             Text("Unlock all features with a one-time purchase or subscription")
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 .multilineTextAlignment(.center)
         }
     }
@@ -229,7 +226,7 @@ struct SubscriptionManagementView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Already Purchased?")
                 .font(.headline)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Button {
                 Task {
@@ -241,7 +238,7 @@ struct SubscriptionManagementView: View {
                         .foregroundColor(COLOR_WARM_AMBER)
                     
                     Text("Restore Purchases")
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     Spacer()
                     
@@ -250,11 +247,11 @@ struct SubscriptionManagementView: View {
                             .tint(COLOR_WARM_AMBER)
                     } else {
                         Image(systemName: "chevron.right")
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                 }
                 .padding()
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
                 .cornerRadius(12)
             }
             .disabled(premiumManager.isLoading)
@@ -266,7 +263,7 @@ struct SubscriptionManagementView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Support")
                 .font(.headline)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Link(destination: URL(string: "https://apps.apple.com/account/subscriptions")!) {
                 HStack {
@@ -274,15 +271,15 @@ struct SubscriptionManagementView: View {
                         .foregroundColor(COLOR_WARM_AMBER)
                     
                     Text("Subscription Help")
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     Spacer()
                     
                     Image(systemName: "arrow.up.right")
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 .padding()
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
                 .cornerRadius(12)
             }
         }
@@ -291,6 +288,7 @@ struct SubscriptionManagementView: View {
 
 // MARK: - Feature Access Row
 struct FeatureAccessRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let status: String
     let isUnlocked: Bool
@@ -298,16 +296,16 @@ struct FeatureAccessRow: View {
     var body: some View {
         HStack {
             Image(systemName: isUnlocked ? "checkmark.circle.fill" : "lock.circle.fill")
-                .foregroundColor(isUnlocked ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY.opacity(0.5))
+                .foregroundColor(isUnlocked ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme).opacity(0.5))
             
             Text(title)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Spacer()
             
             Text(status)
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }
     }
 }

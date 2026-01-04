@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		5CAPPBG00000000000000001 /* AppBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAPPBG00000000000000002 /* AppBackground.swift */; };
 		5C0B56442F07E56100835C95 /* CustomRecipeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B563F2F07E56100835C95 /* CustomRecipeEditorView.swift */; };
 		5C0B56452F07E56100835C95 /* StepByStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B56422F07E56100835C95 /* StepByStepView.swift */; };
 		5C0B56462F07E56100835C95 /* BarEquipmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B563D2F07E56100835C95 /* BarEquipmentView.swift */; };
@@ -149,6 +150,7 @@
 		5C3097072BA2A12A006DD90D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5C3097082BA2A12A006DD90D /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		5C30970A2BA2A12A006DD90D /* GenericBackground.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericBackground.swift; sourceTree = "<group>"; };
+		5CAPPBG00000000000000002 /* AppBackground.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppBackground.swift; sourceTree = "<group>"; };
 		5C30970B2BA2A12A006DD90D /* GenericButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericButton.swift; sourceTree = "<group>"; };
 		5C30970C2BA2A12A006DD90D /* GenericTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericTextField.swift; sourceTree = "<group>"; };
 		5C30970E2BA2A12A006DD90D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -304,6 +306,7 @@
 		5C30970D2BA2A12A006DD90D /* UIViews */ = {
 			isa = PBXGroup;
 			children = (
+				5CAPPBG00000000000000002 /* AppBackground.swift */,
 				5C30970A2BA2A12A006DD90D /* GenericBackground.swift */,
 				5C30970B2BA2A12A006DD90D /* GenericButton.swift */,
 				5C30970C2BA2A12A006DD90D /* GenericTextField.swift */,
@@ -579,6 +582,7 @@
 				5C3097492BA7CDAA006DD90D /* SearchBar.swift in Sources */,
 				5C30972A2BA2A12B006DD90D /* Session.swift in Sources */,
 				5C30974D2BA919CE006DD90D /* MixologyView.swift in Sources */,
+				5CAPPBG00000000000000001 /* AppBackground.swift in Sources */,
 				5C30972B2BA2A12B006DD90D /* GenericBackground.swift in Sources */,
 				5CB12FA72BBB4C580035DF02 /* SubDrinkListView.swift in Sources */,
 				5C6B12CE2BB8C24300DBE149 /* DrinkManager.swift in Sources */,

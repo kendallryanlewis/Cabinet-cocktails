@@ -10,6 +10,7 @@ import SwiftUI
 struct StepByStepView: View {
     @StateObject private var timerManager = CocktailTimerManager()
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     let cocktail: DrinkDetails
     
     var currentStepData: CocktailStep? {
@@ -29,7 +30,7 @@ struct StepByStepView: View {
                 
                 // Progress
                 ProgressView(current: timerManager.currentStep + 1, total: timerManager.steps.count)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 
                 Spacer()
                 
@@ -199,7 +200,7 @@ struct TimerDisplayView: View {
                     .animation(.linear(duration: 1), value: timerProgress)
                 
                 Text(timerManager.formatTime(timerManager.remainingTime))
-                    .font(.system(size: 40, weight: .bold, design: .rounded))
+                    .font(.displayMedium)
                     .foregroundColor(timerColor)
             }
             

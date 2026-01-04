@@ -38,7 +38,7 @@ struct PremiumGateView<Content: View>: View {
     private var lockedView: some View {
         VStack(spacing: 20) {
             Image(systemName: "lock.fill")
-                .font(.system(size: 50))
+                .font(.iconMedium)
                 .foregroundColor(COLOR_WARM_AMBER)
             
             Text("Premium Feature")
@@ -160,6 +160,6 @@ struct LimitWarningBanner: View {
         .padding()
         .background(COLOR_CHARCOAL_LIGHT)
         .cornerRadius(12)
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 }

@@ -117,7 +117,7 @@ struct AddToCollectionView: View {
                     .background(COLOR_CHARCOAL_LIGHT)
                     .cornerRadius(12)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
                 
                 // Existing Collections
                 ForEach(collectionManager.collections) { collection in
@@ -142,7 +142,7 @@ struct AddToCollectionView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "folder.badge.plus")
-                .font(.system(size: 60))
+                .font(.iconLarge)
                 .foregroundColor(.gray)
             
             Text("No Collections")

@@ -51,14 +51,7 @@ struct TopShelfView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
@@ -66,17 +59,17 @@ struct TopShelfView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Your Cabinet")
                             .font(.cocktailTitle)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         
                         if !selectedAlcoholTypes.isEmpty {
                             HStack(spacing: 8) {
                                 Text("\(selectedAlcoholTypes.count) ingredient\(selectedAlcoholTypes.count == 1 ? "" : "s")")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 if cocktailsAvailable > 0 {
                                     Text("•")
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     
                                     Text("\(cocktailsAvailable) cocktail\(cocktailsAvailable == 1 ? "" : "s") ready")
                                         .font(.bodyText)
@@ -85,11 +78,11 @@ struct TopShelfView: View {
                                 
                                 if expirationTracker.expiringSoonCount > 0 || expirationTracker.expiredCount > 0 {
                                     Text("•")
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     
                                     HStack(spacing: 4) {
                                         Image(systemName: "exclamationmark.triangle.fill")
-                                            .font(.system(size: 12))
+                                            .font(.caption)
                                         Text("\(expirationTracker.expiringSoonCount + expirationTracker.expiredCount) expiring")
                                     }
                                     .font(.bodyText)
@@ -99,11 +92,11 @@ struct TopShelfView: View {
                         } else {
                             Text("Add ingredients to see what you can make")
                                 .font(.bodyText)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
                     
                     // Expiring Soon Section
                     if !expirationTracker.expiringSoonItems.isEmpty || !expirationTracker.expiredItems.isEmpty {
@@ -114,7 +107,7 @@ struct TopShelfView: View {
                                 
                                 Text(expirationTracker.expiredItems.isEmpty ? "Expiring Soon" : "Action Needed")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 Spacer()
                                 
@@ -125,7 +118,7 @@ struct TopShelfView: View {
                                         .foregroundColor(COLOR_WARM_AMBER)
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
@@ -133,7 +126,7 @@ struct TopShelfView: View {
                                         ExpirationWarningCard(item: item)
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -144,14 +137,14 @@ struct TopShelfView: View {
                             HStack {
                                 Text("In Your Cabinet")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 Spacer()
                                 
                                 Button(action: { showExpirationSettings = true }) {
                                     HStack(spacing: 4) {
                                         Image(systemName: "calendar.badge.clock")
-                                            .font(.system(size: 14))
+                                            .font(.bodySmall)
                                         Text("Track Expiration")
                                             .font(.caption)
                                             .fontWeight(.semibold)
@@ -164,15 +157,15 @@ struct TopShelfView: View {
                                 }) {
                                     HStack(spacing: 4) {
                                         Image(systemName: "trash")
-                                            .font(.system(size: 14))
+                                            .font(.bodySmall)
                                         Text("Clear All")
                                             .font(.caption)
                                             .fontWeight(.semibold)
                                     }
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+.foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
@@ -186,7 +179,7 @@ struct TopShelfView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -194,30 +187,27 @@ struct TopShelfView: View {
                     // Search Bar
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         
                         TextField("Search ingredients", text: $searchText)
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .tint(COLOR_WARM_AMBER)
                             .placeholder(when: searchText.isEmpty) {
                                 Text("Search ingredients")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                         
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                         }
                     }
                     .padding(12)
-                    .background(COLOR_CHARCOAL_LIGHT)
-                    .cornerRadius(12)
-                    .padding(.horizontal)
-                    
+                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                     // Category Filter
                     ScrollView(.horizontal, showsIndicators: false) {
                         HStack(spacing: 12) {
@@ -251,7 +241,7 @@ struct TopShelfView: View {
                                 action: { selectedCategory = .nonAlcohol }
                             )
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     }
                     
                     // Browse All Ingredients
@@ -259,26 +249,26 @@ struct TopShelfView: View {
                         HStack {
                             Text("Browse Ingredients")
                                 .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Spacer()
                             
                             Text("\(filteredIngredients.count)")
                                 .font(.caption)
                                 .fontWeight(.semibold)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         if filteredIngredients.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 36))
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .font(.displayLarge)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Text("No ingredients found")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Button(action: {
                                     searchText = ""
@@ -304,7 +294,7 @@ struct TopShelfView: View {
                                     )
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                     }
                     
@@ -379,6 +369,7 @@ struct TopShelfView: View {
 
 // MARK: - Cabinet Ingredient Chip
 struct CabinetIngredientChip: View {
+    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let expirationInfo: ExpirationInfo?
     let onRemove: () -> Void
@@ -395,11 +386,11 @@ struct CabinetIngredientChip: View {
             } else {
                 ZStack {
                     Circle()
-                        .fill(COLOR_CHARCOAL)
+                        .fill(AdaptiveColors.cardBackground(for: colorScheme))
                         .frame(width: 32, height: 32)
                     
                     Image(systemName: "drop.fill")
-                        .font(.system(size: 14))
+                        .font(.bodySmall)
                         .foregroundColor(COLOR_WARM_AMBER)
                 }
             }
@@ -408,7 +399,7 @@ struct CabinetIngredientChip: View {
                 Text(ingredient.name)
                     .font(.caption)
                     .fontWeight(.medium)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     .lineLimit(1)
                 
                 // Expiration badge
@@ -420,26 +411,27 @@ struct CabinetIngredientChip: View {
                         
                         Text(info.isExpired ? "Expired" : "\\(abs(info.daysUntilExpiration))d")
                             .font(.system(size: 9))
-                            .foregroundColor(info.isExpired ? .red : (info.isExpiringSoon ? .orange : COLOR_TEXT_SECONDARY))
+                            .foregroundColor(info.isExpired ? .red : (info.isExpiringSoon ? .orange : AdaptiveColors.textSecondary(for: colorScheme)))
                     }
                 }
             }
             
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 16))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.navTitle)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
         }
         .padding(.horizontal, 12)
         .padding(.vertical, 8)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(20)
     }
 }
 
 // MARK: - Modern Cabinet Card
 struct ModernCabinetCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let isInCabinet: Bool
     let onTap: () -> Void
@@ -457,7 +449,7 @@ struct ModernCabinetCard: View {
                             .clipped()
                     } else {
                         ZStack {
-                            COLOR_CHARCOAL
+                            AdaptiveColors.cardBackground(for: colorScheme)
                             Image("GenericAlcohol")
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
@@ -472,23 +464,23 @@ struct ModernCabinetCard: View {
                     if isInCabinet {
                         ZStack {
                             Circle()
-                                .fill(COLOR_CHARCOAL_LIGHT)
+                                .fill(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                 .frame(width: 28, height: 28)
                             
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundColor(COLOR_WARM_AMBER)
-                                .font(.system(size: 24))
+                                .font(.iconMini)
                         }
                         .padding(6)
                     } else {
                         ZStack {
                             Circle()
-                                .fill(COLOR_CHARCOAL_LIGHT.opacity(0.8))
+                                .fill(AdaptiveColors.secondaryCardBackground(for: colorScheme).opacity(0.8))
                                 .frame(width: 28, height: 28)
                             
                             Image(systemName: "plus.circle")
                                 .foregroundColor(COLOR_TEXT_SECONDARY)
-                                .font(.system(size: 24))
+                                .font(.iconMini)
                         }
                         .padding(6)
                     }
@@ -499,18 +491,18 @@ struct ModernCabinetCard: View {
                     Text(ingredient.name)
                         .font(.ingredientText)
                         .fontWeight(.semibold)
-                        .foregroundColor(isInCabinet ? COLOR_TEXT_PRIMARY : COLOR_TEXT_SECONDARY)
+                        .foregroundColor(isInCabinet ? AdaptiveColors.textPrimary(for: colorScheme) : AdaptiveColors.textSecondary(for: colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
                     Text(ingredient.type.rawValue.capitalized)
                         .font(.caption)
-                        .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                        .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
                         .textCase(.uppercase)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(isInCabinet ? 0.4 : 0.2), radius: isInCabinet ? 10 : 6, x: 0, y: isInCabinet ? 5 : 3)
@@ -520,6 +512,7 @@ struct ModernCabinetCard: View {
 }
 // MARK: - Expiration Warning Card
 struct ExpirationWarningCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let item: ExpirationInfo
     
     var body: some View {
@@ -532,7 +525,7 @@ struct ExpirationWarningCard: View {
                 Text(item.ingredientName)
                     .font(.bodyText)
                     .fontWeight(.semibold)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     .lineLimit(1)
             }
             
@@ -542,7 +535,7 @@ struct ExpirationWarningCard: View {
         }
         .padding(12)
         .frame(width: 160)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
@@ -570,7 +563,7 @@ struct ExpirationManagementView: View {
             ZStack {
                 LinearGradient(
                     gradient: colorScheme == .dark ?
-                        Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
+                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
                         Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
                     startPoint: .topTrailing,
                     endPoint: .leading
@@ -601,8 +594,8 @@ struct ExpirationManagementView: View {
                                 )
                             }
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
                         
                         // Notifications Toggle
                         VStack(alignment: .leading, spacing: 12) {
@@ -613,367 +606,364 @@ struct ExpirationManagementView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Expiration Reminders")
                                         .font(.bodyText)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     
                                     Text("Get notified 3 days before ingredients expire")
                                         .font(.caption)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                             }
                             .tint(COLOR_WARM_AMBER)
                             .padding(16)
-                            .background(COLOR_CHARCOAL_LIGHT)
-                            .cornerRadius(12)
-                        }
-                        .padding(.horizontal)
-                        
-                        // Add Expiration Button
-                        Button(action: { showAddExpiration = true }) {
-                            HStack {
-                                Image(systemName: "calendar.badge.plus")
-                                    .font(.system(size: 18))
-                                Text("Track New Expiration Date")
-                                    .font(.bodyText)
-                                    .fontWeight(.semibold)
-                            }
-                            .foregroundColor(COLOR_CHARCOAL)
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 16)
-                            .background(COLOR_WARM_AMBER)
-                            .cornerRadius(12)
-                        }
-                        .padding(.horizontal)
-                        
-                        // Expired Items
-                        if !expirationTracker.expiredItems.isEmpty {
-                            ExpirationSection(
-                                title: "Expired",
-                                items: expirationTracker.expiredItems,
-                                color: .red,
-                                icon: "xmark.circle.fill"
-                            )
-                        }
-                        
-                        // Expiring Soon Items
-                        if !expirationTracker.expiringSoonItems.isEmpty {
-                            ExpirationSection(
-                                title: "Expiring Soon",
-                                items: expirationTracker.expiringSoonItems,
-                                color: .orange,
-                                icon: "exclamationmark.triangle.fill"
-                            )
-                        }
-                        
-                        // Fresh Items
-                        if !expirationTracker.freshItems.isEmpty {
-                            ExpirationSection(
-                                title: "Fresh",
-                                items: expirationTracker.freshItems,
-                                color: .green,
-                                icon: "checkmark.circle.fill"
-                            )
-                        }
-                        
-                        // Clear Expired Button
-                        if !expirationTracker.expiredItems.isEmpty {
-                            Button(action: {
-                                expirationTracker.clearExpiredItems()
-                            }) {
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
+                            // Add Expiration Button
+                            Button(action: { showAddExpiration = true }) {
                                 HStack {
-                                    Image(systemName: "trash")
-                                    Text("Clear Expired Items")
+                                    Image(systemName: "calendar.badge.plus")
+                                        .font(.bodyLarge)
+                                    Text("Track New Expiration Date")
                                         .font(.bodyText)
+                                        .fontWeight(.semibold)
                                 }
-                                .foregroundColor(.red)
+                                .foregroundColor(COLOR_CHARCOAL)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 12)
-                                .background(COLOR_CHARCOAL_LIGHT)
+                                .padding(.vertical, 16)
+                                .background(COLOR_WARM_AMBER)
                                 .cornerRadius(12)
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
+                            
+                            // Expired Items
+                            if !expirationTracker.expiredItems.isEmpty {
+                                ExpirationSection(
+                                    title: "Expired",
+                                    items: expirationTracker.expiredItems,
+                                    color: .red,
+                                    icon: "xmark.circle.fill"
+                                )
+                            }
+                            
+                            // Expiring Soon Items
+                            if !expirationTracker.expiringSoonItems.isEmpty {
+                                ExpirationSection(
+                                    title: "Expiring Soon",
+                                    items: expirationTracker.expiringSoonItems,
+                                    color: .orange,
+                                    icon: "exclamationmark.triangle.fill"
+                                )
+                            }
+                            
+                            // Fresh Items
+                            if !expirationTracker.freshItems.isEmpty {
+                                ExpirationSection(
+                                    title: "Fresh",
+                                    items: expirationTracker.freshItems,
+                                    color: .green,
+                                    icon: "checkmark.circle.fill"
+                                )
+                            }
+                            
+                            // Clear Expired Button
+                            if !expirationTracker.expiredItems.isEmpty {
+                                Button(action: {
+                                    expirationTracker.clearExpiredItems()
+                                }) {
+                                    HStack {
+                                        Image(systemName: "trash")
+                                        Text("Clear Expired Items")
+                                            .font(.bodyText)
+                                    }
+                                    .foregroundColor(.red)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .cornerRadius(12)
+                                }
+                                .padding(.horizontal, 20)
+                            }
+                            
+                            Spacer(minLength: 40)
                         }
-                        
-                        Spacer(minLength: 40)
                     }
                 }
-            }
-            .navigationTitle("Expiration Tracking")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        dismiss()
+                .navigationTitle("Expiration Tracking")
+                .navigationBarTitleDisplayMode(.inline)
+                .toolbar {
+                    ToolbarItem(placement: .navigationBarLeading) {
+                        Button("Done") {
+                            dismiss()
+                        }
+                        .foregroundColor(COLOR_WARM_AMBER)
                     }
-                    .foregroundColor(COLOR_WARM_AMBER)
                 }
-            }
-            .sheet(isPresented: $showAddExpiration) {
-                AddExpirationView(isPresented: $showAddExpiration)
+                .sheet(isPresented: $showAddExpiration) {
+                    AddExpirationView(isPresented: $showAddExpiration)
+                }
             }
         }
     }
-}
-
-// MARK: - Stat Card
-struct StatCard: View {
-    let title: String
-    let value: String
-    let color: Color
     
-    var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            Text(value)
-                .font(.system(size: 28, weight: .bold, design: .rounded))
-                .foregroundColor(color)
-            
-            Text(title)
-                .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(12)
-        .background(COLOR_CHARCOAL_LIGHT)
-        .cornerRadius(12)
-    }
-}
-
-// MARK: - Expiration Section
-struct ExpirationSection: View {
-    let title: String
-    let items: [ExpirationInfo]
-    let color: Color
-    let icon: String
-    @StateObject private var expirationTracker = ExpirationTracker.shared
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: icon)
+    // MARK: - Stat Card
+    struct StatCard: View {
+        @Environment(\.colorScheme) var colorScheme
+        let title: String
+        let value: String
+        let color: Color
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(value)
+                    .font(.system(size: 28, weight: .bold, design: .rounded))
                     .foregroundColor(color)
+                
                 Text(title)
-                    .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .font(.caption)
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(12)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
+            .cornerRadius(12)
+        }
+    }
+    
+    // MARK: - Expiration Section
+    struct ExpirationSection: View {
+        @Environment(\.colorScheme) var colorScheme
+        let title: String
+        let items: [ExpirationInfo]
+        let color: Color
+        let icon: String
+        @StateObject private var expirationTracker = ExpirationTracker.shared
+        
+        var body: some View {
+            VStack(alignment: .leading, spacing: 12) {
+                HStack {
+                    Image(systemName: icon)
+                        .foregroundColor(color)
+                    Text(title)
+                        .font(.sectionHeader)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                    
+                    Spacer()
+                    
+                    Text("\\(items.count)")
+                        .font(.caption)
+                        .fontWeight(.semibold)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                }
+                .padding(.horizontal, 20)
+                
+                VStack(spacing: 8) {
+                    ForEach(items) { item in
+                        ExpirationItemRow(item: item, color: color)
+                    }
+                }
+                .padding(.horizontal, 20)
+            }
+        }
+    }
+    
+    // MARK: - Expiration Item Row
+    struct ExpirationItemRow: View {
+        @Environment(\.colorScheme) var colorScheme
+        let item: ExpirationInfo
+        let color: Color
+        @StateObject private var expirationTracker = ExpirationTracker.shared
+        @State private var showEditSheet = false
+        
+        var body: some View {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 12, height: 12)
+                
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.ingredientName)
+                        .font(.bodyText)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                    
+                    Text(dateString(item.expirationDate))
+                        .font(.caption)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                    
+                    if let notes = item.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(.caption)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                            .italic()
+                    }
+                }
                 
                 Spacer()
                 
-                Text("\\(items.count)")
+                Text(item.isExpired ? "Expired" : "\\(item.daysUntilExpiration)d")
                     .font(.caption)
                     .fontWeight(.semibold)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-            }
-            .padding(.horizontal)
-            
-            VStack(spacing: 8) {
-                ForEach(items) { item in
-                    ExpirationItemRow(item: item, color: color)
+                    .foregroundColor(color)
+                
+                Button(action: {
+                    expirationTracker.removeExpirationInfo(for: item.id)
+                }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
             }
-            .padding(.horizontal)
+            .padding(12)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
+            .cornerRadius(12)
+        }
+        
+        private func dateString(_ date: Date) -> String {
+            let formatter = DateFormatter()
+            formatter.dateStyle = .medium
+            return formatter.string(from: date)
         }
     }
-}
-
-// MARK: - Expiration Item Row
-struct ExpirationItemRow: View {
-    let item: ExpirationInfo
-    let color: Color
-    @StateObject private var expirationTracker = ExpirationTracker.shared
-    @State private var showEditSheet = false
     
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(color)
-                .frame(width: 12, height: 12)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text(item.ingredientName)
-                    .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
-                
-                Text(dateString(item.expirationDate))
-                    .font(.caption)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                
-                if let notes = item.notes, !notes.isEmpty {
-                    Text(notes)
-                        .font(.caption)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
-                        .italic()
-                }
-            }
-            
-            Spacer()
-            
-            Text(item.isExpired ? "Expired" : "\\(item.daysUntilExpiration)d")
-                .font(.caption)
-                .fontWeight(.semibold)
-                .foregroundColor(color)
-            
-            Button(action: {
-                expirationTracker.removeExpirationInfo(for: item.id)
-            }) {
-                Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-            }
+    // MARK: - Add Expiration View
+    struct AddExpirationView: View {
+        @Environment(\.colorScheme) var colorScheme
+        @Binding var isPresented: Bool
+        @StateObject private var expirationTracker = ExpirationTracker.shared
+        @State private var selectedIngredient: String = ""
+        @State private var selectedDate = Date().addingTimeInterval(30 * 24 * 60 * 60)
+        @State private var notes = ""
+        @State private var showCustomIngredient = false
+        @State private var customIngredient = ""
+        
+        var cabinetIngredients: [String] {
+            LocalStorageManager.shared.retrieveTopShelfItems().sorted()
         }
-        .padding(12)
-        .background(COLOR_CHARCOAL_LIGHT)
-        .cornerRadius(12)
-    }
-    
-    private func dateString(_ date: Date) -> String {
-        let formatter = DateFormatter()
-        formatter.dateStyle = .medium
-        return formatter.string(from: date)
-    }
-}
-
-// MARK: - Add Expiration View
-struct AddExpirationView: View {
-    @Environment(\.colorScheme) var colorScheme
-    @Binding var isPresented: Bool
-    @StateObject private var expirationTracker = ExpirationTracker.shared
-    @State private var selectedIngredient: String = ""
-    @State private var selectedDate = Date().addingTimeInterval(30 * 24 * 60 * 60)
-    @State private var notes = ""
-    @State private var showCustomIngredient = false
-    @State private var customIngredient = ""
-    
-    var cabinetIngredients: [String] {
-        LocalStorageManager.shared.retrieveTopShelfItems().sorted()
-    }
-    
-    var body: some View {
-        NavigationView {
-            ZStack {
-                LinearGradient(
-                    gradient: colorScheme == .dark ?
+        
+        var body: some View {
+            NavigationView {
+                ZStack {
+                    LinearGradient(
+                        gradient: colorScheme == .dark ?
                         Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                        Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                    startPoint: .topTrailing,
-                    endPoint: .leading
-                )
-                .edgesIgnoringSafeArea(.all)
-                
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Ingredient Selection
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Ingredient")
-                                .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
-                            
-                            if cabinetIngredients.isEmpty {
-                                Text("Your cabinet is empty. Add ingredients first.")
-                                    .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(12)
-                            } else {
-                                Menu {
-                                    ForEach(cabinetIngredients, id: \.self) { ingredient in
-                                        Button(ingredient) {
-                                            selectedIngredient = ingredient
+                            Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
+                        startPoint: .topTrailing,
+                        endPoint: .leading
+                    )
+                    .edgesIgnoringSafeArea(.all)
+                    
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 24) {
+                            // Ingredient Selection
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("Ingredient")
+                                    .font(.sectionHeader)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                
+                                if cabinetIngredients.isEmpty {
+                                    Text("Your cabinet is empty. Add ingredients first.")
+                                        .font(.bodyText)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(COLOR_CHARCOAL_LIGHT)
+                                        .cornerRadius(12)
+                                } else {
+                                    Menu {
+                                        ForEach(cabinetIngredients, id: \.self) { ingredient in
+                                            Button(ingredient) {
+                                                selectedIngredient = ingredient
+                                            }
                                         }
+                                        
+                                        Button("Custom Ingredient...") {
+                                            showCustomIngredient = true
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(selectedIngredient.isEmpty ? "Select ingredient" : selectedIngredient)
+                                                .font(.bodyText)
+                                                .foregroundColor(selectedIngredient.isEmpty ? AdaptiveColors.textSecondary(for: colorScheme) : AdaptiveColors.textPrimary(for: colorScheme))
+                                            
+                                            Spacer()
+                                            
+                                            Image(systemName: "chevron.down")
+                                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                        }
+                                        .padding(12)
+                                        .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                     }
+                                }
+                                
+                                // Date Picker
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Text("Expiration Date")
+                                        .font(.sectionHeader)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     
-                                    Button("Custom Ingredient...") {
-                                        showCustomIngredient = true
-                                    }
-                                } label: {
-                                    HStack {
-                                        Text(selectedIngredient.isEmpty ? "Select ingredient" : selectedIngredient)
+                                    DatePicker("", selection: $selectedDate, displayedComponents: .date)
+                                        .datePickerStyle(.graphical)
+                                        .tint(COLOR_WARM_AMBER)
+                                        .padding(12)
+                                        .background(AdaptiveColors.cardBackground(for: colorScheme))
+                                    
+                                    // Notes
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Notes (Optional)")
+                                            .font(.sectionHeader)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                        
+                                        TextEditor(text: $notes)
                                             .font(.bodyText)
-                                            .foregroundColor(selectedIngredient.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                            .frame(height: 80)
+                                            .padding(8)
+                                            .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                         
-                                        Spacer()
-                                        
-                                        Image(systemName: "chevron.down")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        // Add Button
+                                        Button(action: {
+                                            let ingredient = showCustomIngredient ? customIngredient : selectedIngredient
+                                            if !ingredient.isEmpty {
+                                                expirationTracker.addExpirationInfo(
+                                                    ingredientName: ingredient,
+                                                    expirationDate: selectedDate,
+                                                    notes: notes.isEmpty ? nil : notes
+                                                )
+                                                isPresented = false
+                                            }
+                                        }) {
+                                            Text("Add Expiration Date")
+                                                .font(.bodyText)
+                                                .fontWeight(.semibold)
+                                                .foregroundColor(selectedIngredient.isEmpty && !showCustomIngredient ? COLOR_TEXT_SECONDARY : COLOR_CHARCOAL)
+                                                .frame(maxWidth: .infinity)
+                                                .padding(.vertical, 16)
+                                                .background((selectedIngredient.isEmpty && !showCustomIngredient) ? COLOR_CHARCOAL : COLOR_WARM_AMBER)
+                                                .cornerRadius(12)
+                                        }
+                                        .disabled(selectedIngredient.isEmpty && !showCustomIngredient)
                                     }
-                                    .padding(12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(12)
+                                    .padding()
+                                }
+                            }
+                            .navigationTitle("Track Expiration")
+                            .navigationBarTitleDisplayMode(.inline)
+                            .toolbar {
+                                ToolbarItem(placement: .navigationBarLeading) {
+                                    Button("Cancel") {
+                                        isPresented = false
+                                    }
+                                    .foregroundColor(COLOR_WARM_AMBER)
+                                }
+                            }
+                            .alert("Custom Ingredient", isPresented: $showCustomIngredient) {
+                                TextField("Ingredient name", text: $customIngredient)
+                                Button("Add") {
+                                    selectedIngredient = customIngredient
+                                    showCustomIngredient = false
+                                }
+                                Button("Cancel", role: .cancel) {
+                                    showCustomIngredient = false
                                 }
                             }
                         }
-                        
-                        // Date Picker
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Expiration Date")
-                                .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
-                            
-                            DatePicker("", selection: $selectedDate, displayedComponents: .date)
-                                .datePickerStyle(.graphical)
-                                .tint(COLOR_WARM_AMBER)
-                                .padding(12)
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
-                        }
-                        
-                        // Notes
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Notes (Optional)")
-                                .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
-                            
-                            TextEditor(text: $notes)
-                                .font(.bodyText)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
-                                .frame(height: 80)
-                                .padding(8)
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
-                        }
-                        
-                        // Add Button
-                        Button(action: {
-                            let ingredient = showCustomIngredient ? customIngredient : selectedIngredient
-                            if !ingredient.isEmpty {
-                                expirationTracker.addExpirationInfo(
-                                    ingredientName: ingredient,
-                                    expirationDate: selectedDate,
-                                    notes: notes.isEmpty ? nil : notes
-                                )
-                                isPresented = false
-                            }
-                        }) {
-                            Text("Add Expiration Date")
-                                .font(.bodyText)
-                                .fontWeight(.semibold)
-                                .foregroundColor(selectedIngredient.isEmpty && !showCustomIngredient ? COLOR_TEXT_SECONDARY : COLOR_CHARCOAL)
-                                .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background((selectedIngredient.isEmpty && !showCustomIngredient) ? COLOR_CHARCOAL : COLOR_WARM_AMBER)
-                                .cornerRadius(12)
-                        }
-                        .disabled(selectedIngredient.isEmpty && !showCustomIngredient)
                     }
-                    .padding()
-                }
-            }
-            .navigationTitle("Track Expiration")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
-            .alert("Custom Ingredient", isPresented: $showCustomIngredient) {
-                TextField("Ingredient name", text: $customIngredient)
-                Button("Add") {
-                    selectedIngredient = customIngredient
-                    showCustomIngredient = false
-                }
-                Button("Cancel", role: .cancel) {
-                    showCustomIngredient = false
                 }
             }
         }

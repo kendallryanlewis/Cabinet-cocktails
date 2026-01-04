@@ -121,14 +121,7 @@ struct SearchView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 24) {
@@ -136,16 +129,16 @@ struct SearchView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Quick Mix")
                             .font(.cocktailTitle)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         
                         Text(searchMode == .ingredients 
                             ? "Build cocktails from selected ingredients"
                             : "Search all cocktails and ingredients")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
-                    .padding(.horizontal)
-                    .padding(.top, 20)
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
                     
                     // Mode Toggle
                     HStack(spacing: 12) {
@@ -171,7 +164,7 @@ struct SearchView: View {
                             }
                         )
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     // Selected Ingredients (for Mix Custom mode)
                     if searchMode == .ingredients && !selectedIngredients.isEmpty {
@@ -179,7 +172,7 @@ struct SearchView: View {
                             HStack {
                                 Text("Selected Ingredients")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 Spacer()
                                 
@@ -189,10 +182,10 @@ struct SearchView: View {
                                     Text("Clear")
                                         .font(.caption)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack(spacing: 12) {
@@ -205,7 +198,7 @@ struct SearchView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                             
                             // Results count
@@ -213,7 +206,7 @@ struct SearchView: View {
                                 Text("\(quickMixResults.count) cocktail\(quickMixResults.count == 1 ? "" : "s") found")
                                     .font(.bodyText)
                                     .foregroundColor(COLOR_WARM_AMBER)
-                                    .padding(.horizontal)
+                                    .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -221,29 +214,29 @@ struct SearchView: View {
                     // Search Bar
                     HStack {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         
                         TextField(searchMode == .cocktails ? "Search cocktails or ingredients" : "Search ingredients to add", text: $searchText)
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .tint(COLOR_WARM_AMBER)
                             .placeholder(when: searchText.isEmpty) {
                                 Text(searchMode == .cocktails ? "Search cocktails or ingredients" : "Search ingredients to add")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                         
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                         }
                     }
                     .padding(12)
-                    .background(COLOR_CHARCOAL_LIGHT)
+                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                     .cornerRadius(12)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     // Advanced Filter Controls (only in cocktails mode)
                     if searchMode == .cocktails {
@@ -264,10 +257,10 @@ struct SearchView: View {
                                 }
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                                .foregroundColor(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER.opacity(0.15) : COLOR_CHARCOAL_LIGHT)
+                                .background(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER.opacity(0.15) : AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                 .cornerRadius(8)
                             }
                             
@@ -279,10 +272,10 @@ struct SearchView: View {
                                 }
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 8)
-                                .background(COLOR_CHARCOAL_LIGHT)
+                                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                 .cornerRadius(8)
                             }
                             
@@ -291,7 +284,7 @@ struct SearchView: View {
                                 Image(systemName: "clock.arrow.circlepath")
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 8)
                                     .background(COLOR_CHARCOAL_LIGHT)
@@ -303,7 +296,7 @@ struct SearchView: View {
                                 Image(systemName: "bookmark")
                                     .font(.subheadline)
                                     .fontWeight(.semibold)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 8)
                                     .background(COLOR_CHARCOAL_LIGHT)
@@ -326,7 +319,7 @@ struct SearchView: View {
                             
                             Spacer()
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     }
                     
                     // Ingredient Selection Mode
@@ -335,18 +328,18 @@ struct SearchView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Add Ingredients")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
-                                    .padding(.horizontal)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                    .padding(.horizontal, 20)
                                 
                                 if filteredIngredients.isEmpty {
                                     VStack(spacing: 12) {
                                         Image(systemName: "magnifyingglass")
-                                            .font(.system(size: 36))
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .font(.iconSmall)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         
                                         Text("No ingredients found")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 40)
@@ -366,7 +359,7 @@ struct SearchView: View {
                                             )
                                         }
                                     }
-                                    .padding(.horizontal)
+                                    .padding(.horizontal, 20)
                                 }
                             }
                         } else if selectedIngredients.isEmpty {
@@ -378,18 +371,18 @@ struct SearchView: View {
                                         .frame(width: 80, height: 80)
                                     
                                     Image(systemName: "slider.horizontal.3")
-                                        .font(.system(size: 32))
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .font(.iconSmall)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 
                                 VStack(spacing: 8) {
                                     Text("Build Your Mix")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     
                                     Text("Search and select ingredients to discover cocktail combinations")
                                         .font(.bodyText)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         .multilineTextAlignment(.center)
                                         .padding(.horizontal, 40)
                                 }
@@ -417,7 +410,7 @@ struct SearchView: View {
                                     )
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                     }
                     
@@ -427,50 +420,50 @@ struct SearchView: View {
                             if searchMode == .ingredients && !quickMixResults.isEmpty {
                                 Text("Possible Cocktails")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
-                                    .padding(.horizontal)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                    .padding(.horizontal, 20)
                             } else if searchMode == .cocktails {
                                 HStack {
                                     Text("All Cocktails")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     
                                     Spacer()
                                     
                                     Text("\(displayedCocktails.count)")
                                         .font(.caption)
                                         .fontWeight(.semibold)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                             
                             if displayedCocktails.isEmpty {
                                 if searchMode == .ingredients {
                                     VStack(spacing: 12) {
                                         Image(systemName: "wineglass")
-                                            .font(.system(size: 48))
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .font(.iconMedium)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         
                                         Text("No cocktails found")
                                             .font(.sectionHeader)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         
                                         Text("Try selecting different ingredients")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding(.vertical, 40)
                                 } else {
                                     VStack(spacing: 12) {
                                         Image(systemName: "magnifyingglass")
-                                            .font(.system(size: 48))
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .font(.iconMedium)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         
                                         Text("No results")
                                             .font(.sectionHeader)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         
                                         Button(action: {
                                             searchText = ""
@@ -495,7 +488,7 @@ struct SearchView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -574,6 +567,7 @@ struct SearchView: View {
 
 // MARK: - Mode Toggle Button
 struct ModeToggleButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let title: String
     let isSelected: Bool
@@ -583,7 +577,7 @@ struct ModeToggleButton: View {
         Button(action: action) {
             HStack(spacing: 8) {
                 Image(systemName: icon)
-                    .font(.system(size: 16))
+                    .font(.bodyText)
                 
                 Text(title)
                     .font(.buttonText)
@@ -591,7 +585,7 @@ struct ModeToggleButton: View {
             .foregroundColor(isSelected ? .black : COLOR_TEXT_PRIMARY)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 14)
-            .background(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
+            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.secondaryCardBackground(for: colorScheme))
             .cornerRadius(12)
         }
     }
@@ -599,6 +593,7 @@ struct ModeToggleButton: View {
 
 // MARK: - Ingredient Chip
 struct IngredientChip: View {
+    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let onRemove: () -> Void
     
@@ -613,11 +608,11 @@ struct IngredientChip: View {
             } else {
                 ZStack {
                     Circle()
-                        .fill(COLOR_CHARCOAL)
+                        .fill(AdaptiveColors.cardBackground(for: colorScheme))
                         .frame(width: 28, height: 28)
                     
                     Image(systemName: "drop.fill")
-                        .font(.system(size: 12))
+                        .font(.caption)
                         .foregroundColor(COLOR_WARM_AMBER)
                 }
             }
@@ -625,24 +620,25 @@ struct IngredientChip: View {
             Text(ingredient.name)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 .lineLimit(1)
             
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 14))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.bodySmall)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
         }
         .padding(.horizontal, 10)
         .padding(.vertical, 6)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(16)
     }
 }
 
 // MARK: - Quick Mix Ingredient Card
 struct QuickMixIngredientCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let isSelected: Bool
     let onTap: () -> Void
@@ -664,7 +660,7 @@ struct QuickMixIngredientCard: View {
                             .frame(width: 50, height: 50)
                         
                         Image(systemName: "drop.fill")
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                 }
                 
@@ -672,23 +668,23 @@ struct QuickMixIngredientCard: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(ingredient.name)
                         .font(.ingredientText)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                     
                     Text(ingredient.type.rawValue.capitalized)
                         .font(.caption)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 
                 Spacer()
                 
                 // Selection indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle")
-                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
-                    .font(.system(size: 24))
+                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
+                    .font(.iconMini)
             }
             .padding(12)
-            .background(COLOR_CHARCOAL_LIGHT)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
         }
         .buttonStyle(PlainButtonStyle())
@@ -697,6 +693,7 @@ struct QuickMixIngredientCard: View {
 
 // MARK: - Quick Mix Cocktail Card
 struct QuickMixCocktailCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let cocktail: DrinkDetails
     let onTap: () -> Void
     
@@ -731,7 +728,7 @@ struct QuickMixCocktailCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(cocktail.strDrink)
                         .font(.cardTitle)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
@@ -744,7 +741,7 @@ struct QuickMixCocktailCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)

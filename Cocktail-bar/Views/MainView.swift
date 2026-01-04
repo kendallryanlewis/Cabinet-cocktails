@@ -76,21 +76,11 @@ struct MainView: View {
                         .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
                         .zIndex(1)
                         .opacity(isMenuOpen ? 1 : 0)
-                        .onTapGesture {
-                            withAnimation {
-                                isMenuOpen.toggle()
-                            }
-                        }
                 default:
                     MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
                         .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
                         .zIndex(1)
                         .opacity(isMenuOpen ? 1 : 0)
-                        .onTapGesture {
-                            withAnimation {
-                                isMenuOpen.toggle()
-                            }
-                        }
             }
         }
         .onAppear(){
@@ -119,75 +109,57 @@ struct MainView: View {
             case .cabinet:
                 showCabinet = true
                 viewPage = .home
-                isMenuOpen = true
             case .signatures:
                 showSignatures = true
                 viewPage = .home
-                isMenuOpen = true
             case .mixology:
                 showMixology = true
                 viewPage = .home
-                isMenuOpen = true
             case .quick:
                 showQuick = true
                 viewPage = .home
-                isMenuOpen = true
             case .settings:
                 showSettings = true
                 viewPage = .home
-                isMenuOpen = true
             case .about:
                 showAbout = true
                 viewPage = .home
-                isMenuOpen = true
             case .contact:
                 showContact = true
                 viewPage = .home
-                isMenuOpen = true
             case .shoppingList:
                 showShoppingList = true
                 viewPage = .home
-                isMenuOpen = true
             case .history:
                 showHistory = true
                 viewPage = .home
-                isMenuOpen = true
             case .recommendations:
                 showRecommendations = true
                 viewPage = .home
-                isMenuOpen = true
             case .educational:
                 showEducational = true
                 viewPage = .home
-                isMenuOpen = true
             case .seasonal:
                 showSeasonal = true
                 viewPage = .home
-                isMenuOpen = true
             case .preferences:
                 showPreferences = true
                 viewPage = .home
-                isMenuOpen = true
             case .customRecipes:
                 showCustomRecipes = true
                 viewPage = .home
-                isMenuOpen = true
             case .costTracking:
                 showCostTracking = true
                 viewPage = .home
-                isMenuOpen = true
             case .barEquipment:
                 showBarEquipment = true
                 viewPage = .home
-                isMenuOpen = true
             case .help:
                 showHelp = true
                 viewPage = .home
-                isMenuOpen = true
             case .premium:
                 showPremium = true
                 viewPage = .home
-                isMenuOpen = true
             default:
                 break
             }
@@ -197,79 +169,130 @@ struct MainView: View {
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showCabinet) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showSignatures) {
             SignaturesView(isMenuOpen: .constant(false), viewPage: $viewPage)
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showSignatures) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showMixology) {
             MixologyView(isMenuOpen: .constant(false), viewPage: $viewPage)
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showMixology) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showQuick) {
             SearchView(isMenuOpen: .constant(false))
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showQuick) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showSettings) {
             SettingsView(isMenuOpen: .constant(false))
+        }
+        .onChange(of: showSettings) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showAbout) {
             AboutView(isMenuOpen: .constant(false))
         }
+        .onChange(of: showAbout) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showContact) {
             ContactView(isMenuOpen: .constant(false))
+        }
+        .onChange(of: showContact) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showShoppingList) {
             ShoppingListView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showShoppingList) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showHistory) {
             HistoryView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showHistory) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showRecommendations) {
             RecommendationsView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showRecommendations) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showEducational) {
             EducationalContentView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showEducational) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showSeasonal) {
             SeasonalCocktailsView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showSeasonal) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showPreferences) {
             UserPreferencesView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showPreferences) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showCustomRecipes) {
             CustomRecipesListView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showCustomRecipes) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showCostTracking) {
             CostTrackingView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showCostTracking) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showBarEquipment) {
             BarEquipmentView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
+        .onChange(of: showBarEquipment) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
         .sheet(isPresented: $showHelp) {
             HelpView()
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
+        }
+        .onChange(of: showHelp) { isShowing in
+            if !isShowing { isMenuOpen = true }
         }
         .sheet(isPresented: $showTutorial) {
             TutorialView()
@@ -279,7 +302,10 @@ struct MainView: View {
                 .presentationDragIndicator(.visible)
                 .transition(.move(edge: .bottom).combined(with: .opacity))
         }
-        .sheet(isPresented: $showWelcomePopup) {
+        .onChange(of: showPremium) { isShowing in
+            if !isShowing { isMenuOpen = true }
+        }
+        .fullScreenCover(isPresented: $showWelcomePopup) {
             WelcomePopupView(isPresented: $showWelcomePopup)
         }
         .sheet(isPresented: $showFirstTimeCabinet) {

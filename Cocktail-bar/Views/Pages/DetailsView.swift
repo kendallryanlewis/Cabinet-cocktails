@@ -33,14 +33,14 @@ struct DetailsView: View {
             if isLoading {
                 // Loading state
                 ZStack {
-                    LinearGradient(colors: [LINEAR_TOP, LINEAR_BOTTOM], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+                    AppBackground()
                     SwiftUI.ProgressView()
                         .scaleEffect(1.5)
                         .tint(COLOR_WARM_AMBER)
                 }
             } else if let details = cocktailDetails {
                 ZStack(){
-                    LinearGradient(colors: [LINEAR_TOP, LINEAR_BOTTOM], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
+                    AppBackground()
                     VStack(){
                         if let imageURLString = details.strDrinkThumb,
                            let imageURL = URL(string: imageURLString) {
@@ -84,7 +84,7 @@ struct DetailsView: View {
                                             Image(systemName: "xmark")
                                                 .resizable()
                                                 .aspectRatio(contentMode: .fit)
-                                                .foregroundColor(.white)
+                                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                                 .frame(width: 10, height: 10)
                                         }
                                     })
@@ -219,18 +219,18 @@ struct DetailsView: View {
                                                 }) {
                                                     HStack(spacing: 12) {
                                                         Image(systemName: hasIngredient ? "checkmark.circle.fill" : "circle")
-                                                            .foregroundColor(hasIngredient ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
-                                                            .font(.system(size: 20))
+                                                            .foregroundColor(hasIngredient ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
+                                                            .font(.navTitle)
                                                         
                                                         VStack(alignment: .leading, spacing: 2) {
                                                             Text(ingredientName)
                                                                 .font(.ingredientText)
-                                                                .foregroundColor(hasIngredient ? COLOR_TEXT_PRIMARY : COLOR_TEXT_SECONDARY)
+                                                                .foregroundColor(hasIngredient ? AdaptiveColors.textPrimary(for: colorScheme) : AdaptiveColors.textSecondary(for: colorScheme))
                                                             
                                                             if let measureText = measure, !measureText.isEmpty {
                                                                 Text(measureText)
                                                                     .font(.caption)
-                                                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                                             }
                                                         }
                                                         
@@ -245,7 +245,7 @@ struct DetailsView: View {
                                         // Inline helper text
                                         Text("Tap to add to your cabinet")
                                             .font(.caption)
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                             .padding(.top, 8)
                                         Spacer()
                                     }
@@ -330,11 +330,11 @@ struct DetailsView: View {
                     LinearGradient(colors: [LINEAR_TOP, LINEAR_BOTTOM], startPoint: .top, endPoint: .bottom).ignoresSafeArea()
                     VStack(spacing: 16) {
                         Image(systemName: "exclamationmark.triangle")
-                            .font(.system(size: 48))
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .font(.iconMedium)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         Text("Cocktail not found")
                             .font(.sectionHeader)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         Button("Close") {
                             dismiss()
                         }
@@ -446,7 +446,7 @@ struct MarkAsMadeSheet: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Mark as Made")
                                 .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Text(cocktailName)
                                 .font(.cocktailTitle)
@@ -455,7 +455,7 @@ struct MarkAsMadeSheet: View {
                             if historyManager.getCocktailCount(for: cocktailName) > 0 {
                                 Text("You've made this \\(historyManager.getCocktailCount(for: cocktailName)) time\(historyManager.getCocktailCount(for: cocktailName) == 1 ? "" : "s") before")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                         }
                         
@@ -463,7 +463,7 @@ struct MarkAsMadeSheet: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Rating (Optional)")
                                 .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             HStack(spacing: 16) {
                                 ForEach(1...5, id: \.self) { star in
@@ -471,15 +471,15 @@ struct MarkAsMadeSheet: View {
                                         rating = star
                                     }) {
                                         Image(systemName: star <= rating ? "star.fill" : "star")
-                                            .font(.system(size: 32))
-                                            .foregroundColor(star <= rating ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                                            .font(.iconSmall)
+                                            .foregroundColor(star <= rating ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                 }
                                 
                                 if rating > 0 {
                                     Button(action: { rating = 0 }) {
                                         Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                 }
                             }
@@ -489,18 +489,17 @@ struct MarkAsMadeSheet: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Notes (Optional)")
                                 .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             TextEditor(text: $notes)
                                 .font(.bodyText)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .frame(height: 100)
                                 .padding(8)
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
+                                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                .cornerRadius(8)
                         }
                         
-                        // Save Button
                         Button(action: {
                             historyManager.addToHistory(
                                 cocktailName: cocktailName,

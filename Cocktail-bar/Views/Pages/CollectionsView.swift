@@ -53,8 +53,7 @@ struct CollectionsView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(colors: [LINEAR_TOP, LINEAR_BOTTOM], startPoint: .top, endPoint: .bottom)
-                    .ignoresSafeArea()
+                AppBackground()
                 
                 VStack(spacing: 0) {
                     // Search Bar
@@ -123,7 +122,7 @@ struct CollectionsView: View {
                     )
                 }
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
         }
         .padding(.bottom, 8)
     }
@@ -146,7 +145,7 @@ struct CollectionsView: View {
     private var emptyStateView: some View {
         VStack(spacing: 20) {
             Image(systemName: "folder.badge.plus")
-                .font(.system(size: 70))
+                .font(.system(size: 70, design: .rounded))
                 .foregroundColor(COLOR_WARM_AMBER.opacity(0.5))
             
             Text(searchText.isEmpty ? "No Collections Yet" : "No Results")
@@ -530,7 +529,7 @@ struct TagManagerView: View {
                     if collectionManager.tags.isEmpty {
                         VStack(spacing: 16) {
                             Image(systemName: "tag")
-                                .font(.system(size: 60))
+                                .font(.iconLarge)
                                 .foregroundColor(.gray)
                             
                             Text("No Tags Yet")

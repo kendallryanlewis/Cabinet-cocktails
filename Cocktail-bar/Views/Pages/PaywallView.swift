@@ -11,6 +11,7 @@ import StoreKit
 struct PaywallView: View {
     @EnvironmentObject var premiumManager: PremiumManager
     @Environment(\.dismiss) var dismiss
+    @Environment(\.colorScheme) var colorScheme
     
     @State private var selectedProduct: Product?
     @State private var isPurchasing = false
@@ -93,7 +94,7 @@ struct PaywallView: View {
         VStack(spacing: 16) {
             // Icon
             Image(systemName: "crown.fill")
-                .font(.system(size: 60))
+                .font(.iconLarge)
                 .foregroundStyle(
                     LinearGradient(
                         colors: [COLOR_WARM_AMBER, COLOR_WARM_AMBER.opacity(0.7)],
@@ -104,25 +105,25 @@ struct PaywallView: View {
             
             // Title
             Text("Upgrade to Premium")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .font(.cocktailTitle)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             // Subtitle
             if let feature = feature {
                 Text(featureMessage(for: feature))
                     .font(.body)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
             } else {
                 Text("Unlock all features and master the art of mixology")
                     .font(.body)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
             }
         }
-        .padding(.top, 20)
+        .padding(.top, 24)
     }
     
     // MARK: - Features Section
@@ -147,7 +148,7 @@ struct PaywallView: View {
         VStack(spacing: 16) {
             Text("Choose Your Plan")
                 .font(.title3.bold())
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             ForEach(premiumManager.products, id: \.id) { product in
@@ -173,7 +174,7 @@ struct PaywallView: View {
         VStack(spacing: 16) {
             Text("Free vs Premium")
                 .font(.title3.bold())
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
             VStack(spacing: 12) {
@@ -213,13 +214,13 @@ struct PaywallView: View {
         VStack(spacing: 8) {
             Text("✓ One-time purchase, lifetime access")
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             Text("✓ All future updates included")
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             Text("✓ Cancel subscription anytime")
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }
         .padding(.bottom, 20)
     }
@@ -294,6 +295,7 @@ struct PaywallView: View {
 
 // MARK: - Feature Row
 struct FeatureRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let title: String
     let description: String
@@ -308,11 +310,11 @@ struct FeatureRow: View {
             VStack(alignment: .leading, spacing: 4) {
                 Text(title)
                     .font(.headline)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text(description)
                     .font(.caption)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             Spacer()
@@ -322,6 +324,7 @@ struct FeatureRow: View {
 
 // MARK: - Product Card
 struct ProductCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let product: Product
     let isSelected: Bool
     let isPurchasing: Bool
@@ -341,7 +344,7 @@ struct ProductCard: View {
                         HStack {
                             Text(product.displayName)
                                 .font(.headline)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             if isBestValue {
                                 Text("BEST VALUE")
@@ -356,7 +359,7 @@ struct ProductCard: View {
                         
                         Text(product.description)
                             .font(.caption)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     
                     Spacer()
@@ -369,18 +372,18 @@ struct ProductCard: View {
                         if let period = subscriptionPeriod {
                             Text(period)
                                 .font(.caption2)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
                     }
                 }
                 
                 if showDetails {
                     Divider()
-                        .background(COLOR_TEXT_SECONDARY.opacity(0.3))
+                        .background(AdaptiveColors.textSecondary(for: colorScheme).opacity(0.3))
                     
                     Text(productDetails)
                         .font(.caption)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         .frame(maxWidth: .infinity, alignment: .leading)
                 }
                 
@@ -449,6 +452,7 @@ struct ProductCard: View {
 
 // MARK: - Comparison Row
 struct ComparisonRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let feature: String
     let free: Any
     let premium: Any
@@ -457,7 +461,7 @@ struct ComparisonRow: View {
         HStack {
             Text(feature)
                 .font(.subheadline)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             Spacer()
             
@@ -475,11 +479,11 @@ struct ComparisonRow: View {
     private func comparisonValue(_ value: Any) -> some View {
         if let bool = value as? Bool {
             Image(systemName: bool ? "checkmark.circle.fill" : "xmark.circle.fill")
-                .foregroundColor(bool ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY.opacity(0.5))
+                .foregroundColor(bool ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme).opacity(0.5))
         } else if let string = value as? String {
             Text(string)
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }
     }
 }

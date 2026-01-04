@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CollectionDetailView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var collectionManager = CollectionManager.shared
     let collection: CocktailCollection
     
@@ -132,7 +133,7 @@ struct CollectionDetailView: View {
                         .frame(width: 80, height: 80)
                     
                     Image(systemName: collection.iconName)
-                        .font(.system(size: 36))
+                        .font(.iconSmall)
                         .foregroundColor(collection.displayColor)
                 }
                 
@@ -141,7 +142,7 @@ struct CollectionDetailView: View {
                         Text(collection.name)
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(.white)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         
                         if collection.isFavorite {
                             Image(systemName: "star.fill")
@@ -172,7 +173,7 @@ struct CollectionDetailView: View {
             }
         }
         .padding()
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(16)
     }
     
@@ -180,7 +181,7 @@ struct CollectionDetailView: View {
         VStack(alignment: .leading, spacing: 12) {
             Text("Tags")
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             
             FlowLayout(spacing: 8) {
                 ForEach(collectionManager.getTags(for: collection)) { tag in
@@ -207,7 +208,7 @@ struct CollectionDetailView: View {
             HStack {
                 Text("Cocktails")
                     .font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Spacer()
                 
@@ -224,7 +225,7 @@ struct CollectionDetailView: View {
             if collection.cocktails.isEmpty {
                 VStack(spacing: 16) {
                     Image(systemName: "wineglass")
-                        .font(.system(size: 50))
+                        .font(.iconMedium)
                         .foregroundColor(.gray)
                     
                     Text("No cocktails yet")
@@ -260,6 +261,7 @@ struct CollectionDetailView: View {
 
 // MARK: - Collection Cocktail Row
 struct CollectionCocktailRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let cocktail: CollectionCocktail
     let collectionId: UUID
     @StateObject private var collectionManager = CollectionManager.shared
@@ -283,7 +285,7 @@ struct CollectionCocktailRow: View {
                     .font(.title2)
                     .foregroundColor(.gray)
                     .frame(width: 60, height: 60)
-                    .background(COLOR_CHARCOAL)
+                    .background(AdaptiveColors.cardBackground(for: colorScheme))
                     .cornerRadius(8)
             }
             
@@ -292,7 +294,7 @@ struct CollectionCocktailRow: View {
                 Text(cocktail.drinkName)
                     .font(.body)
                     .fontWeight(.medium)
-                    .foregroundColor(.white)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 if let notes = cocktail.notes, !notes.isEmpty {
                     Text(notes)
@@ -314,7 +316,7 @@ struct CollectionCocktailRow: View {
             }
         }
         .padding()
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(12)
         .alert("Remove Cocktail", isPresented: $showDeleteAlert) {
             Button("Cancel", role: .cancel) {}
@@ -336,6 +338,7 @@ struct CollectionCocktailRow: View {
 // MARK: - Edit Collection View
 struct EditCollectionView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var collectionManager = CollectionManager.shared
     
     let collection: CocktailCollection
@@ -366,33 +369,33 @@ struct EditCollectionView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Collection Name")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             TextField("Collection name", text: $name)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
+                                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                .cornerRadius(8)
                         }
                         
                         // Description
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description (Optional)")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             TextField("Add a description...", text: $description)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
+                                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                .cornerRadius(8)
                         }
                         
                         // Icon Selection
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Icon")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                                 ForEach(CocktailCollection.collectionIcons, id: \.self) { icon in
@@ -412,7 +415,7 @@ struct EditCollectionView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Color")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 6), spacing: 12) {
                                 ForEach(Array(CocktailCollection.collectionColors.values), id: \.self) { color in
@@ -434,7 +437,7 @@ struct EditCollectionView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Tags (Optional)")
                                     .font(.headline)
-                                    .foregroundColor(.white)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 FlowLayout(spacing: 8) {
                                     ForEach(collectionManager.tags) { tag in

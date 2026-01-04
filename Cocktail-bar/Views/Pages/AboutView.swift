@@ -13,14 +13,7 @@ struct AboutView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
@@ -28,19 +21,19 @@ struct AboutView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 12) {
                             Image(systemName: "info.circle.fill")
-                                .font(.system(size: 32))
+                                .font(.iconSmall)
                                 .foregroundColor(COLOR_WARM_AMBER)
                             Text("About")
                                 .font(.cocktailTitle)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         }
                         Text("Your personal bartending companion")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 20)
-                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.horizontal, 20)
                     
                     // App Name Card
                     VStack(spacing: 16) {
@@ -50,21 +43,21 @@ struct AboutView: View {
                         
                         Text("Welcome to Cabinet Cocktails, the innovative iOS app designed to transform your home bartending experience. Whether you're a cocktail aficionado or a newcomer eager to explore the world of mixology, our app is your personal guide to crafting delightful drinks with what you have.")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .multilineTextAlignment(.center)
                             .lineSpacing(4)
                     }
+                    .frame(maxWidth: .infinity)
                     .padding(24)
-                    .background(COLOR_CHARCOAL)
+                    .background(AdaptiveColors.cardBackground(for: colorScheme))
                     .cornerRadius(16)
-                    .padding(.horizontal)
                     
                     // Features Section
                     VStack(alignment: .leading, spacing: 20) {
                         Text("What We Offer")
                             .font(.sectionHeader)
                             .foregroundColor(COLOR_WARM_AMBER)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         
                         VStack(spacing: 16) {
                             AboutFeatureCard(
@@ -85,7 +78,6 @@ struct AboutView: View {
                                 description: "Discover cocktails that are just one or two ingredients away, helping you gradually build your bar and skills."
                             )
                         }
-                        .padding(.horizontal)
                     }
                     
                     // Key Features List
@@ -102,22 +94,22 @@ struct AboutView: View {
                             FeaturePoint(icon: "checkmark.circle.fill", text: "Smart mixology suggestions")
                         }
                     }
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(20)
-                    .background(COLOR_CHARCOAL)
+                    .background(AdaptiveColors.cardBackground(for: colorScheme))
                     .cornerRadius(12)
-                    .padding(.horizontal)
                     
                     // Closing Message
                     VStack(spacing: 8) {
                         Text("Cheers! 🥃")
-                            .font(.system(size: 24, weight: .bold, design: .rounded))
+                            .font(.sectionHeader)
                             .foregroundColor(COLOR_WARM_AMBER)
                         Text("Thanks for using Cabinet Cocktails. Here's to your next unforgettable cocktail!")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             .multilineTextAlignment(.center)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     Spacer(minLength: 60)
                 }
@@ -129,6 +121,7 @@ struct AboutView: View {
 
 // MARK: - About Feature Card
 struct AboutFeatureCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let title: String
     let description: String
@@ -136,38 +129,39 @@ struct AboutFeatureCard: View {
     var body: some View {
         HStack(alignment: .top, spacing: 16) {
             Image(systemName: icon)
-                .font(.system(size: 28))
+                .font(.cocktailTitle)
                 .foregroundColor(COLOR_WARM_AMBER)
                 .frame(width: 40)
             
             VStack(alignment: .leading, spacing: 8) {
                 Text(title)
                     .font(.cardTitle)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 Text(description)
                     .font(.ingredientText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .lineSpacing(4)
             }
         }
         .padding(16)
-        .background(COLOR_CHARCOAL)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(12)
     }
 }
 
 struct FeaturePoint: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let text: String
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.system(size: 16))
+                .font(.bodyText)
                 .foregroundColor(COLOR_WARM_AMBER)
             Text(text)
                 .font(.bodyText)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
         }
     }
 }

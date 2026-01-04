@@ -66,14 +66,7 @@ struct TutorialView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             VStack(spacing: 0) {
                 // Skip Button
@@ -124,11 +117,11 @@ struct TutorialView: View {
                                 }
                                 .font(.subheadline)
                                 .fontWeight(.semibold)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .frame(maxWidth: .infinity)
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(12)
+                                .background(AdaptiveColors.cardBackground(for: colorScheme))
+                                .cornerRadius(10)
                             }
                         }
                         
@@ -175,6 +168,7 @@ struct TutorialPage {
 
 // MARK: - Tutorial Page View
 struct TutorialPageView: View {
+    @Environment(\.colorScheme) var colorScheme
     let page: TutorialPage
     
     var body: some View {
@@ -188,15 +182,15 @@ struct TutorialPageView: View {
                     .frame(width: 150, height: 150)
                 
                 Image(systemName: page.icon)
-                    .font(.system(size: 60))
+                    .font(.iconLarge)
                     .foregroundColor(page.color)
             }
             
             // Content
             VStack(spacing: 16) {
                 Text(page.title)
-                    .font(.system(size: 28, weight: .bold))
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .font(.cocktailTitle)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     .multilineTextAlignment(.center)
                 
                 Text(page.description)

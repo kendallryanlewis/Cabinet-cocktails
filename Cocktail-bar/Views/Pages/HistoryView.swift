@@ -33,13 +33,7 @@ struct HistoryView: View {
     }
     
     private var backgroundGradient: some View {
-        let gradientColors = colorScheme == .dark ? [LINEAR_BOTTOM, LINEAR_BOTTOM] : [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]
-        let gradient = Gradient(colors: gradientColors)
-        return LinearGradient(
-            gradient: gradient,
-            startPoint: .topTrailing,
-            endPoint: .leading
-        )
+        AppBackground()
     }
     
     private var headerView: some View {
@@ -56,11 +50,11 @@ struct HistoryView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("History")
                     .font(.cocktailTitle)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("\(historyManager.historyItems.count) cocktail\(historyManager.historyItems.count == 1 ? "" : "s") made")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             Spacer()
@@ -68,7 +62,7 @@ struct HistoryView: View {
             Button(action: { showStatistics = true }) {
                 VStack(spacing: 4) {
                     Image(systemName: "chart.bar.fill")
-                        .font(.system(size: 24))
+                        .font(.iconMini)
                         .foregroundColor(COLOR_WARM_AMBER)
                     
                     Text("Stats")
@@ -82,22 +76,22 @@ struct HistoryView: View {
     private var searchBar: some View {
         HStack {
             Image(systemName: "magnifyingglass")
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             TextField("Search history", text: $searchText)
                 .font(.bodyText)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 .tint(COLOR_WARM_AMBER)
             
             if !searchText.isEmpty {
                 Button(action: { searchText = "" }) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
             }
         }
         .padding(12)
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(12)
     }
     
@@ -129,12 +123,12 @@ struct HistoryView: View {
     private var emptyFilteredView: some View {
         VStack(spacing: 16) {
             Image(systemName: "magnifyingglass")
-                .font(.system(size: 48))
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .font(.iconMedium)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             Text("No cocktails found")
                 .font(.bodyText)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             Button(action: {
                 searchText = ""
@@ -156,7 +150,7 @@ struct HistoryView: View {
                         Text(sectionTitle(for: group.date))
                             .font(.sectionHeader)
                             .foregroundColor(COLOR_WARM_AMBER)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         
                         ForEach(group.items) { item in
                             HistoryItemCard(
@@ -185,10 +179,10 @@ struct HistoryView: View {
                     .foregroundColor(.red)
                     .frame(maxWidth: .infinity)
                     .padding(.vertical, 12)
-                    .background(COLOR_CHARCOAL_LIGHT)
+                    .background(AdaptiveColors.cardBackground(for: colorScheme))
                     .cornerRadius(12)
                 }
-                .padding(.horizontal)
+                .padding(.horizontal, 20)
                 .padding(.top, 8)
                 
                 Spacer(minLength: 40)
@@ -253,20 +247,21 @@ struct HistoryView: View {
 
 // MARK: - Empty History View
 struct EmptyHistoryView: View {
+    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "clock.arrow.circlepath")
-                .font(.system(size: 64))
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .font(.iconLarge)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             VStack(spacing: 8) {
                 Text("No History Yet")
                     .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("Start making cocktails and they'll appear here")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -276,6 +271,7 @@ struct EmptyHistoryView: View {
 
 // MARK: - Period Filter Button
 struct PeriodFilterButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let isSelected: Bool
     let count: Int
@@ -287,15 +283,15 @@ struct PeriodFilterButton: View {
                 Text(title)
                     .font(.bodyText)
                     .fontWeight(isSelected ? .semibold : .regular)
-                    .foregroundColor(isSelected ? COLOR_CHARCOAL : COLOR_TEXT_PRIMARY)
+                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("\(count)")
                     .font(.caption)
-                    .foregroundColor(isSelected ? COLOR_CHARCOAL : COLOR_TEXT_SECONDARY)
+                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textSecondary(for: colorScheme))
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 10)
-            .background(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
+            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(20)
         }
     }
@@ -303,6 +299,7 @@ struct PeriodFilterButton: View {
 
 // MARK: - History Item Card
 struct HistoryItemCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let item: CocktailHistoryItem
     let onTap: () -> Void
     let onDelete: () -> Void
@@ -329,13 +326,13 @@ struct HistoryItemCard: View {
                 } else {
                     ZStack {
                         Rectangle()
-                            .fill(COLOR_CHARCOAL)
+                            .fill(AdaptiveColors.cardBackground(for: colorScheme))
                             .frame(width: 60, height: 60)
                             .cornerRadius(8)
                         
                         Image(systemName: "wineglass")
                             .foregroundColor(COLOR_WARM_AMBER)
-                            .font(.system(size: 24))
+                            .font(.iconMini)
                     }
                 }
                 
@@ -344,23 +341,23 @@ struct HistoryItemCard: View {
                     Text(item.cocktailName)
                         .font(.bodyText)
                         .fontWeight(.semibold)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(1)
                     
                     HStack(spacing: 4) {
                         Image(systemName: "clock")
-                            .font(.system(size: 12))
+                            .font(.caption)
                         Text(timeAgo(from: item.dateMade))
                     }
                     .font(.caption)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     
                     // Rating
                     if let rating = item.rating {
                         HStack(spacing: 2) {
                             ForEach(0..<rating, id: \.self) { _ in
                                 Image(systemName: "star.fill")
-                                    .font(.system(size: 10))
+                                    .font(.captionSmall)
                                     .foregroundColor(COLOR_WARM_AMBER)
                             }
                         }
@@ -370,7 +367,7 @@ struct HistoryItemCard: View {
                     if let notes = item.notes, !notes.isEmpty {
                         Text(notes)
                             .font(.caption)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             .lineLimit(1)
                             .italic()
                     }
@@ -381,14 +378,14 @@ struct HistoryItemCard: View {
                 // Delete Button
                 Button(action: onDelete) {
                     Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
-                        .font(.system(size: 20))
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        .font(.navTitle)
                 }
             }
             .padding(12)
-            .background(COLOR_CHARCOAL_LIGHT)
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(12)
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -429,7 +426,7 @@ struct HistoryStatisticsView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Overview")
                                 .font(.sectionHeader)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 12) {
                                 StatCard(title: "Total Made", value: "\(statistics.totalCocktailsMade)", color: COLOR_WARM_AMBER)
@@ -447,17 +444,17 @@ struct HistoryStatisticsView: View {
                                         .foregroundColor(.orange)
                                     Text("Current Streak")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 }
                                 
                                 HStack {
                                     Text("\(statistics.currentStreak)")
-                                        .font(.system(size: 48, weight: .bold, design: .rounded))
+                                        .font(.displayLarge)
                                         .foregroundColor(.orange)
                                     
                                     Text("day\(statistics.currentStreak == 1 ? "" : "s")")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -471,15 +468,15 @@ struct HistoryStatisticsView: View {
                             VStack(alignment: .leading, spacing: 12) {
                                 Text("Average Rating")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 HStack(spacing: 4) {
                                     Text(String(format: "%.1f", avgRating))
-                                        .font(.system(size: 36, weight: .bold, design: .rounded))
+                                        .font(.cocktailTitle)
                                         .foregroundColor(COLOR_WARM_AMBER)
                                     
                                     Image(systemName: "star.fill")
-                                        .font(.system(size: 24))
+                                        .font(.iconMini)
                                         .foregroundColor(COLOR_WARM_AMBER)
                                 }
                                 .padding()
@@ -497,7 +494,7 @@ struct HistoryStatisticsView: View {
                                         .foregroundColor(COLOR_WARM_AMBER)
                                     Text("Top Cocktails")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 }
                                 
                                 VStack(spacing: 8) {
@@ -510,14 +507,14 @@ struct HistoryStatisticsView: View {
                                             
                                             Text(favorite.name)
                                                 .font(.bodyText)
-                                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                             
                                             Spacer()
                                             
                                             Text("\(favorite.count)×")
                                                 .font(.caption)
                                                 .fontWeight(.semibold)
-                                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         }
                                         .padding(12)
                                         .background(COLOR_CHARCOAL_LIGHT)
@@ -535,7 +532,7 @@ struct HistoryStatisticsView: View {
                                         .foregroundColor(COLOR_WARM_AMBER)
                                     Text("Most Used Ingredients")
                                         .font(.sectionHeader)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 }
                                 
                                 VStack(spacing: 8) {
@@ -548,14 +545,14 @@ struct HistoryStatisticsView: View {
                                             
                                             Text(ingredient.ingredient)
                                                 .font(.bodyText)
-                                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                             
                                             Spacer()
                                             
                                             Text("\(ingredient.count)×")
                                                 .font(.caption)
                                                 .fontWeight(.semibold)
-                                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         }
                                         .padding(12)
                                         .background(COLOR_CHARCOAL_LIGHT)
@@ -599,6 +596,30 @@ struct HistoryStatisticsView: View {
                 ShareSheet(items: [historyManager.exportHistoryAsText()])
             }
         }
+    }
+}
+
+// MARK: - Stat Card
+struct StatCard: View {
+    @Environment(\.colorScheme) var colorScheme
+    let title: String
+    let value: String
+    let color: Color
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(value)
+                .font(.system(size: 28, weight: .bold, design: .rounded))
+                .foregroundColor(color)
+            
+            Text(title)
+                .font(.caption)
+                .foregroundColor(COLOR_TEXT_SECONDARY)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(12)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
+        .cornerRadius(12)
     }
 }
 

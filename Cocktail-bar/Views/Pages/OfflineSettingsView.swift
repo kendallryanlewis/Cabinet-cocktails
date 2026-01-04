@@ -9,6 +9,7 @@ import SwiftUI
 
 struct OfflineSettingsView: View {
     @Environment(\.presentationMode) var presentationMode
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var cacheManager = OfflineCacheManager.shared
     @State private var showClearCacheAlert = false
     @State private var isCachingFavorites = false
@@ -23,17 +24,17 @@ struct OfflineSettingsView: View {
                         // Header
                         VStack(spacing: 12) {
                             Image(systemName: cacheManager.isOfflineMode ? "wifi.slash" : "wifi")
-                                .font(.system(size: 60))
+                                .font(.iconLarge)
                                 .foregroundColor(cacheManager.isOfflineMode ? .orange : COLOR_WARM_AMBER)
                             
                             Text("Offline Mode")
                                 .font(.title2)
                                 .fontWeight(.bold)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Text(cacheManager.isOfflineMode ? "No internet connection" : "Connected to internet")
                                 .font(.subheadline)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
                         .padding(.top, 30)
                         .padding(.bottom, 20)
@@ -45,7 +46,7 @@ struct OfflineSettingsView: View {
                                     .foregroundColor(syncStatusColor)
                                 Text("Sync Status")
                                     .font(.headline)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 Spacer()
                                 Text(syncStatusText)
                                     .font(.subheadline)
@@ -56,11 +57,11 @@ struct OfflineSettingsView: View {
                                 HStack {
                                     Text("Last synced:")
                                         .font(.caption)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     Spacer()
                                     Text(formatDate(lastSync))
                                         .font(.caption)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 }
                             }
                             
@@ -87,13 +88,13 @@ struct OfflineSettingsView: View {
                         .padding()
                         .background(COLOR_CHARCOAL_LIGHT)
                         .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         // Cache Statistics
                         VStack(spacing: 16) {
                             Text("Cache Statistics")
                                 .font(.headline)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             StatRow(icon: "doc.on.doc", label: "Cached Cocktails", value: "\(cacheManager.cachedCocktailsCount)")
@@ -104,13 +105,13 @@ struct OfflineSettingsView: View {
                         .padding()
                         .background(COLOR_CHARCOAL_LIGHT)
                         .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         // Cache Actions
                         VStack(spacing: 12) {
                             Text("Cache Management")
                                 .font(.headline)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .frame(maxWidth: .infinity, alignment: .leading)
                             
                             Button(action: {
@@ -167,13 +168,13 @@ struct OfflineSettingsView: View {
                         .padding()
                         .background(COLOR_CHARCOAL_LIGHT)
                         .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         // Info Section
                         VStack(alignment: .leading, spacing: 12) {
                             Text("About Offline Mode")
                                 .font(.headline)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             InfoRow(icon: "checkmark.circle", text: "Access cached cocktails without internet")
                             InfoRow(icon: "arrow.down.circle", text: "Automatic sync when connection restored")
@@ -183,7 +184,7 @@ struct OfflineSettingsView: View {
                         .padding()
                         .background(COLOR_CHARCOAL_LIGHT.opacity(0.5))
                         .cornerRadius(12)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         Spacer(minLength: 40)
                     }
@@ -246,6 +247,7 @@ struct OfflineSettingsView: View {
 
 // MARK: - Stat Row
 struct StatRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let label: String
     let value: String
@@ -257,18 +259,19 @@ struct StatRow: View {
                 .frame(width: 24)
             Text(label)
                 .font(.subheadline)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             Spacer()
             Text(value)
                 .font(.subheadline)
                 .fontWeight(.semibold)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
         }
     }
 }
 
 // MARK: - Info Row
 struct InfoRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let text: String
     
@@ -279,7 +282,7 @@ struct InfoRow: View {
                 .frame(width: 20)
             Text(text)
                 .font(.caption)
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }
     }
 }

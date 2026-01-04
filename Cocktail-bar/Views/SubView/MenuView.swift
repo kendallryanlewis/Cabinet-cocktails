@@ -17,17 +17,25 @@ struct MenuView: View {
     @State private var discoverExpanded = false
     @State private var cabinetExpanded = false
     @State private var hasAppeared = false
+    
+    // Menu text colors - adapt to light/dark mode
+    private var menuTitleColor: Color {
+        colorScheme == .dark ? COLOR_WARM_AMBER : Color(hex: "#4A4A4A")
+    }
+    private var menuTextColor: Color { colorScheme == .dark ? .white : Color(hex: "#4A4A4A")  }
+    private var menuSecondaryColor: Color { colorScheme == .dark ? .white : Color(hex: "#4A4A4A") }
+    private var menuItemBackground: Color { colorScheme == .dark ? .clear : Color(hex: "#3A3A3C") }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        VStack(alignment: .leading, spacing: EdgeInsets.sectionSpacing) {
             UserHeader()
             Spacer()
             
-            VStack(alignment: .leading, spacing: 5) {
+            VStack(alignment: .leading, spacing: 8) {
                 HStack(){
                     Text("Quick")
                     Spacer()
-                }.foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : .darkGray)
+                }.foregroundColor(menuTitleColor)
                     .font(.largeTitle).bold()
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
@@ -43,29 +51,29 @@ struct MenuView: View {
                 // Discover dropdown items (appear under the title)
                 if discoverExpanded {
                     VStack(alignment: .leading, spacing: 4) {
-                        MenuItem(title: "Quick", action: {
+                        MenuItem(title: "Quick", textColor: menuSecondaryColor, action: {
                             withAnimation { viewPage = .quick; isOpen.toggle() }
                         })
-                        MenuItem(title: "Recommendations", action: {
-                            withAnimation { viewPage = .recommendations; isOpen.toggle() }
+                        MenuItem(title: "Recommendations", textColor: menuSecondaryColor, isLocked: !premiumManager.isPremium, action: {
+                            withAnimation { viewPage = premiumManager.isPremium ? .recommendations : .premium; isOpen.toggle() }
                         })
-                        MenuItem(title: "Seasonal Cocktails", action: {
-                            withAnimation { viewPage = .seasonal; isOpen.toggle() }
+                        MenuItem(title: "Seasonal Cocktails", textColor: menuSecondaryColor, isLocked: !premiumManager.hasAccess(to: .seasonalContent), action: {
+                            withAnimation { viewPage = premiumManager.hasAccess(to: .seasonalContent) ? .seasonal : .premium; isOpen.toggle() }
                         })
-                        MenuItem(title: "Educational", action: {
-                            withAnimation { viewPage = .educational; isOpen.toggle() }
+                        MenuItem(title: "Educational", textColor: menuSecondaryColor, isLocked: !premiumManager.hasAccess(to: .educationalContent), action: {
+                            withAnimation { viewPage = premiumManager.hasAccess(to: .educationalContent) ? .educational : .premium; isOpen.toggle() }
                         })
                     }
-                    .padding(.leading, 24)
+                    .padding(.leading, EdgeInsets.horizontalPadding)
                     .transition(.opacity)
                     .opacity(hasAppeared ? 1 : 0)
                 }
 
-                                // Main Navigation Items
+                // Main Navigation Items
                 HStack(){
                     Text("‍Cabinet")
                     Spacer()
-                }.foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : .darkGray)
+                }.foregroundColor(menuTitleColor)
                     .font(.largeTitle).bold()
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
@@ -75,30 +83,29 @@ struct MenuView: View {
                                 discoverExpanded = false
                             }
                             cabinetExpanded.toggle()
-                            // Don't close menu, just toggle dropdown
                         }
                     }
                 
                 // Cabinet dropdown items (appear under the title)
                 if cabinetExpanded {
                     VStack(alignment: .leading, spacing: 4) {
-                        MenuItem(title: "Cabinet", action: {
+                        MenuItem(title: "Cabinet", textColor: menuSecondaryColor, action: {
                             withAnimation { viewPage = .cabinet; isOpen.toggle() }
                         })
-                        MenuItem(title: "Shopping List", action: {
-                            withAnimation { viewPage = .shoppingList; isOpen.toggle() }
+                        MenuItem(title: "Shopping List", textColor: menuSecondaryColor, isLocked: !premiumManager.hasAccess(to: .shoppingList), action: {
+                            withAnimation { viewPage = premiumManager.hasAccess(to: .shoppingList) ? .shoppingList : .premium; isOpen.toggle() }
                         })
-                        MenuItem(title: "My Recipes", action: {
-                            withAnimation { viewPage = .customRecipes; isOpen.toggle() }
+                        MenuItem(title: "My Recipes", textColor: menuSecondaryColor, isLocked: !premiumManager.hasAccess(to: .customRecipes), action: {
+                            withAnimation { viewPage = premiumManager.hasAccess(to: .customRecipes) ? .customRecipes : .premium; isOpen.toggle() }
                         })
-                        MenuItem(title: "Cost Tracking", action: {
-                            withAnimation { viewPage = .costTracking; isOpen.toggle() }
+                        MenuItem(title: "Cost Tracking", textColor: menuSecondaryColor, isLocked: !premiumManager.hasAccess(to: .costTracking), action: {
+                            withAnimation { viewPage = premiumManager.hasAccess(to: .costTracking) ? .costTracking : .premium; isOpen.toggle() }
                         })
-                        MenuItem(title: "Bar Equipment", action: {
-                            withAnimation { viewPage = .barEquipment; isOpen.toggle() }
+                        MenuItem(title: "Bar Equipment", textColor: menuSecondaryColor, isLocked: !premiumManager.isPremium, action: {
+                            withAnimation { viewPage = premiumManager.isPremium ? .barEquipment : .premium; isOpen.toggle() }
                         })
                     }
-                    .padding(.leading, 24)
+                    .padding(.leading, EdgeInsets.horizontalPadding)
                     .transition(.opacity)
                     .opacity(hasAppeared ? 1 : 0)
                 }
@@ -106,7 +113,7 @@ struct MenuView: View {
                 HStack(){
                     Text("‍Mixology")
                     Spacer()
-                }.foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : .darkGray)
+                }.foregroundColor(menuTitleColor)
                     .font(.largeTitle)
                     .bold()
                     .opacity(hasAppeared ? 1 : 0)
@@ -121,7 +128,7 @@ struct MenuView: View {
                 HStack(){
                     Text("‍Signatures")
                     Spacer()
-                }.foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : .darkGray)
+                }.foregroundColor(menuTitleColor)
                     .font(.largeTitle).bold()
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
@@ -143,7 +150,7 @@ struct MenuView: View {
                     }
                     Spacer()
                 }.font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(menuTextColor)
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
                     .onTapGesture {
@@ -157,7 +164,7 @@ struct MenuView: View {
                     Text("Settings")
                     Spacer()
                 }.font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(menuTextColor)
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
                     .onTapGesture {
@@ -171,13 +178,13 @@ struct MenuView: View {
                     Text("History")
                     Spacer()
                 }.font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(menuTextColor)
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
                     .onTapGesture {
                         withAnimation {
                             viewPage = .history
-                            // Don't close menu, allow toggling from any view
+                            isOpen.toggle()
                         }
                     }
                     
@@ -185,7 +192,7 @@ struct MenuView: View {
                     Text("About")
                     Spacer()
                 }.font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(menuTextColor)
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
                     .onTapGesture {
@@ -199,7 +206,7 @@ struct MenuView: View {
                     Text("Help")
                     Spacer()
                 }.font(.headline)
-                    .foregroundColor(.white)
+                    .foregroundColor(menuTextColor)
                     .opacity(hasAppeared ? 1 : 0)
                     .offset(x: hasAppeared ? 0 : -30)
                     .onTapGesture {
@@ -211,6 +218,7 @@ struct MenuView: View {
             }
         }.padding(EdgeInsets.mainBorder)
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        .background(MenuBackground())
         .onAppear {
             withAnimation(.easeOut(duration: 0.6)) {
                 hasAppeared = true
@@ -246,7 +254,7 @@ struct MenuSection<Content: View>: View {
             }) {
                 HStack {
                     Image(systemName: icon)
-                        .font(.system(size: 16))
+                        .font(.bodyText)
                         .foregroundColor(COLOR_WARM_AMBER)
                     Text(title)
                         .font(.title3.bold())
@@ -276,9 +284,13 @@ struct MenuSection<Content: View>: View {
 
 // MARK: - Menu Item Component
 struct MenuItem: View {
+    @Environment(\.colorScheme) var colorScheme
+    
     let title: String
     var icon: String? = nil
     var iconColor: Color = .white
+    var textColor: Color = .white
+    var isLocked: Bool = false
     let action: () -> Void
     
     var body: some View {
@@ -286,13 +298,18 @@ struct MenuItem: View {
             HStack(spacing: 8) {
                 if let icon = icon {
                     Image(systemName: icon)
-                        .font(.system(size: 14))
-                        .foregroundColor(iconColor)
+                        .font(.bodySmall)
+                        .foregroundColor(isLocked ? (colorScheme == .dark ? COLOR_TEXT_SECONDARY : Color(hex: "#666666")) : iconColor)
                 }
                 Text(title)
                     .font(.body)
-                    .foregroundColor(.white)
+                    .foregroundColor(isLocked ? (colorScheme == .dark ? COLOR_TEXT_SECONDARY : Color(hex: "#666666")) : textColor)
                 Spacer()
+                if isLocked {
+                    Image(systemName: "lock.fill")
+                        .font(.caption)
+                        .foregroundColor(COLOR_WARM_AMBER)
+                }
             }
             .padding(.vertical, 8)
         }

@@ -70,7 +70,7 @@ struct SubstitutionSuggestionsView: View {
     private var emptyStateView: some View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.circle.fill")
-                .font(.system(size: 60))
+                .font(.iconLarge)
                 .foregroundColor(.green)
             
             Text("You have all ingredients!")

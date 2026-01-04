@@ -19,14 +19,7 @@ struct SettingsView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 32) {
@@ -34,14 +27,14 @@ struct SettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Settings")
                             .font(.cocktailTitle)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         Text("Personalize your experience")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 20)
-                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.horizontal, 20)
                     
                     // Profile Section
                     VStack(alignment: .leading, spacing: 16) {
@@ -54,12 +47,12 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Name")
                                     .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 TextField("Enter your name", text: $username)
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     .padding(12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                     .cornerRadius(8)
                                     .autocapitalization(.words)
                             }
@@ -68,19 +61,19 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Email")
                                     .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 TextField("your@email.com", text: $email)
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     .padding(12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                                     .cornerRadius(8)
                                     .autocapitalization(.none)
                                     .keyboardType(.emailAddress)
                             }
                         }
                         .padding(20)
-                        .background(COLOR_CHARCOAL)
+                        .background(AdaptiveColors.cardBackground(for: colorScheme))
                         .cornerRadius(12)
                         
                         // Save button
@@ -97,7 +90,7 @@ struct SettingsView: View {
                                 .cornerRadius(12)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     // Preferences Section
                     VStack(alignment: .leading, spacing: 16) {
@@ -110,7 +103,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Drink Strength Preference")
                                     .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 Picker("Preferred Strength", selection: $preferencesManager.preferences.preferredStrength) {
                                     ForEach([DrinkStrength.light, .medium, .strong, .veryStrong], id: \.self) { strength in
                                         Text(strength.rawValue).tag(strength)
@@ -122,14 +115,14 @@ struct SettingsView: View {
                                 }
                             }
                             .padding(16)
-                            .background(COLOR_CHARCOAL)
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
                             .cornerRadius(12)
                             
                             // Experience Level
                             VStack(alignment: .leading, spacing: 8) {
                                 Text("Experience Level")
                                     .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 Picker("Your Experience", selection: $preferencesManager.preferences.experienceLevel) {
                                     ForEach([DifficultyLevel.beginner, .intermediate, .advanced, .expert], id: \.self) { level in
                                         Text(level.rawValue).tag(level)
@@ -141,7 +134,7 @@ struct SettingsView: View {
                                 }
                             }
                             .padding(16)
-                            .background(COLOR_CHARCOAL)
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
                             .cornerRadius(12)
                             
                             // Quick links to detailed preference pages
@@ -152,17 +145,17 @@ struct SettingsView: View {
                                             .foregroundColor(COLOR_WARM_AMBER)
                                         Text("Favorite Spirits")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Spacer()
                                         Text("\(preferencesManager.preferences.favoriteSpirits.count)")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         Image(systemName: "chevron.right")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .padding(16)
                                 }
                                 
-                                Divider().background(COLOR_TEXT_SECONDARY.opacity(0.3))
+                                Divider().background(AdaptiveColors.textSecondary(for: colorScheme).opacity(0.3))
                                 
                                 NavigationLink(destination: AllergiesView()) {
                                     HStack {
@@ -170,17 +163,17 @@ struct SettingsView: View {
                                             .foregroundColor(.red)
                                         Text("Allergies")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Spacer()
                                         Text("\(preferencesManager.preferences.allergies.count)")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         Image(systemName: "chevron.right")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .padding(16)
                                 }
                                 
-                                Divider().background(COLOR_TEXT_SECONDARY.opacity(0.3))
+                                Divider().background(AdaptiveColors.textSecondary(for: colorScheme).opacity(0.3))
                                 
                                 NavigationLink(destination: DislikedIngredientsView()) {
                                     HStack {
@@ -188,17 +181,17 @@ struct SettingsView: View {
                                             .foregroundColor(.orange)
                                         Text("Disliked Ingredients")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Spacer()
                                         Text("\(preferencesManager.preferences.dislikedIngredients.count)")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         Image(systemName: "chevron.right")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .padding(16)
                                 }
                                 
-                                Divider().background(COLOR_TEXT_SECONDARY.opacity(0.3))
+                                Divider().background(AdaptiveColors.textSecondary(for: colorScheme).opacity(0.3))
                                 
                                 NavigationLink(destination: DietaryRestrictionsView()) {
                                     HStack {
@@ -206,21 +199,21 @@ struct SettingsView: View {
                                             .foregroundColor(.green)
                                         Text("Dietary Restrictions")
                                             .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Spacer()
                                         Text("\(preferencesManager.preferences.dietaryRestrictions.count)")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                         Image(systemName: "chevron.right")
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     .padding(16)
                                 }
                             }
-                            .background(COLOR_CHARCOAL)
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
                             .cornerRadius(12)
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     // App Info Section
                     VStack(alignment: .leading, spacing: 16) {
@@ -238,10 +231,10 @@ struct SettingsView: View {
                             SettingsRow(title: "Favorites", value: "\(LocalStorageManager.shared.retrieveFavoriteItems().count)")
                         }
                         .padding(20)
-                        .background(COLOR_CHARCOAL)
+                        .background(AdaptiveColors.cardBackground(for: colorScheme))
                         .cornerRadius(12)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     Spacer(minLength: 60)
                 }
@@ -267,6 +260,7 @@ struct SettingsView: View {
 }
 
 struct SettingsRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let value: String
     
@@ -274,7 +268,7 @@ struct SettingsRow: View {
         HStack {
             Text(title)
                 .font(.bodyText)
-                .foregroundColor(COLOR_TEXT_PRIMARY)
+                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
             Spacer()
             Text(value)
                 .font(.bodyText)

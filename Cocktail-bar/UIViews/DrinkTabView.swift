@@ -55,7 +55,7 @@ struct DrinkTabView: View {
                 // Chevron
                 Image(systemName: "chevron.right")
                     .foregroundColor(COLOR_TEXT_SECONDARY)
-                    .font(.system(size: 14))
+                    .font(.bodySmall)
             }
             .padding(12)
         }

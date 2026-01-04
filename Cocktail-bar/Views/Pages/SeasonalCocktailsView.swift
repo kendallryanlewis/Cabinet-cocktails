@@ -8,33 +8,39 @@
 import SwiftUI
 
 struct SeasonalCocktailsView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var seasonalManager = SeasonalCocktailManager.shared
     @StateObject private var drinkManager = DrinkManager()
     @State private var selectedTab = 0
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Tab Selector
-                Picker("View Mode", selection: $selectedTab) {
-                    Text("Seasonal").tag(0)
-                    Text("Holidays").tag(1)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+            ZStack {
+                AppBackground()
                 
-                // Content
-                TabView(selection: $selectedTab) {
-                    SeasonalRecommendationsView()
-                        .tag(0)
+                VStack(spacing: 0) {
+                    // Tab Selector
+                    Picker("View Mode", selection: $selectedTab) {
+                        Text("Seasonal").tag(0)
+                        Text("Holidays").tag(1)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
                     
-                    HolidayCocktailsView()
-                        .tag(1)
+                    // Content
+                    TabView(selection: $selectedTab) {
+                        SeasonalRecommendationsView()
+                            .tag(0)
+                        
+                        HolidayCocktailsView()
+                            .tag(1)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
             .navigationTitle("Seasonal Cocktails")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
         }
     }
 }
@@ -53,7 +59,7 @@ struct SeasonalRecommendationsView: View {
             VStack(alignment: .leading, spacing: 20) {
                 // Current Season Header
                 SeasonHeaderCard(season: seasonalManager.currentSeason)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 
                 // Season Description
                 if let recommendation = seasonalManager.seasonalRecommendations[seasonalManager.currentSeason] {
@@ -71,19 +77,19 @@ struct SeasonalRecommendationsView: View {
                     .padding()
                     .background(Color(.systemBackground))
                     .cornerRadius(12)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 }
                 
                 // Seasonal Cocktails
                 VStack(alignment: .leading, spacing: 12) {
                     Text("Perfect for \(seasonalManager.currentSeason.rawValue)")
                         .font(.headline)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     
                     if currentSeasonCocktails.isEmpty {
                         VStack(spacing: 12) {
                             Image(systemName: "leaf")
-                                .font(.system(size: 50))
+                                .font(.iconMedium)
                                 .foregroundColor(.gray)
                             
                             Text("No seasonal cocktails found")
@@ -101,7 +107,7 @@ struct SeasonalRecommendationsView: View {
                                     }
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                     }
                 }
@@ -118,7 +124,7 @@ struct SeasonalRecommendationsView: View {
                             Text(season.rawValue)
                                 .font(.headline)
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         if !seasonCocktails.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -129,7 +135,7 @@ struct SeasonalRecommendationsView: View {
                                         }
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                     }
@@ -156,7 +162,7 @@ struct SeasonHeaderCard: View {
     var body: some View {
         HStack {
             Image(systemName: season.icon)
-                .font(.system(size: 40))
+                .font(.displayMedium)
                 .foregroundColor(seasonColor)
             
             VStack(alignment: .leading, spacing: 4) {
@@ -261,7 +267,7 @@ struct HolidayCocktailsView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Upcoming Holidays")
                             .font(.headline)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         
                         ForEach(seasonalManager.upcomingHolidays, id: \.self) { holiday in
                             HolidaySection(holiday: holiday)
@@ -273,7 +279,7 @@ struct HolidayCocktailsView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("All Holidays")
                         .font(.headline)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     
                     ForEach(Holiday.allCases.filter { !seasonalManager.upcomingHolidays.contains($0) }, id: \.self) { holiday in
                         HolidaySection(holiday: holiday)
@@ -311,7 +317,7 @@ struct HolidaySection: View {
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
-            .padding(.horizontal)
+            .padding(.horizontal, 20)
             
             if !holidayCocktails.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
@@ -322,13 +328,13 @@ struct HolidaySection: View {
                             }
                         }
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 }
             } else {
                 Text("No cocktails found for this holiday")
                     .font(.caption)
                     .foregroundColor(.secondary)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
             }
         }
     }

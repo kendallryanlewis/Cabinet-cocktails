@@ -23,29 +23,22 @@ struct HelpView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(
-                    gradient: colorScheme == .dark ?
-                        Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                        Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                    startPoint: .topTrailing,
-                    endPoint: .leading
-                )
-                .edgesIgnoringSafeArea(.all)
+                AppBackground()
                 
                 ScrollView(showsIndicators: false) {
                     VStack(alignment: .leading, spacing: 24) {
                         // Header
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Help & Support")
-                                .font(.system(size: 34, weight: .bold))
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .font(.cocktailTitle)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Text("Learn how to make the most of your cocktail experience")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
                         
                         // Tutorial Button
                         Button(action: { showTutorial = true }) {
@@ -57,23 +50,23 @@ struct HelpView: View {
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Interactive Tutorial")
                                         .font(.headline)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     
                                     Text("Take a guided tour of all features")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 
                                 Spacer()
                                 
                                 Image(systemName: "chevron.right")
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                             .padding()
-                            .background(COLOR_CHARCOAL_LIGHT)
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
                             .cornerRadius(12)
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         // Help Sections
                         ForEach(HelpSection.allCases, id: \.self) { section in
@@ -92,11 +85,11 @@ struct HelpView: View {
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Contact & Support")
                                 .font(.title2.bold())
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Text("We're here to help! Choose your preferred way to reach us.")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             
                             // Email Support
                             Button(action: {
@@ -112,19 +105,19 @@ struct HelpView: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Email Support")
                                             .font(.headline)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Text("support@cocktailapp.com")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     
                                     Spacer()
                                     
                                     Image(systemName: "chevron.right")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
+                                .background(AdaptiveColors.cardBackground(for: colorScheme))
                                 .cornerRadius(12)
                             }
                             
@@ -142,19 +135,19 @@ struct HelpView: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Send Feedback")
                                             .font(.headline)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Text("Help us improve the app")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     
                                     Spacer()
                                     
                                     Image(systemName: "chevron.right")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
+                                .background(AdaptiveColors.cardBackground(for: colorScheme))
                                 .cornerRadius(12)
                             }
                             
@@ -172,26 +165,26 @@ struct HelpView: View {
                                     VStack(alignment: .leading, spacing: 2) {
                                         Text("Report a Bug")
                                             .font(.headline)
-                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                         Text("Let us know about issues")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     }
                                     
                                     Spacer()
                                     
                                     Image(systemName: "chevron.right")
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                                 .padding()
-                                .background(COLOR_CHARCOAL_LIGHT)
+                                .background(AdaptiveColors.cardBackground(for: colorScheme))
                                 .cornerRadius(12)
                             }
                         }
                         .padding()
-                        .background(COLOR_CHARCOAL_LIGHT.opacity(0.5))
+                        .background(AdaptiveColors.cardBackground(for: colorScheme))
                         .cornerRadius(16)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         .padding(.bottom, 40)
                     }
                 }
@@ -206,6 +199,7 @@ struct HelpView: View {
 
 // MARK: - Help Section Card
 struct HelpSectionCard: View {
+    @Environment(\.colorScheme) var colorScheme
     let section: HelpView.HelpSection
     let isExpanded: Bool
     let onTap: () -> Void
@@ -221,12 +215,12 @@ struct HelpSectionCard: View {
                     
                     Text(section.rawValue)
                         .font(.headline)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     Spacer()
                     
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 .padding()
             }
@@ -238,12 +232,12 @@ struct HelpSectionCard: View {
                     }
                 }
                 .padding()
-                .background(COLOR_CHARCOAL.opacity(0.5))
+                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
             }
         }
-        .background(COLOR_CHARCOAL_LIGHT)
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(12)
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
     
     func iconForSection(_ section: HelpView.HelpSection) -> String {
@@ -302,6 +296,7 @@ struct HelpItem {
 }
 
 struct HelpItemView: View {
+    @Environment(\.colorScheme) var colorScheme
     let item: HelpItem
     
     var body: some View {
@@ -313,7 +308,7 @@ struct HelpItemView: View {
             
             Text(item.description)
                 .font(.body)
-                .foregroundColor(.secondary)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 .fixedSize(horizontal: false, vertical: true)
         }
     }

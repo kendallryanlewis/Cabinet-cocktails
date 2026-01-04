@@ -18,14 +18,7 @@ struct ShoppingListView: View {
     
     var body: some View {
         ZStack {
-            LinearGradient(
-                gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                startPoint: .topTrailing,
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             if shoppingList.items.isEmpty {
                 EmptyShoppingListView()
@@ -36,30 +29,30 @@ struct ShoppingListView: View {
                         VStack(alignment: .leading, spacing: 12) {
                             HStack(spacing: 12) {
                                 Image(systemName: "cart.fill")
-                                    .font(.system(size: 32))
+                                    .font(.iconSmall)
                                     .foregroundColor(COLOR_WARM_AMBER)
                                 Text("Shopping List")
                                     .font(.cocktailTitle)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             }
                             
                             HStack {
                                 Text("\(shoppingList.items.count) item\(shoppingList.items.count == 1 ? "" : "s")")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 let checkedCount = shoppingList.items.filter { $0.isChecked }.count
                                 if checkedCount > 0 {
                                     Text("•")
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     Text("\(checkedCount) checked")
                                         .font(.bodyText)
                                         .foregroundColor(COLOR_WARM_AMBER)
                                 }
                             }
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
                         
                         // Action Buttons
                         HStack(spacing: 12) {
@@ -76,7 +69,7 @@ struct ShoppingListView: View {
                             Button(action: { showingShareSheet = true }) {
                                 Label("Share", systemImage: "square.and.arrow.up")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 10)
                                     .background(COLOR_CHARCOAL)
@@ -86,29 +79,29 @@ struct ShoppingListView: View {
                             Button(action: { showingClearConfirmation = true }) {
                                 Label("Clear", systemImage: "trash")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                     .padding(.horizontal, 16)
                                     .padding(.vertical, 10)
                                     .background(COLOR_CHARCOAL)
                                     .cornerRadius(20)
                             }
                         }
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                         
                         // Grouped Items
                         ForEach(shoppingList.groupedItems(), id: \.category) { group in
                             VStack(alignment: .leading, spacing: 12) {
                                 Text(group.category.rawValue)
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_WARM_AMBER)
-                                    .padding(.horizontal)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                    .padding(.horizontal, 20)
                                 
                                 VStack(spacing: 8) {
                                     ForEach(group.items) { item in
                                         ShoppingListItemRow(item: item)
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                         
@@ -143,6 +136,7 @@ struct ShoppingListView: View {
 
 // MARK: - Shopping List Item Row
 struct ShoppingListItemRow: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var shoppingList = ShoppingListManager.shared
     let item: ShoppingListItem
     
@@ -153,21 +147,21 @@ struct ShoppingListItemRow: View {
                 shoppingList.toggleChecked(item: item)
             }) {
                 Image(systemName: item.isChecked ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 24))
-                    .foregroundColor(item.isChecked ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    .font(.iconMini)
+                    .foregroundColor(item.isChecked ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             // Content
             VStack(alignment: .leading, spacing: 4) {
                 Text(item.ingredient)
                     .font(.bodyText)
-                    .foregroundColor(item.isChecked ? COLOR_TEXT_SECONDARY : COLOR_TEXT_PRIMARY)
+                    .foregroundColor(item.isChecked ? AdaptiveColors.textSecondary(for: colorScheme) : AdaptiveColors.textPrimary(for: colorScheme))
                     .strikethrough(item.isChecked)
                 
                 if !item.cocktails.isEmpty {
                     Text("For: \(item.cocktails.prefix(2).joined(separator: ", "))\(item.cocktails.count > 2 ? " +\(item.cocktails.count - 2)" : "")")
                         .font(.ingredientText)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                 }
             }
             
@@ -180,8 +174,8 @@ struct ShoppingListItemRow: View {
                 }
             }) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.system(size: 20))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.navTitle)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
         }
         .padding(16)
@@ -192,23 +186,24 @@ struct ShoppingListItemRow: View {
 
 // MARK: - Empty State
 struct EmptyShoppingListView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var shoppingList = ShoppingListManager.shared
     @State private var showingAddItem = false
     
     var body: some View {
         VStack(spacing: 24) {
             Image(systemName: "cart")
-                .font(.system(size: 64))
-                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .font(.iconLarge)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             
             VStack(spacing: 8) {
                 Text("Your Shopping List is Empty")
                     .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("Add ingredients you need or generate from almost-there cocktails")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -230,7 +225,7 @@ struct EmptyShoppingListView: View {
                 Button(action: { showingAddItem = true }) {
                     Text("Add Item Manually")
                         .font(.bodyText)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
                         .background(COLOR_CHARCOAL)
@@ -268,17 +263,17 @@ struct AddShoppingItemSheet: View {
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Ingredient Name")
                             .font(.ingredientText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         
                         TextField("e.g., Lime juice", text: $itemName)
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             .padding(12)
                             .background(COLOR_CHARCOAL_LIGHT)
                             .cornerRadius(8)
                             .autocapitalization(.words)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     .padding(.top, 40)
                     
                     Button(action: {
@@ -290,14 +285,14 @@ struct AddShoppingItemSheet: View {
                         Text("Add to List")
                             .font(.bodyText)
                             .fontWeight(.semibold)
-                            .foregroundColor(itemName.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_CHARCOAL)
+                            .foregroundColor(itemName.isEmpty ? AdaptiveColors.textSecondary(for: colorScheme) : COLOR_CHARCOAL)
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 16)
                             .background(itemName.isEmpty ? COLOR_CHARCOAL : COLOR_WARM_AMBER)
                             .cornerRadius(12)
                     }
                     .disabled(itemName.isEmpty)
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     Spacer()
                 }

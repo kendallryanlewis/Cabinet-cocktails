@@ -15,99 +15,165 @@ struct WelcomePopupView: View {
     @State private var username: String = ""
     @State private var email: String = ""
     @State private var subscribeToNewsletter: Bool = true
+    @State private var hasAppeared: Bool = false
     
     var body: some View {
         ZStack {
-            Color.black.opacity(0.4)
-                .ignoresSafeArea()
+            // Background using unified app background
+            AppBackground()
             
-            VStack(spacing: 24) {
-                // Header
-                VStack(spacing: 8) {
-                    Text("Welcome to")
-                        .font(.title3)
-                        .foregroundColor(.secondary)
-                    Text(APP_NAME)
-                        .font(.system(size: 32, weight: .bold))
-                        .foregroundColor(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
-                }
-                .padding(.top, 32)
-                
-                Text("Let's personalize your experience")
-                    .font(.body)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                
-                // Form
-                VStack(spacing: 16) {
-                    // Username field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Name")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        TextField("Enter your name", text: $username)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .autocapitalization(.words)
-                    }
-                    
-                    // Email field
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Email (Optional)")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                        TextField("your@email.com", text: $email)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
-                    }
-                    
-                    // Newsletter toggle
-                    if !email.isEmpty {
-                        Toggle(isOn: $subscribeToNewsletter) {
-                            Text("Subscribe to cocktail recipes newsletter")
-                                .font(.subheadline)
-                                .foregroundColor(.secondary)
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 32) {
+                    // Header with icon
+                    VStack(spacing: 20) {
+                        // App icon/logo area
+                        ZStack {
+                            Circle()
+                                .fill(AdaptiveColors.cardBackground(for: colorScheme))
+                                .frame(width: 100, height: 100)
+                            
+                            Image(systemName: "wineglass.fill")
+                                .font(.displayLarge)
+                                .foregroundColor(COLOR_WARM_AMBER)
                         }
-                        .tint(colorScheme == .dark ? COLOR_PRIMARY : COLOR_SECONDARY)
+                        .opacity(hasAppeared ? 1 : 0)
+                        .scaleEffect(hasAppeared ? 1 : 0.8)
+                        
+                        VStack(spacing: 8) {
+                            Text("Welcome to")
+                                .font(.bodyText)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                            Text(APP_NAME)
+                                .font(.cocktailTitle)
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
+                        .opacity(hasAppeared ? 1 : 0)
+                        .offset(y: hasAppeared ? 0 : 20)
                     }
-                }
-                .padding(.horizontal, 32)
-                
-                // Buttons
-                VStack(spacing: 12) {
-                    // Save button
-                    Button(action: {
-                        saveProfile()
-                    }) {
-                        Text("Get Started")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(colorScheme == .dark ? COLOR_SECONDARY : COLOR_PRIMARY)
-                            .cornerRadius(12)
-                    }
+                    .padding(.top, 60)
                     
-                    // Skip button
-                    Button(action: {
-                        session.setWelcomeCompleted()
-                        isPresented = false
-                    }) {
-                        Text("Skip for now")
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
+                    // Subtitle
+                    Text("Let's personalize your experience")
+                        .font(.bodyText)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .opacity(hasAppeared ? 1 : 0)
+                        .offset(y: hasAppeared ? 0 : 20)
+                    
+                    // Form Card
+                    VStack(spacing: 24) {
+                        // Username field
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Name")
+                                .font(.ingredientText)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                            
+                            TextField("Enter your name", text: $username)
+                                .font(.bodyText)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AdaptiveColors.background(for: colorScheme))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(COLOR_WARM_AMBER.opacity(0.3), lineWidth: 1)
+                                        )
+                                )
+                                .autocapitalization(.words)
+                        }
+                        
+                        // Email field
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Email (Optional)")
+                                .font(.ingredientText)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                            
+                            TextField("your@email.com", text: $email)
+                                .font(.bodyText)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                .padding()
+                                .background(
+                                    RoundedRectangle(cornerRadius: 12)
+                                        .fill(AdaptiveColors.background(for: colorScheme))
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 12)
+                                                .stroke(COLOR_WARM_AMBER.opacity(0.3), lineWidth: 1)
+                                        )
+                                )
+                                .autocapitalization(.none)
+                                .keyboardType(.emailAddress)
+                        }
+                        
+                        // Newsletter toggle
+                        if !email.isEmpty {
+                            HStack(spacing: 12) {
+                                Toggle("", isOn: $subscribeToNewsletter)
+                                    .labelsHidden()
+                                    .tint(COLOR_WARM_AMBER)
+                                
+                                Text("Subscribe to cocktail recipes newsletter")
+                                    .font(.caption)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                
+                                Spacer()
+                            }
+                            .padding(.top, 8)
+                        }
                     }
+                    .padding(24)
+                    .background(
+                        RoundedRectangle(cornerRadius: 16)
+                            .fill(AdaptiveColors.cardBackground(for: colorScheme))
+                    )
+                    .padding(.horizontal, 20)
+                    .opacity(hasAppeared ? 1 : 0)
+                    .offset(y: hasAppeared ? 0 : 30)
+                    
+                    // Buttons
+                    VStack(spacing: 16) {
+                        // Get Started button
+                        Button(action: {
+                            saveProfile()
+                        }) {
+                            HStack(spacing: 10) {
+                                Text("Get Started")
+                                    .font(.buttonText)
+                                Image(systemName: "arrow.right")
+                                    .font(.buttonSmall)
+                            }
+                            .foregroundColor(colorScheme == .dark ? COLOR_CHARCOAL : .white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(
+                                RoundedRectangle(cornerRadius: 14)
+                                    .fill(COLOR_WARM_AMBER)
+                            )
+                        }
+                        
+                        // Skip button
+                        Button(action: {
+                            session.setWelcomeCompleted()
+                            isPresented = false
+                        }) {
+                            Text("Skip for now")
+                                .font(.bodyText)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        }
+                        .padding(.bottom, 8)
+                    }
+                    .padding(.horizontal, 24)
+                    .opacity(hasAppeared ? 1 : 0)
+                    .offset(y: hasAppeared ? 0 : 30)
+                    
+                    Spacer(minLength: 40)
                 }
-                .padding(.horizontal, 32)
-                .padding(.bottom, 32)
             }
-            .background(
-                RoundedRectangle(cornerRadius: 20)
-                    .fill(colorScheme == .dark ? Color(hex: "#1C1C1E") : Color.white)
-            )
-            .padding(40)
-            .shadow(color: Color.black.opacity(0.3), radius: 20, x: 0, y: 10)
+        }
+        .onAppear {
+            withAnimation(.easeOut(duration: 0.8)) {
+                hasAppeared = true
+            }
         }
     }
     

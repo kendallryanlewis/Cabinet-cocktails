@@ -41,7 +41,7 @@ struct IngredientCheckPrompt: View {
                         HStack(spacing: 12) {
                             Image(systemName: selectedIngredients.contains(ingredient) ? "checkmark.circle.fill" : "circle")
                                 .foregroundColor(selectedIngredients.contains(ingredient) ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
-                                .font(.system(size: 22))
+                                .font(.sectionHeader)
                             
                             Text(ingredient)
                                 .font(.ingredientText)
@@ -107,7 +107,7 @@ struct MissingIngredientPrompt: View {
                     HStack(spacing: 12) {
                         Image(systemName: "circle")
                             .foregroundColor(COLOR_TEXT_SECONDARY)
-                            .font(.system(size: 18))
+                            .font(.bodyLarge)
                         
                         Text(ingredient)
                             .font(.ingredientText)
@@ -151,7 +151,7 @@ struct AddedToCabinetConfirmation: View {
         VStack(spacing: 16) {
             Image(systemName: "checkmark.circle.fill")
                 .foregroundColor(COLOR_WARM_AMBER)
-                .font(.system(size: 48))
+                .font(.iconMedium)
                 .padding(.top, 24)
             
             VStack(spacing: 8) {
@@ -264,7 +264,7 @@ struct InlineIngredientToggle: View {
             HStack(spacing: 12) {
                 Image(systemName: isInCabinet ? "checkmark.circle.fill" : "circle")
                     .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
-                    .font(.system(size: 20))
+                    .font(.navTitle)
                 
                 Text(ingredient)
                     .font(.ingredientText)

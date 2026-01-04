@@ -8,36 +8,42 @@
 import SwiftUI
 
 struct CostTrackingView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var costManager = CostTrackingManager.shared
     @State private var selectedTab = 0
     
     var body: some View {
         NavigationView {
-            VStack(spacing: 0) {
-                // Tab Selector
-                Picker("View Mode", selection: $selectedTab) {
-                    Text("Budget").tag(0)
-                    Text("Ingredients").tag(1)
-                    Text("Analytics").tag(2)
-                }
-                .pickerStyle(SegmentedPickerStyle())
-                .padding()
+            ZStack {
+                AppBackground()
                 
-                // Content
-                TabView(selection: $selectedTab) {
-                    BudgetOverviewView()
-                        .tag(0)
+                VStack(spacing: 0) {
+                    // Tab Selector
+                    Picker("View Mode", selection: $selectedTab) {
+                        Text("Budget").tag(0)
+                        Text("Ingredients").tag(1)
+                        Text("Analytics").tag(2)
+                    }
+                    .pickerStyle(SegmentedPickerStyle())
+                    .padding()
                     
-                    IngredientCostsView()
-                        .tag(1)
-                    
-                    SpendingAnalyticsView()
-                        .tag(2)
+                    // Content
+                    TabView(selection: $selectedTab) {
+                        BudgetOverviewView()
+                            .tag(0)
+                        
+                        IngredientCostsView()
+                            .tag(1)
+                        
+                        SpendingAnalyticsView()
+                            .tag(2)
+                    }
+                    .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
                 }
-                .tabViewStyle(PageTabViewStyle(indexDisplayMode: .never))
             }
             .navigationTitle("Cost Tracking")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
         }
     }
 }
@@ -53,11 +59,11 @@ struct BudgetOverviewView: View {
                 if let budget = costManager.budget {
                     // Budget Card
                     BudgetCard(budget: budget)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     
                     // Spending Summary
                     SpendingSummaryCard(budget: budget)
-                        .padding(.horizontal)
+                        .padding(.horizontal, 20)
                     
                     // Edit Budget Button
                     Button(action: { showingBudgetEditor = true }) {
@@ -69,12 +75,12 @@ struct BudgetOverviewView: View {
                             .background(Color(.systemGray6))
                             .cornerRadius(12)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                 } else {
                     // No Budget Set
                     VStack(spacing: 20) {
                         Image(systemName: "dollarsign.circle")
-                            .font(.system(size: 60))
+                            .font(.iconLarge)
                             .foregroundColor(.gray)
                         
                         Text("No Budget Set")
@@ -89,7 +95,7 @@ struct BudgetOverviewView: View {
                         Button(action: { showingBudgetEditor = true }) {
                             Label("Set Budget", systemImage: "plus.circle.fill")
                                 .font(.headline)
-                                .foregroundColor(.white)
+                                .foregroundColor(COLOR_CHARCOAL)
                                 .padding()
                                 .background(Color.blue)
                                 .cornerRadius(12)
@@ -127,7 +133,7 @@ struct BudgetCard: View {
                 Spacer()
                 
                 Image(systemName: "dollarsign.circle.fill")
-                    .font(.system(size: 40))
+                    .font(.displayMedium)
                     .foregroundColor(.blue)
             }
             
@@ -271,7 +277,7 @@ struct BudgetEditorView: View {
                     Button(action: saveBudget) {
                         Text("Save Budget")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(COLOR_CHARCOAL)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(isValid ? Color.blue : Color.gray)
@@ -323,7 +329,7 @@ struct IngredientCostsView: View {
             if costManager.ingredientCosts.isEmpty {
                 VStack(spacing: 20) {
                     Image(systemName: "cart")
-                        .font(.system(size: 60))
+                        .font(.iconLarge)
                         .foregroundColor(.gray)
                     
                     Text("No Ingredient Costs")
@@ -338,7 +344,7 @@ struct IngredientCostsView: View {
                     Button(action: { showingAddCost = true }) {
                         Label("Add Ingredient Cost", systemImage: "plus.circle.fill")
                             .font(.headline)
-                            .foregroundColor(.white)
+                            .foregroundColor(COLOR_CHARCOAL)
                             .padding()
                             .background(Color.blue)
                             .cornerRadius(12)
@@ -597,11 +603,11 @@ struct SpendingAnalyticsView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Recent Purchases")
                             .font(.headline)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         
                         ForEach(costManager.ingredientCosts.sorted(by: { $0.purchaseDate > $1.purchaseDate }).prefix(5)) { cost in
                             RecentPurchaseRow(cost: cost)
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                         }
                     }
                 }

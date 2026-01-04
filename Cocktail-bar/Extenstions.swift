@@ -8,12 +8,18 @@
 import SwiftUI
 
 extension EdgeInsets {
-    static let mainBorder = EdgeInsets(top: 30, leading: 30, bottom: 30, trailing: 30)
-    static let mainTop = EdgeInsets(top: 30, leading: 0, bottom: 0, trailing: 0)
-    static let mainBottom = EdgeInsets(top: 0, leading: 0, bottom: 30, trailing: 0)
+    static let mainBorder = EdgeInsets(top: 20, leading: 20, bottom: 20, trailing: 20)
+    static let mainTop = EdgeInsets(top: 20, leading: 0, bottom: 0, trailing: 0)
+    static let mainBottom = EdgeInsets(top: 0, leading: 0, bottom: 20, trailing: 0)
     static let standardPadding = EdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
     static let smallPadding = EdgeInsets(top: 8, leading: 8, bottom: 8, trailing: 8)
     static let largePadding = EdgeInsets(top: 24, leading: 24, bottom: 24, trailing: 24)
+    
+    // Consistent horizontal padding for all views
+    static let horizontalPadding: CGFloat = 20
+    static let verticalPadding: CGFloat = 16
+    static let cardPadding: CGFloat = 16
+    static let sectionSpacing: CGFloat = 24
 }
 
 extension View {
@@ -36,6 +42,21 @@ extension View {
             placeholder().opacity(shouldShow ? 1 : 0)
             self
         }
+    }
+    
+    /// Apply consistent horizontal padding across all views
+    func standardHorizontalPadding() -> some View {
+        self.padding(.horizontal, EdgeInsets.horizontalPadding)
+    }
+    
+    /// Apply consistent vertical padding
+    func standardVerticalPadding() -> some View {
+        self.padding(.vertical, EdgeInsets.verticalPadding)
+    }
+    
+    /// Apply consistent card padding
+    func cardPadding() -> some View {
+        self.padding(EdgeInsets.cardPadding)
     }
 }
 

@@ -39,45 +39,48 @@ struct CustomRecipeEditorView: View {
     
     var body: some View {
         NavigationView {
-            Form {
-                // Basic Info
-                Section(header: Text("Basic Information")) {
-                    TextField("Recipe Name", text: $recipeName)
-                    
-                    Picker("Category", selection: $category) {
-                        ForEach(categories, id: \.self) { category in
-                            Text(category).tag(category)
-                        }
-                    }
-                    
-                    Picker("Glass Type", selection: $glassType) {
-                        ForEach(glassTypes, id: \.self) { glass in
-                            Text(glass).tag(glass)
-                        }
-                    }
-                }
+            ZStack {
+                AppBackground()
                 
-                // Image
-                Section(header: Text("Photo")) {
-                    PhotosPicker(selection: $selectedImage, matching: .images) {
-                        HStack {
-                            if let imageData = imageData, let uiImage = UIImage(data: imageData) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 60, height: 60)
-                                    .cornerRadius(8)
-                            } else {
-                                Image(systemName: "photo")
-                                    .font(.system(size: 30))
-                                    .foregroundColor(.gray)
-                                    .frame(width: 60, height: 60)
-                                    .background(Color(.systemGray6))
-                                    .cornerRadius(8)
+                Form {
+                    // Basic Info
+                    Section(header: Text("Basic Information")) {
+                        TextField("Recipe Name", text: $recipeName)
+                        
+                        Picker("Category", selection: $category) {
+                            ForEach(categories, id: \.self) { category in
+                                Text(category).tag(category)
                             }
-                            
-                            VStack(alignment: .leading) {
-                                Text("Add Photo")
+                        }
+                        
+                        Picker("Glass Type", selection: $glassType) {
+                            ForEach(glassTypes, id: \.self) { glass in
+                                Text(glass).tag(glass)
+                            }
+                        }
+                    }
+                    
+                    // Image
+                    Section(header: Text("Photo")) {
+                        PhotosPicker(selection: $selectedImage, matching: .images) {
+                            HStack {
+                                if let imageData = imageData, let uiImage = UIImage(data: imageData) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFill()
+                                        .frame(width: 60, height: 60)
+                                        .cornerRadius(8)
+                                } else {
+                                    Image(systemName: "photo")
+                                        .font(.iconSmall)
+                                        .foregroundColor(.gray)
+                                        .frame(width: 60, height: 60)
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                }
+                                
+                                VStack(alignment: .leading) {
+                                    Text("Add Photo")
                                     .font(.headline)
                                 Text("Choose from library")
                                     .font(.caption)
@@ -186,6 +189,8 @@ struct CustomRecipeEditorView: View {
                     Toggle("Make Public", isOn: $isPublic)
                 }
             }
+            .scrollContentBackground(.hidden)
+            }
             .navigationTitle("New Recipe")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -280,7 +285,7 @@ struct CustomRecipesListView: View {
                 if recipeManager.recipes.isEmpty {
                     VStack(spacing: 20) {
                         Image(systemName: "book.closed")
-                            .font(.system(size: 60))
+                            .font(.iconLarge)
                             .foregroundColor(.gray)
                         
                         Text("No Custom Recipes")
@@ -351,7 +356,7 @@ struct CustomRecipeRow: View {
                     .clipped()
             } else {
                 Image(systemName: "photo")
-                    .font(.system(size: 30))
+                    .font(.iconSmall)
                     .foregroundColor(.gray)
                     .frame(width: 60, height: 60)
                     .background(Color(.systemGray6))
@@ -453,7 +458,7 @@ struct CustomRecipeDetailView: View {
                         ForEach(recipe.ingredients) { ingredient in
                             HStack {
                                 Image(systemName: "circle.fill")
-                                    .font(.system(size: 6))
+                                    .font(.captionSmall)
                                     .foregroundColor(.blue)
                                 VStack(alignment: .leading) {
                                     Text(ingredient.name)

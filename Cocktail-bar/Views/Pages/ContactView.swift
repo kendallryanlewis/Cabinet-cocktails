@@ -19,12 +19,12 @@ struct ContactView: View {
     @State private var name: String = ""
     @State private var email: String = ""
     @State private var message: String = ""
-
+    
     var body: some View {
         ZStack {
             LinearGradient(
                 gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
+                Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
                     Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
                 startPoint: .topTrailing,
                 endPoint: .leading
@@ -37,19 +37,19 @@ struct ContactView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         HStack(spacing: 12) {
                             Image(systemName: "envelope.circle.fill")
-                                .font(.system(size: 32))
+                                .font(.iconSmall)
                                 .foregroundColor(COLOR_WARM_AMBER)
                             Text("Contact & Help")
                                 .font(.cocktailTitle)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         }
                         Text("We'd love to hear from you")
                             .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 20)
-                    .padding(.horizontal)
+                    .padding(.top, 24)
+                    .padding(.horizontal, 20)
                     
                     // Help Link Card
                     Button(action: {
@@ -57,133 +57,132 @@ struct ContactView: View {
                     }) {
                         HStack(spacing: 16) {
                             Image(systemName: "questionmark.circle.fill")
-                                .font(.system(size: 24))
+                                .font(.iconMini)
                                 .foregroundColor(COLOR_WARM_AMBER)
                             
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Need Help?")
                                     .font(.cardTitle)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 Text("Visit our help page for FAQs and guides")
                                     .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
                             
                             Spacer()
                             
                             Image(systemName: "arrow.right.circle.fill")
-                                .font(.system(size: 20))
+                                .font(.navTitle)
                                 .foregroundColor(COLOR_WARM_AMBER)
                         }
                         .padding(20)
-                        .background(COLOR_CHARCOAL)
+                        .background(AdaptiveColors.cardBackground(for: colorScheme))
                         .cornerRadius(12)
                     }
-                    .padding(.horizontal)
+                    .padding(.horizontal, 20)
                     
                     // Contact Form
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("Send us a message")
-                            .font(.sectionHeader)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                        
-                        VStack(spacing: 16) {
-                            // Name field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Name")
-                                    .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                                TextField("Enter your name", text: $name)
-                                    .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
-                                    .padding(12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(8)
-                                    .autocapitalization(.words)
-                            }
+                        VStack(alignment: .leading, spacing: 20) {
+                            Text("Send us a message")
+                                .font(.sectionHeader)
+                                .foregroundColor(COLOR_WARM_AMBER)
                             
-                            // Email field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Email")
-                                    .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                                TextField("your@email.com", text: $email)
-                                    .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
-                                    .padding(12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(8)
-                                    .autocapitalization(.none)
-                                    .keyboardType(.emailAddress)
-                            }
-                            
-                            // Message field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Message")
-                                    .font(.ingredientText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                                ZStack(alignment: .topLeading) {
-                                    if message.isEmpty {
-                                        Text("Tell us what's on your mind...")
-                                            .font(.bodyText)
-                                            .foregroundColor(COLOR_TEXT_SECONDARY)
-                                            .padding(.horizontal, 16)
-                                            .padding(.vertical, 20)
-                                    }
-                                    TextEditor(text: $message)
+                            VStack(spacing: 16) {
+                                // Name field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Name")
+                                        .font(.ingredientText)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    TextField("Enter your name", text: $name)
                                         .font(.bodyText)
-                                        .foregroundColor(COLOR_TEXT_PRIMARY)
-                                        .padding(8)
-                                        .scrollContentBackground(.hidden)
-                                        .background(Color.clear)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                        .padding(12)
+                                        .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                        .cornerRadius(8)
                                 }
-                                .frame(minHeight: 150)
-                                .background(COLOR_CHARCOAL_LIGHT)
-                                .cornerRadius(8)
+                                
+                                // Email field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Email")
+                                        .font(.ingredientText)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    TextField("your@email.com", text: $email)
+                                        .font(.bodyText)
+                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                        .padding(12)
+                                        .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                        .cornerRadius(8)
+                                        .autocapitalization(.none)
+                                        .keyboardType(.emailAddress)
+                                }
+                                
+                                // Message field
+                                VStack(alignment: .leading, spacing: 8) {
+                                    Text("Message")
+                                        .font(.ingredientText)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    ZStack(alignment: .topLeading) {
+                                        if message.isEmpty {
+                                            Text("Tell us what's on your mind...")
+                                                .font(.bodyText)
+                                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 20)
+                                        }
+                                        TextEditor(text: $message)
+                                            .font(.bodyText)
+                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                            .padding(8)
+                                            .scrollContentBackground(.hidden)
+                                            .background(Color.clear)
+                                    }
+                                    .frame(minHeight: 150)
+                                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                                    .cornerRadius(8)
+                                }
                             }
-                        }
-                        .padding(20)
-                        .background(COLOR_CHARCOAL)
-                        .cornerRadius(12)
-                        
-                        // Submit button
-                        Button(action: {
-                            if MFMailComposeViewController.canSendMail() {
-                                showingMailView = true
-                            } else {
-                                showingConfirmation = true
-                            }
-                        }) {
-                            HStack {
-                                Image(systemName: "paperplane.fill")
-                                Text("Send Message")
-                            }
-                            .font(.bodyText)
-                            .fontWeight(.semibold)
-                            .foregroundColor(COLOR_CHARCOAL)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .background(name.isEmpty || email.isEmpty || message.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_WARM_AMBER)
+                            .padding(20)
+                            .background(AdaptiveColors.cardBackground(for: colorScheme))
                             .cornerRadius(12)
+                            
+                            // Submit button
+                            Button(action: {
+                                if MFMailComposeViewController.canSendMail() {
+                                    showingMailView = true
+                                } else {
+                                    showingConfirmation = true
+                                }
+                            }) {
+                                HStack {
+                                    Image(systemName: "paperplane.fill")
+                                    Text("Send Message")
+                                }
+                                .font(.bodyText)
+                                .fontWeight(.semibold)
+                                .foregroundColor(COLOR_CHARCOAL)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .background(name.isEmpty || email.isEmpty || message.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_WARM_AMBER)
+                                .cornerRadius(12)
+                            }
+                            .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
                         }
-                        .disabled(name.isEmpty || email.isEmpty || message.isEmpty)
-                    }
-                    .padding(.horizontal)
-                    
-                    Spacer(minLength: 60)
+                        .padding(.horizontal, 20)
+                        
+                        Spacer(minLength: 60)
                 }
             }
-        }
-        .sheet(isPresented: $showingMailView) {
-            MailView(subject: "Contact from \(name)", messageBody: "Name: \(name)\nEmail: \(email)\nMessage: \(message)")
-        }
-        .sheet(isPresented: $showingWebView) {
-            WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
-        }
-        .alert("Mail Not Available", isPresented: $showingConfirmation) {
-            Button("OK", role: .cancel) { }
-        } message: {
-            Text("Please configure your email app to send messages.")
+            .sheet(isPresented: $showingMailView) {
+                MailView(subject: "Contact from \(name)", messageBody: "Name: \(name)\nEmail: \(email)\nMessage: \(message)")
+            }
+            .sheet(isPresented: $showingWebView) {
+                WebView(url: URL(string: "\(WEBSITE_URL)/Cabinet-cocktails")!)
+            }
+            .alert("Mail Not Available", isPresented: $showingConfirmation) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text("Please configure your email app to send messages.")
+            }
         }
     }
 }

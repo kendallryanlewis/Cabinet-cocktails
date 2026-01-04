@@ -11,52 +11,56 @@ typealias DrinkStrength = UserPreferences.DrinkStrength
 typealias DietaryRestriction = UserPreferences.DietaryRestriction
 
 struct UserPreferencesView: View {
+    @Environment(\.colorScheme) var colorScheme
     @StateObject private var preferencesManager = UserPreferencesManager.shared
     @State private var showingAllergyInput = false
     @State private var newAllergy = ""
     
     var body: some View {
         NavigationView {
-            Form {
-                // Drink Strength
-                Section(header: Text("Drink Strength Preference")) {
-                    Picker("Preferred Strength", selection: $preferencesManager.preferences.preferredStrength) {
-                        ForEach([DrinkStrength.light, .medium, .strong, .veryStrong], id: \.self) { strength in
-                            Text(strength.rawValue).tag(strength)
-                        }
-                    }
-                    .onChange(of: preferencesManager.preferences.preferredStrength) { _ in
-                        preferencesManager.save()
-                    }
-                }
+            ZStack {
+                AppBackground()
                 
-                // Experience Level
-                Section(header: Text("Experience Level")) {
-                    Picker("Your Experience", selection: $preferencesManager.preferences.experienceLevel) {
-                        ForEach([DifficultyLevel.beginner, .intermediate, .advanced, .expert], id: \.self) { level in
-                            HStack {
-                                Image(systemName: levelIcon(level))
-                                Text(level.rawValue)
+                Form {
+                    // Drink Strength
+                    Section(header: Text("Drink Strength Preference")) {
+                        Picker("Preferred Strength", selection: $preferencesManager.preferences.preferredStrength) {
+                            ForEach([DrinkStrength.light, .medium, .strong, .veryStrong], id: \.self) { strength in
+                                Text(strength.rawValue).tag(strength)
                             }
-                            .tag(level)
+                        }
+                        .onChange(of: preferencesManager.preferences.preferredStrength) { _ in
+                            preferencesManager.save()
                         }
                     }
-                    .onChange(of: preferencesManager.preferences.experienceLevel) { _ in
-                        preferencesManager.save()
-                    }
-                }
-                
-                // Favorite Spirits
-                Section(header: Text("Favorite Spirits")) {
-                    NavigationLink(destination: FavoriteSpiritsView()) {
-                        HStack {
-                            Text("Manage Favorites")
-                            Spacer()
-                            Text("\(preferencesManager.preferences.favoriteSpirits.count)")
-                                .foregroundColor(.secondary)
+                    
+                    // Experience Level
+                    Section(header: Text("Experience Level")) {
+                        Picker("Your Experience", selection: $preferencesManager.preferences.experienceLevel) {
+                            ForEach([DifficultyLevel.beginner, .intermediate, .advanced, .expert], id: \.self) { level in
+                                HStack {
+                                    Image(systemName: levelIcon(level))
+                                    Text(level.rawValue)
+                                }
+                                .tag(level)
+                            }
+                        }
+                        .onChange(of: preferencesManager.preferences.experienceLevel) { _ in
+                            preferencesManager.save()
                         }
                     }
-                }
+                    
+                    // Favorite Spirits
+                    Section(header: Text("Favorite Spirits")) {
+                        NavigationLink(destination: FavoriteSpiritsView()) {
+                            HStack {
+                                Text("Manage Favorites")
+                                Spacer()
+                                Text("\(preferencesManager.preferences.favoriteSpirits.count)")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
                 
                 // Allergies
                 Section(header: Text("Allergies & Dietary Restrictions")) {
@@ -106,8 +110,11 @@ struct UserPreferencesView: View {
                     }
                 }
             }
+            .scrollContentBackground(.hidden)
             .navigationTitle("Preferences")
             .navigationBarTitleDisplayMode(.large)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
+            }
         }
     }
     

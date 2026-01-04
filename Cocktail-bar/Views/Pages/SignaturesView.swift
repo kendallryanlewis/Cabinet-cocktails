@@ -38,14 +38,7 @@ struct SignaturesView: View {
     
     var body: some View {
         ZStack(){
-            LinearGradient(
-                gradient: colorScheme == .dark ? 
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) : 
-                    Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]), 
-                startPoint: .topTrailing, 
-                endPoint: .leading
-            )
-            .edgesIgnoringSafeArea(.all)
+            AppBackground()
             
             if DrinkManager.shared.signatureCocktails.isEmpty {
                 // Empty state
@@ -57,42 +50,39 @@ struct SignaturesView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Your Signatures")
                                 .font(.cocktailTitle)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                             
                             Text("\(DrinkManager.shared.signatureCocktails.count) saved cocktail\(DrinkManager.shared.signatureCocktails.count == 1 ? "" : "s")")
                                 .font(.bodyText)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
-                        .padding(.horizontal)
-                        .padding(.top, 20)
+                        .padding(.horizontal, 20)
+                        .padding(.top, 24)
                         
                         // Search Bar
                         HStack {
                             Image(systemName: "magnifyingglass")
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             
                             TextField("Search your signatures", text: $searchText)
                                 .font(.bodyText)
-                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 .tint(COLOR_WARM_AMBER)
                                 .placeholder(when: searchText.isEmpty) {
                                     Text("Search your signatures")
                                         .font(.bodyText)
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                             
                             if !searchText.isEmpty {
                                 Button(action: { searchText = "" }) {
                                     Image(systemName: "xmark.circle.fill")
-                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 }
                             }
                         }
                         .padding(12)
-                        .background(COLOR_CHARCOAL_LIGHT)
-                        .cornerRadius(12)
-                        .padding(.horizontal)
-                        
+                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
                         // Category Filter
                         if !cocktailCategories.isEmpty {
                             ScrollView(.horizontal, showsIndicators: false) {
@@ -113,7 +103,7 @@ struct SignaturesView: View {
                                         )
                                     }
                                 }
-                                .padding(.horizontal)
+                                .padding(.horizontal, 20)
                             }
                         }
                         
@@ -121,16 +111,16 @@ struct SignaturesView: View {
                         if filteredCocktails.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "magnifyingglass")
-                                    .font(.system(size: 48))
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .font(.iconMedium)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Text("No cocktails found")
                                     .font(.sectionHeader)
-                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                                 
                                 Text("Try adjusting your search or filters")
                                     .font(.bodyText)
-                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                 
                                 Button(action: {
                                     searchText = ""
@@ -155,7 +145,7 @@ struct SignaturesView: View {
                                     )
                                 }
                             }
-                            .padding(.horizontal)
+                            .padding(.horizontal, 20)
                         }
                         
                         // Bottom spacing
@@ -209,7 +199,7 @@ struct SignatureCocktailCard: View {
                 VStack(alignment: .leading, spacing: 8) {
                     Text(cocktail.name)
                         .font(.cardTitle)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
                     
@@ -222,7 +212,7 @@ struct SignatureCocktailCard: View {
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(COLOR_CHARCOAL_LIGHT)
+                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
             .cornerRadius(12)
             .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
@@ -233,6 +223,7 @@ struct SignatureCocktailCard: View {
 
 // MARK: - Category Filter Button
 struct CategoryFilterButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let title: String
     let isSelected: Bool
     let action: () -> Void
@@ -242,7 +233,7 @@ struct CategoryFilterButton: View {
             Text(title)
                 .font(.caption)
                 .fontWeight(.medium)
-                .foregroundColor(isSelected ? .black : COLOR_TEXT_SECONDARY)
+                .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textSecondary(for: colorScheme))
                 .padding(.horizontal, 16)
                 .padding(.vertical, 8)
                 .background(isSelected ? COLOR_WARM_AMBER : COLOR_CHARCOAL_LIGHT)
@@ -263,23 +254,23 @@ struct EmptySignaturesView: View {
             // Icon
             ZStack {
                 Circle()
-                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
                     .frame(width: 100, height: 100)
                 
                 Image(systemName: "heart.slash")
-                    .font(.system(size: 40))
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .font(.displayMedium)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             }
             
             // Text
             VStack(spacing: 8) {
                 Text("No Signatures Yet")
                     .font(.sectionHeader)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Text("Save your favorite cocktails to quickly access them later")
                     .font(.bodyText)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -295,7 +286,7 @@ struct EmptySignaturesView: View {
                     Text("Explore Cocktails")
                 }
                 .font(.buttonText)
-                .foregroundColor(.white)
+                .foregroundColor(COLOR_CHARCOAL)
                 .padding(.horizontal, 24)
                 .padding(.vertical, 14)
                 .background(COLOR_WARM_AMBER)
@@ -304,6 +295,6 @@ struct EmptySignaturesView: View {
             
             Spacer()
         }
-        .padding(.horizontal)
+        .padding(.horizontal, 20)
     }
 }
