@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		5CAPPBG00000000000000001 /* AppBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAPPBG00000000000000002 /* AppBackground.swift */; };
 		5C0B56442F07E56100835C95 /* CustomRecipeEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B563F2F07E56100835C95 /* CustomRecipeEditorView.swift */; };
 		5C0B56452F07E56100835C95 /* StepByStepView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B56422F07E56100835C95 /* StepByStepView.swift */; };
 		5C0B56462F07E56100835C95 /* BarEquipmentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C0B563D2F07E56100835C95 /* BarEquipmentView.swift */; };
@@ -66,6 +65,7 @@
 		5C63B4702BD2C8EB00D93580 /* WebView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C63B46F2BD2C8EB00D93580 /* WebView.swift */; };
 		5C6B12CE2BB8C24300DBE149 /* DrinkManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C6B12CD2BB8C24300DBE149 /* DrinkManager.swift */; };
 		5CADDCOLL001 /* AddToCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CADDCOLL002 /* AddToCollectionView.swift */; };
+		5CAPPBG00000000000000001 /* AppBackground.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CAPPBG00000000000000002 /* AppBackground.swift */; };
 		5CB12FA52BBB4C390035DF02 /* DrinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB12FA42BBB4C390035DF02 /* DrinkView.swift */; };
 		5CB12FA72BBB4C580035DF02 /* SubDrinkListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB12FA62BBB4C580035DF02 /* SubDrinkListView.swift */; };
 		5CBARTENDER123456789012 /* BartenderPrompts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CBARTENDER123456789011 /* BartenderPrompts.swift */; };
@@ -150,7 +150,6 @@
 		5C3097072BA2A12A006DD90D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		5C3097082BA2A12A006DD90D /* Session.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Session.swift; sourceTree = "<group>"; };
 		5C30970A2BA2A12A006DD90D /* GenericBackground.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericBackground.swift; sourceTree = "<group>"; };
-		5CAPPBG00000000000000002 /* AppBackground.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppBackground.swift; sourceTree = "<group>"; };
 		5C30970B2BA2A12A006DD90D /* GenericButton.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericButton.swift; sourceTree = "<group>"; };
 		5C30970C2BA2A12A006DD90D /* GenericTextField.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GenericTextField.swift; sourceTree = "<group>"; };
 		5C30970E2BA2A12A006DD90D /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
@@ -176,6 +175,7 @@
 		5C63B46F2BD2C8EB00D93580 /* WebView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebView.swift; sourceTree = "<group>"; };
 		5C6B12CD2BB8C24300DBE149 /* DrinkManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkManager.swift; sourceTree = "<group>"; };
 		5CADDCOLL002 /* AddToCollectionView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AddToCollectionView.swift; sourceTree = "<group>"; };
+		5CAPPBG00000000000000002 /* AppBackground.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppBackground.swift; sourceTree = "<group>"; };
 		5CB12FA42BBB4C390035DF02 /* DrinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrinkView.swift; sourceTree = "<group>"; };
 		5CB12FA62BBB4C580035DF02 /* SubDrinkListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SubDrinkListView.swift; sourceTree = "<group>"; };
 		5CBARTENDER123456789011 /* BartenderPrompts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BartenderPrompts.swift; sourceTree = "<group>"; };
@@ -823,7 +823,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "KNDL.Cocktail-bar";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -857,7 +857,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 2.1;
+				MARKETING_VERSION = 2.2;
 				PRODUCT_BUNDLE_IDENTIFIER = "KNDL.Cocktail-bar";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
