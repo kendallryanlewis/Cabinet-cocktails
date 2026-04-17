@@ -151,7 +151,7 @@ struct PaywallView: View {
                 .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            ForEach(premiumManager.products, id: \.id) { product in
+            ForEach(premiumManager.sortedProducts, id: \.id) { product in
                 ProductCard(
                     product: product,
                     isSelected: selectedProduct?.id == product.id,
@@ -212,13 +212,13 @@ struct PaywallView: View {
     // MARK: - Footer Section
     private var footerSection: some View {
         VStack(spacing: 8) {
-            Text("✓ One-time purchase, lifetime access")
-                .font(.caption)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
             Text("✓ All future updates included")
                 .font(.caption)
                 .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-            Text("✓ Cancel subscription anytime")
+            Text("✓ Subscriptions cancel anytime from App Store settings")
+                .font(.caption)
+                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+            Text("✓ Lifetime plan — one-time purchase, no renewal")
                 .font(.caption)
                 .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
         }

@@ -11,43 +11,29 @@ import Combine
 
 // MARK: - Product Identifiers
 enum ProductID: String, CaseIterable {
-    // One-Time Purchases
-    case proLifetime = "com.cocktailbar.pro.lifetime"
+    // One-Time Purchase
+    case proLifetime = "KNDL.Cocktailbar.pro.lifetime"
     
     // Subscriptions
-    case monthlySubscription = "com.cocktailbar.subscription.monthly"
-    case annualSubscription = "com.cocktailbar.subscription.annual"
-    
-    // Feature Packs
-    case essentialPack = "com.cocktailbar.pack.essential"
-    case creatorPack = "com.cocktailbar.pack.creator"
-    case professionalPack = "com.cocktailbar.pack.professional"
+    case monthlySubscription = "KNDL.Cocktailbar.subscription.monthly"
+    case annualSubscription = "KNDL.Cocktailbar.subscription.annual"
     
     var displayName: String {
         switch self {
-        case .proLifetime: return "Cocktail Bar Pro"
+        case .proLifetime: return "Lifetime Access"
         case .monthlySubscription: return "Premium Monthly"
         case .annualSubscription: return "Premium Annual"
-        case .essentialPack: return "Essential Pack"
-        case .creatorPack: return "Creator Pack"
-        case .professionalPack: return "Professional Pack"
         }
     }
     
     var description: String {
         switch self {
         case .proLifetime:
-            return "Lifetime access to all premium features"
+            return "One-time purchase, all features forever"
         case .monthlySubscription:
-            return "Monthly access to all premium features"
+            return "Full access, billed monthly"
         case .annualSubscription:
-            return "Annual access to all premium features (Save 50%)"
-        case .essentialPack:
-            return "Unlimited storage and offline mode"
-        case .creatorPack:
-            return "Custom recipe creator and sharing"
-        case .professionalPack:
-            return "Cost tracking and batch calculator"
+            return "Full access, billed yearly — save over 50%"
         }
     }
 }
@@ -222,14 +208,8 @@ class PremiumManager: ObservableObject {
     
     // MARK: - Premium Status
     private func updatePremiumStatus() {
-        // User is premium if they have:
-        // 1. Lifetime Pro purchase
-        // 2. Active subscription
-        // 3. Complete bundle
-        
         let hasLifetimePro = purchasedProducts.contains(ProductID.proLifetime.rawValue)
         let hasActiveSubscription = activeSubscription != nil
-        
         isPremium = hasLifetimePro || hasActiveSubscription
     }
     
@@ -263,114 +243,47 @@ class PremiumManager: ObservableObject {
     
     // MARK: - Feature Access Checks
     
-    /// Check if user has access to unlimited cabinet
-    func hasUnlimitedCabinet() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.essentialPack.rawValue)
-    }
+    func hasUnlimitedCabinet() -> Bool { return isPremium }
     
-    /// Check cabinet limit for free users
     func canAddToCabinet(currentCount: Int) -> Bool {
-        if hasUnlimitedCabinet() {
-            return true
-        }
-        return currentCount < FREE_CABINET_LIMIT
+        return isPremium ? true : currentCount < FREE_CABINET_LIMIT
     }
     
-    /// Get cabinet limit
     func getCabinetLimit() -> Int? {
-        return hasUnlimitedCabinet() ? nil : FREE_CABINET_LIMIT
+        return isPremium ? nil : FREE_CABINET_LIMIT
     }
     
-    /// Check if user has access to unlimited favorites
-    func hasUnlimitedFavorites() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.essentialPack.rawValue)
-    }
+    func hasUnlimitedFavorites() -> Bool { return isPremium }
     
-    /// Check favorites limit for free users
     func canAddToFavorites(currentCount: Int) -> Bool {
-        if hasUnlimitedFavorites() {
-            return true
-        }
-        return currentCount < FREE_FAVORITES_LIMIT
+        return isPremium ? true : currentCount < FREE_FAVORITES_LIMIT
     }
     
-    /// Get favorites limit
     func getFavoritesLimit() -> Int? {
-        return hasUnlimitedFavorites() ? nil : FREE_FAVORITES_LIMIT
+        return isPremium ? nil : FREE_FAVORITES_LIMIT
     }
     
-    /// Check if user has access to unlimited collections
-    func hasUnlimitedCollections() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.essentialPack.rawValue)
-    }
+    func hasUnlimitedCollections() -> Bool { return isPremium }
     
-    /// Check collections limit for free users
     func canCreateCollection(currentCount: Int) -> Bool {
-        if hasUnlimitedCollections() {
-            return true
-        }
-        return currentCount < FREE_COLLECTIONS_LIMIT
+        return isPremium ? true : currentCount < FREE_COLLECTIONS_LIMIT
     }
     
-    /// Get collections limit
     func getCollectionsLimit() -> Int? {
-        return hasUnlimitedCollections() ? nil : FREE_COLLECTIONS_LIMIT
+        return isPremium ? nil : FREE_COLLECTIONS_LIMIT
     }
     
-    /// Check if user can access offline mode
-    func canAccessOfflineMode() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.essentialPack.rawValue)
-    }
-    
-    /// Check if user can create custom recipes
-    func canCreateCustomRecipes() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.creatorPack.rawValue)
-    }
-    
-    /// Check if user can access cost tracking
-    func canAccessCostTracking() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.professionalPack.rawValue)
-    }
-    
-    /// Check if user can use batch calculator
-    func canUseBatchCalculator() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.professionalPack.rawValue)
-    }
-    
-    /// Check if user can export recipes
-    func canExportRecipes() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.creatorPack.rawValue)
-    }
-    
-    /// Check if user can access advanced search
-    func canAccessAdvancedSearch() -> Bool {
-        return isPremium
-    }
-    
-    /// Check if user can access educational content
-    func canAccessEducationalContent() -> Bool {
-        return isPremium
-    }
-    
-    /// Check if user can access ingredient substitutions
-    func canAccessIngredientSubstitutions() -> Bool {
-        return isPremium
-    }
-    
-    /// Check if user can access seasonal content
-    func canAccessSeasonalContent() -> Bool {
-        return isPremium
-    }
-    
-    /// Check if user can access shopping list
-    func canAccessShoppingList() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.professionalPack.rawValue)
-    }
-    
-    /// Check if user can access expiration tracking
-    func canAccessExpirationTracking() -> Bool {
-        return isPremium || purchasedProducts.contains(ProductID.professionalPack.rawValue)
-    }
+    func canAccessOfflineMode() -> Bool { return isPremium }
+    func canCreateCustomRecipes() -> Bool { return isPremium }
+    func canAccessCostTracking() -> Bool { return isPremium }
+    func canUseBatchCalculator() -> Bool { return isPremium }
+    func canExportRecipes() -> Bool { return isPremium }
+    func canAccessAdvancedSearch() -> Bool { return isPremium }
+    func canAccessEducationalContent() -> Bool { return isPremium }
+    func canAccessIngredientSubstitutions() -> Bool { return isPremium }
+    func canAccessSeasonalContent() -> Bool { return isPremium }
+    func canAccessShoppingList() -> Bool { return isPremium }
+    func canAccessExpirationTracking() -> Bool { return isPremium }
     
     /// Check if user has access to specific feature
     func hasAccess(to feature: PremiumFeature) -> Bool {
@@ -413,9 +326,22 @@ class PremiumManager: ObservableObject {
         return products.first { $0.id == id.rawValue }
     }
     
-    /// Check if product is purchased
     func isPurchased(_ productID: ProductID) -> Bool {
         return purchasedProducts.contains(productID.rawValue)
+    }
+    
+    /// Products sorted for display: monthly → annual → lifetime
+    var sortedProducts: [Product] {
+        let order: [String] = [
+            ProductID.monthlySubscription.rawValue,
+            ProductID.annualSubscription.rawValue,
+            ProductID.proLifetime.rawValue
+        ]
+        return products.sorted {
+            let i1 = order.firstIndex(of: $0.id) ?? 99
+            let i2 = order.firstIndex(of: $1.id) ?? 99
+            return i1 < i2
+        }
     }
     
     /// Get subscription status text
