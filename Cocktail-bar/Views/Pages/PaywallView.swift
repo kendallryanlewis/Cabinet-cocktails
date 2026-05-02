@@ -29,13 +29,9 @@ struct PaywallView: View {
     
     var body: some View {
         ZStack {
-            // Background gradient
-            LinearGradient(
-                gradient: Gradient(colors: [COLOR_CHARCOAL, COLOR_CHARCOAL_LIGHT]),
-                startPoint: .topLeading,
-                endPoint: .bottomTrailing
-            )
-            .ignoresSafeArea()
+            // Background — adapts to light/dark mode
+            AppBackground()
+                .ignoresSafeArea()
             
             ScrollView {
                 VStack(spacing: 30) {
@@ -139,7 +135,7 @@ struct PaywallView: View {
             FeatureRow(icon: "sparkles", title: "Smart Substitutions", description: "AI-powered alternatives")
         }
         .padding()
-        .background(COLOR_CHARCOAL_LIGHT.opacity(0.5))
+        .background(AdaptiveColors.cardBackground(for: colorScheme))
         .cornerRadius(16)
     }
     
@@ -190,7 +186,7 @@ struct PaywallView: View {
                 ComparisonRow(feature: "Educational Content", free: "Basic", premium: "Full Access")
             }
             .padding()
-            .background(COLOR_CHARCOAL_LIGHT.opacity(0.5))
+            .background(AdaptiveColors.cardBackground(for: colorScheme))
             .cornerRadius(16)
         }
     }
@@ -409,7 +405,7 @@ struct ProductCard: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(COLOR_CHARCOAL_LIGHT.opacity(0.5))
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
                     .overlay(
                         RoundedRectangle(cornerRadius: 16)
                             .stroke(isSelected ? COLOR_WARM_AMBER : Color.clear, lineWidth: 2)

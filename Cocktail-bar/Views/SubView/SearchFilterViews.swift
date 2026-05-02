@@ -174,14 +174,7 @@ struct SortOptionsView: View {
             }
             .navigationTitle("Sort By")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
+            .toolbar {}
         }
     }
 }
@@ -250,13 +243,6 @@ struct SearchHistoryView: View {
             .navigationTitle("Search History")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 if !filterManager.searchHistory.isEmpty {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         Button(role: .destructive) {
@@ -358,14 +344,7 @@ struct SavedSearchesView: View {
             }
             .navigationTitle("Saved Searches")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
+            .toolbar {}
         }
     }
     
@@ -442,13 +421,6 @@ struct SaveSearchSheet: View {
             .navigationTitle("Save Search")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         filterManager.saveSearch(name: searchName, query: query, filter: filter)

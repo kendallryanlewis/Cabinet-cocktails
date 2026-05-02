@@ -22,7 +22,7 @@ struct AddToCollectionView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                COLOR_CHARCOAL.ignoresSafeArea()
+                AppBackground()
                 
                 VStack(spacing: 0) {
                     // Cocktail Info
@@ -41,14 +41,8 @@ struct AddToCollectionView: View {
             }
             .navigationTitle("Add to Collection")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Add") {
                         addToSelectedCollections()
@@ -84,13 +78,13 @@ struct AddToCollectionView: View {
                     .font(.title2)
                     .foregroundColor(.gray)
                     .frame(width: 60, height: 60)
-                    .background(COLOR_CHARCOAL_LIGHT)
-                    .cornerRadius(8)
+                .background(COLOR_CHARCOAL_LIGHT)
+                .cornerRadius(8)
             }
             
             Text(drinkName)
                 .font(.headline)
-                .foregroundColor(.white)
+                .foregroundColor(COLOR_TEXT_PRIMARY)
             
             Spacer()
         }
@@ -109,7 +103,7 @@ struct AddToCollectionView: View {
                         
                         Text("Create New Collection")
                             .fontWeight(.medium)
-                            .foregroundColor(.white)
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
                         
                         Spacer()
                     }
@@ -148,11 +142,11 @@ struct AddToCollectionView: View {
             Text("No Collections")
                 .font(.title3)
                 .fontWeight(.semibold)
-                .foregroundColor(.white)
+                .foregroundColor(COLOR_TEXT_PRIMARY)
             
             Text("Create a collection to organize your cocktails")
                 .font(.body)
-                .foregroundColor(.gray)
+                .foregroundColor(COLOR_TEXT_SECONDARY)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 40)
             
@@ -224,12 +218,12 @@ struct CollectionSelectRow: View {
                     Text(collection.name)
                         .font(.body)
                         .fontWeight(.medium)
-                        .foregroundColor(.white)
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
                     
                     HStack(spacing: 8) {
                         Label("\(collection.cocktailCount)", systemImage: "wineglass")
                             .font(.caption)
-                            .foregroundColor(.gray)
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
                         
                         if alreadyContains {
                             Text("• Already added")

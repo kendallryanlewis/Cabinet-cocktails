@@ -289,13 +289,6 @@ struct BudgetEditorView: View {
             }
             .navigationTitle("Set Budget")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-            }
             .onAppear {
                 if let budget = costManager.budget {
                     amount = String(format: "%.2f", budget.amount)
@@ -466,12 +459,6 @@ struct AddIngredientCostView: View {
             .navigationTitle("Add Ingredient Cost")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         saveCost()

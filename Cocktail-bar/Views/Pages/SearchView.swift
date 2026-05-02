@@ -8,7 +8,6 @@
 import SwiftUI
 
 struct SearchView: View {
-    @Environment(\.colorScheme) var colorScheme
     @Binding var isMenuOpen: Bool
     
     @StateObject private var filterManager = SearchFilterManager.shared
@@ -118,237 +117,199 @@ struct SearchView: View {
         }
         return Array(ingredients).sorted()
     }
-    
+
+
+    private var headerSubtitle: String {
+        if searchMode == .cocktails {
+            let count = displayedCocktails.count
+            return count == 1 ? "1 cocktail" : "\(count) cocktails"
+        } else if selectedIngredients.isEmpty {
+            return "Select ingredients to start"
+        } else {
+            let count = quickMixResults.count
+            return count == 1 ? "1 possible cocktail" : "\(count) possible cocktails"
+        }
+    }
+
+    private var searchPlaceholder: String {
+        searchMode == .cocktails ? "Cocktails, ingredients, categories..." : "Search ingredients to add..."
+    }
+
     var body: some View {
-        ZStack {
-            AppBackground()
-            
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Quick Mix")
-                            .font(.cocktailTitle)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                        
-                        Text(searchMode == .ingredients 
-                            ? "Build cocktails from selected ingredients"
-                            : "Search all cocktails and ingredients")
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+        ZStack(alignment: .top) {
+            COLOR_BACKGROUND.ignoresSafeArea()
+            VStack(spacing: 0) {
+                // Header
+                HStack(alignment: .bottom) {
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(searchMode == .cocktails ? "Discover" : "Quick Mix")
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        Text(headerSubtitle)
+                            .font(.system(size: 13))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
                     }
-                    .padding(.horizontal, 20)
-                    .padding(.top, 24)
-                    
-                    // Mode Toggle
-                    HStack(spacing: 12) {
-                        ModeToggleButton(
-                            icon: "doc.text.magnifyingglass",
-                            title: "Search All",
-                            isSelected: searchMode == .cocktails,
-                            action: { 
-                                searchMode = .cocktails
-                                selectedIngredients.removeAll()
-                                filterCategory = nil
-                            }
-                        )
-                        
-                        ModeToggleButton(
-                            icon: "slider.horizontal.3",
-                            title: "Mix Custom",
-                            isSelected: searchMode == .ingredients,
-                            action: { 
-                                searchMode = .ingredients
-                                searchText = ""
-                                filterCategory = nil
-                            }
-                        )
-                    }
-                    .padding(.horizontal, 20)
-                    
-                    // Selected Ingredients (for Mix Custom mode)
-                    if searchMode == .ingredients && !selectedIngredients.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("Selected Ingredients")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                
-                                Spacer()
-                                
-                                Button(action: {
-                                    selectedIngredients.removeAll()
-                                }) {
-                                    Text("Clear")
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(selectedIngredients, id: \.id) { ingredient in
-                                        IngredientChip(
-                                            ingredient: ingredient,
-                                            onRemove: {
-                                                selectedIngredients.removeAll(where: { $0.name == ingredient.name })
-                                            }
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                            }
-                            
-                            // Results count
-                            if !quickMixResults.isEmpty {
-                                Text("\(quickMixResults.count) cocktail\(quickMixResults.count == 1 ? "" : "s") found")
-                                    .font(.bodyText)
+                    Spacer()
+                    HStack(spacing: 16) {
+                        if !debouncedSearchText.isEmpty || filterManager.currentFilter.isActive {
+                            Button(action: { showSaveSearch = true }) {
+                                Image(systemName: "bookmark.fill")
+                                    .font(.system(size: 17))
                                     .foregroundColor(COLOR_WARM_AMBER)
-                                    .padding(.horizontal, 20)
                             }
                         }
+                        Button(action: { showHistory = true }) {
+                            Image(systemName: "clock.arrow.circlepath")
+                                .font(.system(size: 17))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                        }
+                        Button(action: { showSavedSearches = true }) {
+                            Image(systemName: "bookmark")
+                                .font(.system(size: 17))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                        }
                     }
-                    
-                    // Search Bar
-                    HStack {
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 28)
+                .padding(.bottom, 20)
+
+                // Search Bar + Filter / Sort buttons
+                HStack(spacing: 12) {
+                    HStack(spacing: 10) {
                         Image(systemName: "magnifyingglass")
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                        
-                        TextField(searchMode == .cocktails ? "Search cocktails or ingredients" : "Search ingredients to add", text: $searchText)
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .font(.system(size: 15, weight: .medium))
+                        TextField(searchPlaceholder, text: $searchText)
+                            .font(.system(size: 16))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
                             .tint(COLOR_WARM_AMBER)
-                            .placeholder(when: searchText.isEmpty) {
-                                Text(searchMode == .cocktails ? "Search cocktails or ingredients" : "Search ingredients to add")
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            }
-                        
                         if !searchText.isEmpty {
                             Button(action: { searchText = "" }) {
                                 Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
                             }
                         }
                     }
-                    .padding(12)
-                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                    .cornerRadius(12)
-                    .padding(.horizontal, 20)
-                    
-                    // Advanced Filter Controls (only in cocktails mode)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
+                    .background(Color.white.opacity(0.07))
+                    .cornerRadius(13)
+
                     if searchMode == .cocktails {
-                        HStack(spacing: 12) {
-                            // Filter Button
-                            Button(action: {
-                                tempFilter = filterManager.currentFilter
-                                showFilters = true
-                            }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: "line.3.horizontal.decrease.circle")
-                                    Text("Filter")
-                                    if filterManager.currentFilter.activeCount > 0 {
-                                        Text("(\(filterManager.currentFilter.activeCount))")
-                                            .font(.caption)
-                                            .fontWeight(.bold)
-                                    }
-                                }
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(filterManager.currentFilter.isActive ? COLOR_WARM_AMBER.opacity(0.15) : AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                .cornerRadius(8)
+                        // Filter button
+                        Button(action: { tempFilter = filterManager.currentFilter; showFilters = true }) {
+                            ZStack {
+                                (filterManager.currentFilter.isActive ? COLOR_WARM_AMBER : Color.white.opacity(0.07))
+                                Image(systemName: "slider.horizontal.3")
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(filterManager.currentFilter.isActive ? COLOR_CHARCOAL : COLOR_TEXT_SECONDARY)
                             }
-                            
-                            // Sort Button
-                            Button(action: { showSort = true }) {
-                                HStack(spacing: 6) {
-                                    Image(systemName: currentSortOption.icon)
-                                    Text("Sort")
-                                }
-                                .font(.subheadline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 8)
-                                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                .cornerRadius(8)
-                            }
-                            
-                            // History Button
-                            Button(action: { showHistory = true }) {
-                                Image(systemName: "clock.arrow.circlepath")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(8)
-                            }
-                            
-                            // Saved Searches Button
-                            Button(action: { showSavedSearches = true }) {
-                                Image(systemName: "bookmark")
-                                    .font(.subheadline)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 8)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(8)
-                            }
-                            
-                            // Save Current Search Button
-                            if !debouncedSearchText.isEmpty || filterManager.currentFilter.isActive {
-                                Button(action: { showSaveSearch = true }) {
-                                    Image(systemName: "bookmark.fill")
-                                        .font(.subheadline)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 8)
-                                        .background(COLOR_WARM_AMBER.opacity(0.15))
-                                        .cornerRadius(8)
-                                }
-                            }
-                            
-                            Spacer()
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(13)
                         }
-                        .padding(.horizontal, 20)
+
+                        // Sort button
+                        Button(action: { showSort = true }) {
+                            ZStack {
+                                Color.white.opacity(0.07)
+                                Image(systemName: currentSortOption.icon)
+                                    .font(.system(size: 16, weight: .medium))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                            }
+                            .frame(width: 50, height: 50)
+                            .cornerRadius(13)
+                        }
                     }
-                    
-                    // Ingredient Selection Mode
-                    if searchMode == .ingredients {
-                        if !searchText.isEmpty {
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Add Ingredients")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    .padding(.horizontal, 20)
-                                
-                                if filteredIngredients.isEmpty {
-                                    VStack(spacing: 12) {
-                                        Image(systemName: "magnifyingglass")
-                                            .font(.iconSmall)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        
-                                        Text("No ingredients found")
-                                            .font(.bodyText)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                }
+                .padding(.horizontal, 20)
+
+                // Mode Toggle
+                HStack(spacing: 0) {
+                    SearchModeButton(
+                        title: "All Cocktails",
+                        icon: "doc.text.magnifyingglass",
+                        isSelected: searchMode == .cocktails,
+                        action: {
+                            searchMode = .cocktails
+                            selectedIngredients.removeAll()
+                            filterCategory = nil
+                        }
+                    )
+                    SearchModeButton(
+                        title: "Quick Mix",
+                        icon: "slider.horizontal.3",
+                        isSelected: searchMode == .ingredients,
+                        action: {
+                            searchMode = .ingredients
+                            searchText = ""
+                            filterCategory = nil
+                        }
+                    )
+                }
+                .padding(3)
+                .background(Color.white.opacity(0.06))
+                .cornerRadius(12)
+                .padding(.horizontal, 20)
+                .padding(.top, 14)
+                .padding(.bottom, 8)
+
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+
+                // Scrollable Content
+                ScrollView(showsIndicators: false) {
+                    LazyVStack(alignment: .leading, spacing: 24) {
+
+                        // Selected ingredients (Quick Mix mode)
+                        if searchMode == .ingredients && !selectedIngredients.isEmpty {
+                            VStack(alignment: .leading, spacing: 10) {
+                                HStack {
+                                    Text("SELECTED")
+                                        .font(.system(size: 12, weight: .semibold))
+                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .kerning(1)
+                                    if !quickMixResults.isEmpty {
+                                        Text("\(quickMixResults.count) match\(quickMixResults.count == 1 ? "" : "es")")
+                                            .font(.system(size: 11))
+                                            .foregroundColor(COLOR_WARM_AMBER)
                                     }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 40)
+                                    Spacer()
+                                    Button("Clear") { selectedIngredients.removeAll() }
+                                        .font(.system(size: 13))
+                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                }
+                                .padding(.horizontal, 20)
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 8) {
+                                        ForEach(selectedIngredients, id: \.id) { ingredient in
+                                            IngredientChip(ingredient: ingredient) {
+                                                selectedIngredients.removeAll { $0.name == ingredient.name }
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+                        }
+
+                        // Ingredient search results
+                        if searchMode == .ingredients && !searchText.isEmpty {
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text("INGREDIENTS")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .kerning(1)
+                                    .padding(.horizontal, 20)
+                                if filteredIngredients.isEmpty {
+                                    SearchEmptyView(message: "No ingredients found for \"\(searchText)\"")
                                 } else {
-                                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
+                                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
                                         ForEach(filteredIngredients, id: \.id) { ingredient in
                                             QuickMixIngredientCard(
                                                 ingredient: ingredient,
-                                                isSelected: selectedIngredients.contains(where: { $0.name == ingredient.name }),
+                                                isSelected: selectedIngredients.contains { $0.name == ingredient.name },
                                                 onTap: {
                                                     if let index = selectedIngredients.firstIndex(where: { $0.name == ingredient.name }) {
                                                         selectedIngredients.remove(at: index)
@@ -362,138 +323,43 @@ struct SearchView: View {
                                     .padding(.horizontal, 20)
                                 }
                             }
-                        } else if selectedIngredients.isEmpty {
-                            // Empty state for ingredient mode
-                            VStack(spacing: 16) {
-                                ZStack {
-                                    Circle()
-                                        .fill(COLOR_CHARCOAL_LIGHT)
-                                        .frame(width: 80, height: 80)
-                                    
-                                    Image(systemName: "slider.horizontal.3")
-                                        .font(.iconSmall)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                
-                                VStack(spacing: 8) {
-                                    Text("Build Your Mix")
-                                        .font(.sectionHeader)
-                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    
-                                    Text("Search and select ingredients to discover cocktail combinations")
-                                        .font(.bodyText)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        .multilineTextAlignment(.center)
-                                        .padding(.horizontal, 40)
-                                }
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 60)
                         }
-                    }
-                    
-                    // Category Filter (for cocktail results)
-                    if !displayedCocktails.isEmpty && !cocktailCategories.isEmpty {
-                        ScrollView(.horizontal, showsIndicators: false) {
-                            HStack(spacing: 12) {
-                                CategoryFilterButton(
-                                    title: "All",
-                                    isSelected: filterCategory == nil,
-                                    action: { filterCategory = nil }
-                                )
-                                
-                                ForEach(cocktailCategories, id: \.self) { category in
-                                    CategoryFilterButton(
-                                        title: category,
-                                        isSelected: filterCategory == category,
-                                        action: { filterCategory = category }
-                                    )
-                                }
-                            }
-                            .padding(.horizontal, 20)
+
+                        // Quick Mix empty prompt
+                        if searchMode == .ingredients && selectedIngredients.isEmpty && searchText.isEmpty {
+                            QuickMixEmptyPrompt()
                         }
-                    }
-                    
-                    // Cocktail Results
-                    if searchMode == .cocktails || (searchMode == .ingredients && !selectedIngredients.isEmpty && searchText.isEmpty) {
-                        VStack(alignment: .leading, spacing: 12) {
+
+                        // Cocktail results
+                        if searchMode == .cocktails || (searchMode == .ingredients && !selectedIngredients.isEmpty && searchText.isEmpty) {
                             if searchMode == .ingredients && !quickMixResults.isEmpty {
-                                Text("Possible Cocktails")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                Text("POSSIBLE COCKTAILS")
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .kerning(1)
                                     .padding(.horizontal, 20)
-                            } else if searchMode == .cocktails {
-                                HStack {
-                                    Text("All Cocktails")
-                                        .font(.sectionHeader)
-                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    
-                                    Spacer()
-                                    
-                                    Text("\(displayedCocktails.count)")
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                .padding(.horizontal, 20)
                             }
-                            
                             if displayedCocktails.isEmpty {
-                                if searchMode == .ingredients {
-                                    VStack(spacing: 12) {
-                                        Image(systemName: "wineglass")
-                                            .font(.iconMedium)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        
-                                        Text("No cocktails found")
-                                            .font(.sectionHeader)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        
-                                        Text("Try selecting different ingredients")
-                                            .font(.bodyText)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 40)
-                                } else {
-                                    VStack(spacing: 12) {
-                                        Image(systemName: "magnifyingglass")
-                                            .font(.iconMedium)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        
-                                        Text("No results")
-                                            .font(.sectionHeader)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        
-                                        Button(action: {
-                                            searchText = ""
-                                            filterCategory = nil
-                                        }) {
-                                            Text("Clear Search")
-                                                .font(.buttonText)
-                                                .foregroundColor(COLOR_WARM_AMBER)
+                                SearchEmptyView(
+                                    message: searchMode == .ingredients
+                                        ? "No cocktails match your ingredients."
+                                        : searchText.isEmpty ? "No cocktails found." : "No results for \"\(searchText)\""
+                                )
+                            } else {
+                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())], spacing: 12) {
+                                    ForEach(displayedCocktails, id: \.id) { cocktail in
+                                        QuickMixCocktailCard(cocktail: cocktail) {
+                                            selectedCocktail = cocktail
                                         }
                                     }
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 40)
-                                }
-                            } else {
-                                LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
-                                    ForEach(displayedCocktails, id: \.id) { cocktail in
-                                        QuickMixCocktailCard(
-                                            cocktail: cocktail,
-                                            onTap: {
-                                                selectedCocktail = cocktail
-                                            }
-                                        )
-                                    }
                                 }
                                 .padding(.horizontal, 20)
                             }
                         }
+
+                        Spacer(minLength: 100)
                     }
-                    
-                    Spacer(minLength: 40)
+                    .padding(.top, 24)
                 }
             }
         }
@@ -503,14 +369,11 @@ struct SearchView: View {
             }
         }
         .onChange(of: searchText) { newValue in
-            // Performance: Debounce search to avoid excessive filtering
             searchTask?.cancel()
             searchTask = Task {
-                try? await Task.sleep(nanoseconds: 300_000_000) // 300ms debounce
+                try? await Task.sleep(nanoseconds: 300_000_000)
                 if !Task.isCancelled {
                     debouncedSearchText = newValue
-                    
-                    // Add to search history if in cocktails mode and has results
                     if searchMode == .cocktails && !newValue.isEmpty && !displayedCocktails.isEmpty {
                         filterManager.addToHistory(query: newValue, resultCount: displayedCocktails.count)
                     }
@@ -565,127 +428,206 @@ struct SearchView: View {
     }
 }
 
-// MARK: - Mode Toggle Button
-struct ModeToggleButton: View {
-    @Environment(\.colorScheme) var colorScheme
+// MARK: - Search Mode Button
+struct SearchModeButton: View {
+    let title: String
     let icon: String
+    let isSelected: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 7) {
+                Image(systemName: icon)
+                    .font(.system(size: 13, weight: .semibold))
+                Text(title)
+                    .font(.system(size: 14, weight: .semibold))
+            }
+            .foregroundColor(isSelected ? .black : COLOR_TEXT_SECONDARY)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 10)
+            .background(isSelected ? COLOR_WARM_AMBER : Color.clear)
+            .cornerRadius(10)
+        }
+    }
+}
+
+// MARK: - Search Filter Chip
+struct SearchFilterChip: View {
+    let icon: String
+    let label: String
+    let isActive: Bool
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 5) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .medium))
+                Text(label)
+                    .font(.system(size: 13, weight: .medium))
+            }
+            .foregroundColor(isActive ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(isActive ? COLOR_WARM_AMBER.opacity(0.12) : Color.white.opacity(0.07))
+            .cornerRadius(10)
+        }
+    }
+}
+
+// MARK: - Category Chip
+struct SearchCategoryChip: View {
     let title: String
     let isSelected: Bool
     let action: () -> Void
-    
+
     var body: some View {
         Button(action: action) {
-            HStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.bodyText)
-                
-                Text(title)
-                    .font(.buttonText)
-            }
-            .foregroundColor(isSelected ? .black : COLOR_TEXT_PRIMARY)
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 14)
-            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.secondaryCardBackground(for: colorScheme))
-            .cornerRadius(12)
+            Text(title)
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(isSelected ? .black : COLOR_TEXT_SECONDARY)
+                .padding(.horizontal, 14)
+                .padding(.vertical, 8)
+                .background(isSelected ? COLOR_WARM_AMBER : Color.white.opacity(0.07))
+                .cornerRadius(20)
         }
+    }
+}
+
+// MARK: - Search Empty View
+struct SearchEmptyView: View {
+    let message: String
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 36))
+                .foregroundColor(COLOR_TEXT_SECONDARY.opacity(0.4))
+            Text(message)
+                .font(.system(size: 15))
+                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal, 40)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 50)
+    }
+}
+
+// MARK: - Quick Mix Empty Prompt
+struct QuickMixEmptyPrompt: View {
+    var body: some View {
+        VStack(spacing: 16) {
+            ZStack {
+                Circle()
+                    .fill(Color.white.opacity(0.05))
+                    .frame(width: 80, height: 80)
+                Image(systemName: "slider.horizontal.3")
+                    .font(.system(size: 30))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+            }
+            VStack(spacing: 6) {
+                Text("Build Your Mix")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                Text("Search and select ingredients to discover cocktail combinations")
+                    .font(.system(size: 14))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.vertical, 60)
     }
 }
 
 // MARK: - Ingredient Chip
 struct IngredientChip: View {
-    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let onRemove: () -> Void
-    
+
     var body: some View {
-        HStack(spacing: 8) {
+        HStack(spacing: 7) {
             if UIImage(named: ingredient.name) != nil {
                 Image(ingredient.name)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: 28, height: 28)
+                    .frame(width: 22, height: 22)
                     .clipShape(Circle())
             } else {
                 ZStack {
                     Circle()
-                        .fill(AdaptiveColors.cardBackground(for: colorScheme))
-                        .frame(width: 28, height: 28)
-                    
+                        .fill(Color.white.opacity(0.1))
+                        .frame(width: 22, height: 22)
                     Image(systemName: "drop.fill")
-                        .font(.caption)
+                        .font(.system(size: 9))
                         .foregroundColor(COLOR_WARM_AMBER)
                 }
             }
-            
             Text(ingredient.name)
-                .font(.caption)
-                .fontWeight(.medium)
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                .font(.system(size: 13, weight: .medium))
+                .foregroundColor(COLOR_TEXT_PRIMARY)
                 .lineLimit(1)
-            
             Button(action: onRemove) {
                 Image(systemName: "xmark.circle.fill")
-                    .font(.bodySmall)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                    .font(.system(size: 14))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
             }
         }
         .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
-        .cornerRadius(16)
+        .padding(.vertical, 7)
+        .background(COLOR_CHARCOAL_LIGHT)
+        .cornerRadius(20)
     }
 }
 
 // MARK: - Quick Mix Ingredient Card
 struct QuickMixIngredientCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let isSelected: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
             HStack(spacing: 10) {
-                // Thumbnail
                 if UIImage(named: ingredient.name) != nil {
                     Image(ingredient.name)
                         .resizable()
                         .aspectRatio(contentMode: .fill)
-                        .frame(width: 50, height: 50)
+                        .frame(width: 46, height: 46)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                 } else {
                     ZStack {
                         RoundedRectangle(cornerRadius: 8)
-                            .fill(COLOR_CHARCOAL)
-                            .frame(width: 50, height: 50)
-                        
+                            .fill(Color.white.opacity(0.06))
+                            .frame(width: 46, height: 46)
                         Image(systemName: "drop.fill")
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
                     }
                 }
-                
-                // Text
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: 3) {
                     Text(ingredient.name)
-                        .font(.ingredientText)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
                         .lineLimit(2)
-                    
                     Text(ingredient.type.rawValue.capitalized)
-                        .font(.caption)
-                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        .font(.system(size: 11))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
                 }
-                
-                Spacer()
-                
-                // Selection indicator
+                Spacer(minLength: 0)
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "plus.circle")
-                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
-                    .font(.iconMini)
+                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    .font(.system(size: 18))
             }
             .padding(12)
-            .background(AdaptiveColors.cardBackground(for: colorScheme))
+            .background(isSelected ? COLOR_WARM_AMBER.opacity(0.08) : Color.white.opacity(0.05))
             .cornerRadius(12)
+            .overlay(
+                RoundedRectangle(cornerRadius: 12)
+                    .strokeBorder(isSelected ? COLOR_WARM_AMBER.opacity(0.3) : Color.clear, lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -693,58 +635,53 @@ struct QuickMixIngredientCard: View {
 
 // MARK: - Quick Mix Cocktail Card
 struct QuickMixCocktailCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let cocktail: DrinkDetails
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Image
-                if let imageURL = cocktail.strDrinkThumb, let url = URL(string: imageURL) {
-                    CachedAsyncImage(url: url) { image in
-                        image
+            ZStack(alignment: .bottomLeading) {
+                Group {
+                    if let imageURL = cocktail.strDrinkThumb, let url = URL(string: imageURL) {
+                        CachedAsyncImage(url: url) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                        } placeholder: {
+                            Color.white.opacity(0.05)
+                                .overlay(SwiftUI.ProgressView().tint(COLOR_WARM_AMBER))
+                        }
+                    } else {
+                        Image("GenericAlcohol")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 140)
-                            .clipped()
-                    } placeholder: {
-                        ZStack {
-                            Color.gray.opacity(0.2)
-                            SwiftUI.ProgressView()
-                                .tint(COLOR_WARM_AMBER)
-                        }
-                        .frame(height: 140)
                     }
-                } else {
-                    Image("GenericAlcohol")
-                        .resizable()
-                        .aspectRatio(contentMode: .fill)
-                        .frame(height: 140)
-                        .clipped()
                 }
-                
-                // Content
-                VStack(alignment: .leading, spacing: 8) {
+                .frame(height: 200)
+                .clipped()
+                LinearGradient(
+                    colors: [.clear, .clear, Color.black.opacity(0.8)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                VStack(alignment: .leading, spacing: 4) {
+                    if let category = cocktail.strCategory {
+                        Text(category.uppercased())
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(COLOR_WARM_AMBER)
+                            .kerning(0.8)
+                    }
                     Text(cocktail.strDrink)
-                        .font(.cardTitle)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-                    
-                    if let category = cocktail.strCategory {
-                        Text(category)
-                            .font(.caption)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                            .textCase(.uppercase)
-                    }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(12)
-                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
+            .frame(height: 200)
+            .cornerRadius(14)
+            .clipped()
         }
         .buttonStyle(PlainButtonStyle())
     }

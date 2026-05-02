@@ -15,10 +15,11 @@ let COMPANY_NAME = "KNDL"
 let APP_NAME = "Cabinet Cocktails"
 
 //Default Colors - Modern Dark Theme
-let COLOR_WARM_AMBER = Color(hex: "#D4A574") // Warm accent for buttons, active states, highlights
-let COLOR_CHARCOAL = Color(hex: "#1C1C1E") // Primary dark background
+let COLOR_BACKGROUND = Color(hex: "#111111")     // Flat matte black — root screen backgrounds
+let COLOR_WARM_AMBER = Color(hex: "#D4A574")     // Warm accent for buttons, active states, highlights
+let COLOR_CHARCOAL = Color(hex: "#1C1C1E")       // Primary surface (NavigationView, sheets)
 let COLOR_CHARCOAL_LIGHT = Color(hex: "#2C2C2E") // Cards, panels, elevated surfaces
-let COLOR_TEXT_PRIMARY = Color(hex: "#FFFFFF") // Primary text
+let COLOR_TEXT_PRIMARY = Color(hex: "#FFFFFF")   // Primary text
 let COLOR_TEXT_SECONDARY = Color(hex: "#8E8E93") // Secondary text, captions
 
 // Light Mode Colors
@@ -52,27 +53,27 @@ struct LayoutConstants {
 }
 
 // MARK: - Adaptive Color Helpers
-// These provide automatic dark/light mode adaptation
+// Single dark theme — clean, modern, sophisticated
 struct AdaptiveColors {
     static func background(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? COLOR_CHARCOAL : COLOR_LIGHT_BACKGROUND
+        COLOR_CHARCOAL
     }
     
     static func cardBackground(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? COLOR_CHARCOAL_LIGHT : COLOR_LIGHT_CARD
+        COLOR_CHARCOAL_LIGHT
     }
     
     static func textPrimary(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? COLOR_TEXT_PRIMARY : COLOR_LIGHT_TEXT_PRIMARY
+        COLOR_TEXT_PRIMARY
     }
     
     static func textSecondary(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? COLOR_TEXT_SECONDARY : COLOR_LIGHT_TEXT_SECONDARY
+        COLOR_TEXT_SECONDARY
     }
     
     // Helper for secondary card backgrounds (e.g., input fields, inner containers)
     static func secondaryCardBackground(for colorScheme: ColorScheme) -> Color {
-        colorScheme == .dark ? COLOR_CHARCOAL_LIGHT : Color(hex: "#E8E1D5") // Slightly darker tan for light mode
+        COLOR_CHARCOAL_LIGHT
     }
 }
 

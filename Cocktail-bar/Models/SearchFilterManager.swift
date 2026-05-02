@@ -53,7 +53,7 @@ enum SortOption: String, Codable, CaseIterable {
     var icon: String {
         switch self {
         case .nameAscending: return "arrow.up.arrow.down"
-        case .nameDescending: return "arrow.down.arrow.up"
+        case .nameDescending: return "arrow.up.arrow.down"
         case .categoryAscending: return "folder"
         case .mostIngredients: return "list.bullet"
         case .leastIngredients: return "list.dash"

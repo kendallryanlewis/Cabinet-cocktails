@@ -9,19 +9,26 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var session: SessionStore
-    @State private var opacity = 0.0
-    
+    @State private var showMain = false
+    @State private var splashOpacity = 1.0
+
     var body: some View {
-        ZStack{
-            LoadingScreen()
-            MainView()
-                .opacity(opacity)
+        ZStack {
+            if showMain {
+                MainView()
+            }
+            if splashOpacity > 0 {
+                LoadingScreen()
+                    .opacity(splashOpacity)
+                    .ignoresSafeArea()
+            }
         }
         .task {
-            // Animate opacity after 2 seconds
-            try? await Task.sleep(nanoseconds: 2_000_000_000)
-            withAnimation(.easeInOut(duration: 1.5)) {
-                opacity = 1.0
+            // Brief pause so the splash image is seen, then fade it out
+            try? await Task.sleep(nanoseconds: 900_000_000)
+            showMain = true
+            withAnimation(.easeInOut(duration: 0.4)) {
+                splashOpacity = 0.0
             }
         }
     }

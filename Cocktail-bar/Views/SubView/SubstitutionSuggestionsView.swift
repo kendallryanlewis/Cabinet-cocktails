@@ -2,8 +2,6 @@
 //  SubstitutionSuggestionsView.swift
 //  Cocktail-bar
 //
-//  Created on 1/1/26.
-//
 
 import SwiftUI
 
@@ -11,222 +9,166 @@ import SwiftUI
 struct SubstitutionSuggestionsView: View {
     let drink: DrinkDetails
     @StateObject private var substitutionManager = SubstitutionManager.shared
-    
+
     @State private var suggestions: [SubstitutionSuggestion] = []
     @State private var selectedSuggestion: SubstitutionSuggestion?
-    @State private var showSubstitutionDetail = false
-    
+
     var body: some View {
-        VStack(spacing: 0) {
-            if !suggestions.isEmpty {
-                headerSection
-                
-                ScrollView {
-                    VStack(spacing: 16) {
-                        ForEach(suggestions) { suggestion in
-                            SubstitutionCard(suggestion: suggestion)
-                                .onTapGesture {
-                                    selectedSuggestion = suggestion
-                                    showSubstitutionDetail = true
+        NavigationView {
+            ZStack {
+                COLOR_BACKGROUND.ignoresSafeArea()
+
+                if suggestions.isEmpty {
+                    emptyStateView
+                } else {
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 20) {
+
+                            // Subtitle
+                            Text("Tap an ingredient to see swap options from your bar.")
+                                .font(.system(size: 14))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .padding(.horizontal, 20)
+                                .padding(.top, 8)
+
+                            // Cards
+                            VStack(spacing: 0) {
+                                ForEach(Array(suggestions.enumerated()), id: \.element.id) { index, suggestion in
+                                    Button { selectedSuggestion = suggestion } label: {
+                                        SubstitutionRow(suggestion: suggestion, isLast: index == suggestions.count - 1)
+                                    }
+                                    .buttonStyle(.plain)
                                 }
+                            }
+                            .background(COLOR_CHARCOAL_LIGHT)
+                            .cornerRadius(14)
+                            .padding(.horizontal, 20)
+
+                            Spacer(minLength: 48)
                         }
                     }
-                    .padding()
                 }
-            } else {
-                emptyStateView
             }
+            .navigationTitle("Substitutions")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
         }
-        .onAppear {
-            loadSuggestions()
-        }
-        .sheet(isPresented: $showSubstitutionDetail) {
-            if let suggestion = selectedSuggestion {
-                SubstitutionDetailView(suggestion: suggestion)
-            }
+        .onAppear { loadSuggestions() }
+        // ── Use .sheet(item:) so the suggestion is always non-nil when sheet opens ──
+        .sheet(item: $selectedSuggestion) { suggestion in
+            SubstitutionDetailView(suggestion: suggestion)
         }
     }
-    
-    private var headerSection: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                Image(systemName: "arrow.triangle.2.circlepath")
-                    .foregroundColor(COLOR_WARM_AMBER)
-                Text("Ingredient Substitutions")
-                    .font(.title2)
-                    .fontWeight(.bold)
-                    .foregroundColor(.white)
-            }
-            
-            Text("Missing ingredients? Here are some alternatives from your bar.")
-                .font(.subheadline)
-                .foregroundColor(.gray)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding()
-        .background(COLOR_CHARCOAL_LIGHT)
-    }
-    
+
+    // MARK: - Empty State
+
     private var emptyStateView: some View {
         VStack(spacing: 16) {
-            Image(systemName: "checkmark.circle.fill")
-                .font(.iconLarge)
-                .foregroundColor(.green)
-            
-            Text("You have all ingredients!")
-                .font(.title3)
-                .fontWeight(.semibold)
-                .foregroundColor(.white)
-            
-            Text("No substitutions needed for this cocktail.")
-                .font(.body)
-                .foregroundColor(.gray)
-                .multilineTextAlignment(.center)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-    
-    private func loadSuggestions() {
-        let missingIngredients = getMissingIngredients()
-        let userInventory = LocalStorageManager.shared.retrieveTopShelfItems()
-        suggestions = substitutionManager.findSuggestions(
-            for: missingIngredients,
-            userInventory: userInventory
-        )
-    }
-    
-    private func getMissingIngredients() -> [String] {
-        var missing: [String] = []
-        let userInventory = LocalStorageManager.shared.retrieveTopShelfItems()
-        let userInventoryLower = userInventory.map { $0.lowercased() }
-        
-        // Get all ingredients from the drink
-        let drinkIngredients = drink.getIngredients()
-        
-        for ingredient in drinkIngredients {
-            let ingredientLower = ingredient.lowercased()
-            if !userInventoryLower.contains(where: { $0.contains(ingredientLower) || ingredientLower.contains($0) }) {
-                missing.append(ingredient)
+            ZStack {
+                Circle().fill(COLOR_CHARCOAL_LIGHT).frame(width: 72, height: 72)
+                Image(systemName: "checkmark.circle.fill")
+                    .font(.system(size: 30))
+                    .foregroundColor(.green)
+            }
+            VStack(spacing: 6) {
+                Text("You have all ingredients!")
+                    .font(.system(size: 20, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                Text("No substitutions needed for \(drink.strDrink).")
+                    .font(.system(size: 14))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal, 40)
             }
         }
-        
-        return missing
+        .padding(.vertical, 60)
+    }
+
+    // MARK: - Data Loading
+
+    private func loadSuggestions() {
+        let missing = getMissingIngredients()
+        let inventory = LocalStorageManager.shared.retrieveTopShelfItems()
+        suggestions = substitutionManager.findSuggestions(for: missing, userInventory: inventory)
+    }
+
+    private func getMissingIngredients() -> [String] {
+        let inventory = LocalStorageManager.shared.retrieveTopShelfItems().map { $0.lowercased() }
+        return drink.getIngredients().filter { ingredient in
+            let lower = ingredient.lowercased()
+            return !inventory.contains(where: { $0.contains(lower) || lower.contains($0) })
+        }
     }
 }
 
-// MARK: - Substitution Card
-struct SubstitutionCard: View {
+// MARK: - Substitution Row (in-list)
+struct SubstitutionRow: View {
     let suggestion: SubstitutionSuggestion
-    
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            // Header with missing ingredient
-            HStack {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Missing:")
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                    Text(suggestion.missingIngredient)
-                        .font(.headline)
-                        .foregroundColor(.white)
-                }
-                
-                Spacer()
-                
-                difficultyBadge
-            }
-            
-            Divider()
-                .background(Color.gray.opacity(0.3))
-            
-            // Recommended alternative
-            if let recommended = suggestion.recommendedAlternative {
-                VStack(alignment: .leading, spacing: 8) {
-                    HStack {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(COLOR_WARM_AMBER)
-                            .font(.caption)
-                        Text("Recommended Substitute")
-                            .font(.subheadline)
-                            .fontWeight(.semibold)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                    }
-                    
-                    HStack {
-                        Text(recommended.name)
-                            .font(.body)
-                            .fontWeight(.medium)
-                            .foregroundColor(.white)
-                        
-                        Spacer()
-                        
-                        Text(recommended.displayRatio())
-                            .font(.caption)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(COLOR_WARM_AMBER.opacity(0.2))
-                            .cornerRadius(8)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                    }
-                    
-                    if let notes = recommended.notes {
-                        Text(notes)
-                            .font(.caption)
-                            .foregroundColor(.gray)
-                            .italic()
-                    }
-                }
-            }
-            
-            // Available alternatives count
-            if suggestion.availableAlternatives.count > 1 {
-                Text("\(suggestion.availableAlternatives.count) alternatives in your bar")
-                    .font(.caption)
-                    .foregroundColor(COLOR_WARM_AMBER)
-            } else if suggestion.availableAlternatives.isEmpty {
-                HStack {
-                    Image(systemName: "info.circle")
-                        .font(.caption)
-                    Text("\(suggestion.substitution.alternatives.count) substitutes available")
-                        .font(.caption)
-                }
-                .foregroundColor(.gray)
-            }
-        }
-        .padding()
-        .background(COLOR_CHARCOAL_LIGHT)
-        .cornerRadius(12)
-    }
-    
-    private var difficultyBadge: some View {
-        HStack(spacing: 4) {
-            Image(systemName: difficultyIcon)
-                .font(.caption)
-            Text(suggestion.substitution.difficulty.rawValue)
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .foregroundColor(difficultyColor)
-        .padding(.horizontal, 8)
-        .padding(.vertical, 4)
-        .background(difficultyColor.opacity(0.2))
-        .cornerRadius(8)
-    }
-    
-    private var difficultyIcon: String {
-        switch suggestion.substitution.difficulty {
-        case .easy: return "checkmark.circle.fill"
-        case .moderate: return "exclamationmark.circle.fill"
-        case .challenging: return "exclamationmark.triangle.fill"
-        }
-    }
-    
+    var isLast: Bool = false
+
     private var difficultyColor: Color {
         switch suggestion.substitution.difficulty {
         case .easy: return .green
-        case .moderate: return .yellow
-        case .challenging: return .orange
+        case .moderate: return .orange
+        case .challenging: return .red
+        }
+    }
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                // Amber icon container
+                ZStack {
+                    RoundedRectangle(cornerRadius: 9)
+                        .fill(COLOR_WARM_AMBER.opacity(0.12))
+                        .frame(width: 40, height: 40)
+                    Image(systemName: "arrow.triangle.2.circlepath")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_WARM_AMBER)
+                }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(suggestion.missingIngredient)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                    if let recommended = suggestion.recommendedAlternative {
+                        HStack(spacing: 4) {
+                            Image(systemName: "star.fill").font(.system(size: 9)).foregroundColor(COLOR_WARM_AMBER)
+                            Text(recommended.name)
+                                .font(.system(size: 13))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                        }
+                    } else {
+                        Text("\(suggestion.substitution.alternatives.count) options available")
+                            .font(.system(size: 13))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                    }
+                }
+
+                Spacer()
+
+                // Difficulty chip
+                Text(suggestion.substitution.difficulty.rawValue)
+                    .font(.system(size: 11, weight: .semibold))
+                    .foregroundColor(difficultyColor)
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(difficultyColor.opacity(0.12))
+                    .cornerRadius(8)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_SECONDARY.opacity(0.4))
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            if !isLast {
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+                    .padding(.leading, 70)
+            }
         }
     }
 }
@@ -234,215 +176,185 @@ struct SubstitutionCard: View {
 // MARK: - Substitution Detail View
 struct SubstitutionDetailView: View {
     let suggestion: SubstitutionSuggestion
-    @Environment(\.presentationMode) var presentationMode
-    
+    @Environment(\.dismiss) var dismiss
+
     var body: some View {
         NavigationView {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Missing ingredient info
-                    missingIngredientSection
-                    
-                    Divider()
-                        .background(Color.gray.opacity(0.3))
-                    
-                    // All alternatives
-                    alternativesSection
-                    
-                    // Category and flavor notes
-                    if suggestion.substitution.preservesOriginalFlavor {
-                        preservesFlavorNote
+            ZStack {
+                COLOR_BACKGROUND.ignoresSafeArea()
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 28) {
+
+                        // ── Missing ingredient header ─────────────────────────
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("MISSING INGREDIENT")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .kerning(1)
+                            Text(suggestion.missingIngredient)
+                                .font(.system(size: 28, weight: .bold))
+                                .foregroundColor(COLOR_TEXT_PRIMARY)
+                            HStack(spacing: 8) {
+                                Text(suggestion.substitution.category.rawValue)
+                                    .font(.system(size: 12, weight: .medium))
+                                    .foregroundColor(COLOR_WARM_AMBER)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(COLOR_WARM_AMBER.opacity(0.12))
+                                    .cornerRadius(8)
+                                if suggestion.substitution.preservesOriginalFlavor {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "checkmark.seal.fill").font(.system(size: 11))
+                                        Text("Flavor preserved").font(.system(size: 12, weight: .medium))
+                                    }
+                                    .foregroundColor(.green)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color.green.opacity(0.10))
+                                    .cornerRadius(8)
+                                }
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                        .padding(.top, 8)
+
+                        // ── Alternatives list ─────────────────────────────────
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("SUBSTITUTES")
+                                .font(.system(size: 11, weight: .semibold))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .kerning(1)
+                                .padding(.horizontal, 20)
+
+                            VStack(spacing: 0) {
+                                ForEach(Array(suggestion.substitution.alternatives.enumerated()), id: \.element.id) { index, alternative in
+                                    let isAvailable = suggestion.availableAlternatives.contains(where: { $0.id == alternative.id })
+                                    let isRecommended = suggestion.recommendedAlternative?.id == alternative.id
+                                    let isLast = index == suggestion.substitution.alternatives.count - 1
+
+                                    AlternativeDetailRow(
+                                        alternative: alternative,
+                                        isAvailable: isAvailable,
+                                        isRecommended: isRecommended,
+                                        isLast: isLast
+                                    )
+                                }
+                            }
+                            .background(COLOR_CHARCOAL_LIGHT)
+                            .cornerRadius(14)
+                            .padding(.horizontal, 20)
+                        }
+
+                        Spacer(minLength: 48)
                     }
                 }
-                .padding()
             }
-            .background(COLOR_CHARCOAL.ignoresSafeArea())
-            .navigationTitle("Substitution Options")
+            .navigationTitle("Swap Options")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
+        }
+    }
+}
+
+// MARK: - Alternative Detail Row
+struct AlternativeDetailRow: View {
+    let alternative: SubstitutionAlternative
+    let isAvailable: Bool
+    let isRecommended: Bool
+    var isLast: Bool = false
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(alignment: .top, spacing: 14) {
+                // Status icon
+                Image(systemName: isAvailable ? "checkmark.circle.fill" : "circle")
+                    .font(.system(size: 20))
+                    .foregroundColor(isRecommended ? COLOR_WARM_AMBER : isAvailable ? .green : COLOR_TEXT_SECONDARY.opacity(0.3))
+                    .frame(width: 24)
+                    .padding(.top, 2)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        Text(alternative.name)
+                            .font(.system(size: 15, weight: isRecommended ? .bold : .semibold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        if isRecommended {
+                            Image(systemName: "star.fill")
+                                .font(.system(size: 10))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
                     }
-                    .foregroundColor(COLOR_WARM_AMBER)
+
+                    // Ratio
+                    Text(alternative.displayRatio())
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(COLOR_WARM_AMBER)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 3)
+                        .background(COLOR_WARM_AMBER.opacity(0.12))
+                        .cornerRadius(6)
+
+                    if let notes = alternative.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(.system(size: 12))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .italic()
+                    }
+
+                    if let flavor = alternative.flavorProfile, !flavor.isEmpty {
+                        HStack(spacing: 4) {
+                            Image(systemName: "leaf.fill").font(.system(size: 10))
+                            Text(flavor).font(.system(size: 12))
+                        }
+                        .foregroundColor(COLOR_WARM_AMBER.opacity(0.7))
+                    }
+
+                    if !isAvailable {
+                        Text("Not in your cabinet")
+                            .font(.system(size: 11))
+                            .foregroundColor(COLOR_TEXT_SECONDARY.opacity(0.5))
+                    }
                 }
+
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            if !isLast {
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+                    .padding(.leading, 54)
             }
         }
     }
-    
-    private var missingIngredientSection: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Image(systemName: "exclamationmark.circle.fill")
-                    .foregroundColor(.red)
-                Text("Missing Ingredient")
-                    .font(.headline)
-                    .foregroundColor(.white)
-            }
-            
-            Text(suggestion.missingIngredient)
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(COLOR_WARM_AMBER)
-            
-            HStack {
-                Text("Category:")
-                    .foregroundColor(.gray)
-                Text(suggestion.substitution.category.rawValue)
-                    .foregroundColor(.white)
-                    .fontWeight(.medium)
-            }
-            .font(.subheadline)
+}
+
+// MARK: - Compact Substitution Badge (kept for compatibility)
+struct SubstitutionBadge: View {
+    let missingCount: Int
+    let hasSubstitutes: Bool
+
+    var body: some View {
+        HStack(spacing: 6) {
+            Image(systemName: "arrow.triangle.2.circlepath").font(.caption)
+            Text("\(missingCount) substitutes").font(.caption).fontWeight(.medium)
         }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(COLOR_CHARCOAL_LIGHT)
-        .cornerRadius(12)
-    }
-    
-    private var alternativesSection: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Available Substitutes")
-                .font(.headline)
-                .foregroundColor(.white)
-            
-            ForEach(suggestion.substitution.alternatives) { alternative in
-                AlternativeRow(
-                    alternative: alternative,
-                    isAvailable: suggestion.availableAlternatives.contains(where: { $0.id == alternative.id }),
-                    isRecommended: suggestion.recommendedAlternative?.id == alternative.id
-                )
-            }
-        }
-    }
-    
-    private var preservesFlavorNote: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "checkmark.seal.fill")
-                .foregroundColor(.green)
-                .font(.title3)
-            
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Flavor Preserved")
-                    .font(.subheadline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.white)
-                Text("These substitutes maintain the original flavor profile")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-            }
-        }
-        .padding()
-        .background(Color.green.opacity(0.1))
+        .foregroundColor(hasSubstitutes ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 6)
+        .background(hasSubstitutes ? COLOR_WARM_AMBER.opacity(0.2) : Color.white.opacity(0.07))
         .cornerRadius(12)
     }
 }
 
-// MARK: - Alternative Row
+// MARK: - AlternativeRow alias kept for backward compat
 struct AlternativeRow: View {
     let alternative: SubstitutionAlternative
     let isAvailable: Bool
     let isRecommended: Bool
-    
     var body: some View {
-        HStack(alignment: .top, spacing: 12) {
-            // Status icon
-            Image(systemName: statusIcon)
-                .foregroundColor(statusColor)
-                .font(.title3)
-                .frame(width: 24)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                // Name and ratio
-                HStack {
-                    Text(alternative.name)
-                        .font(.body)
-                        .fontWeight(isRecommended ? .bold : .medium)
-                        .foregroundColor(.white)
-                    
-                    if isRecommended {
-                        Image(systemName: "star.fill")
-                            .foregroundColor(COLOR_WARM_AMBER)
-                            .font(.caption)
-                    }
-                    
-                    Spacer()
-                }
-                
-                // Ratio
-                Text(alternative.displayRatio())
-                    .font(.caption)
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 4)
-                    .background(COLOR_WARM_AMBER.opacity(0.2))
-                    .cornerRadius(6)
-                    .foregroundColor(COLOR_WARM_AMBER)
-                
-                // Notes
-                if let notes = alternative.notes {
-                    Text(notes)
-                        .font(.caption)
-                        .foregroundColor(.gray)
-                        .italic()
-                }
-                
-                // Flavor profile
-                if let flavor = alternative.flavorProfile {
-                    HStack(spacing: 4) {
-                        Image(systemName: "leaf.fill")
-                            .font(.caption2)
-                        Text(flavor)
-                            .font(.caption)
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER.opacity(0.8))
-                }
-            }
-        }
-        .padding()
-        .background(isAvailable ? COLOR_CHARCOAL_LIGHT : COLOR_CHARCOAL)
-        .cornerRadius(12)
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .stroke(isRecommended ? COLOR_WARM_AMBER : Color.clear, lineWidth: 2)
-        )
-    }
-    
-    private var statusIcon: String {
-        if isAvailable {
-            return "checkmark.circle.fill"
-        } else {
-            return "circle"
-        }
-    }
-    
-    private var statusColor: Color {
-        if isRecommended {
-            return COLOR_WARM_AMBER
-        } else if isAvailable {
-            return .green
-        } else {
-            return .gray
-        }
-    }
-}
-
-// MARK: - Compact Substitution Badge (for DetailsView)
-struct SubstitutionBadge: View {
-    let missingCount: Int
-    let hasSubstitutes: Bool
-    
-    var body: some View {
-        HStack(spacing: 6) {
-            Image(systemName: "arrow.triangle.2.circlepath")
-                .font(.caption)
-            Text("\(missingCount) substitutes")
-                .font(.caption)
-                .fontWeight(.medium)
-        }
-        .foregroundColor(hasSubstitutes ? COLOR_WARM_AMBER : .gray)
-        .padding(.horizontal, 10)
-        .padding(.vertical, 6)
-        .background(hasSubstitutes ? COLOR_WARM_AMBER.opacity(0.2) : Color.gray.opacity(0.2))
-        .cornerRadius(12)
+        AlternativeDetailRow(alternative: alternative, isAvailable: isAvailable, isRecommended: isRecommended)
     }
 }

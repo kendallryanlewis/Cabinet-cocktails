@@ -19,6 +19,7 @@ struct Cocktail_barApp: App {
                 .environmentObject(session)
                 .environmentObject(systemSettings)
                 .environmentObject(premiumManager)
+                .preferredColorScheme(.dark)
         }
     }
 }

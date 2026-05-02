@@ -22,6 +22,7 @@ struct ShareSheet: UIViewControllerRepresentable {
 
 // MARK: - Export Format Selector
 struct ExportFormatSelector: View {
+    @Environment(\.colorScheme) var colorScheme
     let contentType: ShareContentType
     @Binding var selectedFormat: ExportFormat
     @Binding var isPresented: Bool
@@ -44,7 +45,7 @@ struct ExportFormatSelector: View {
     var body: some View {
         NavigationView {
             ZStack {
-                COLOR_CHARCOAL.ignoresSafeArea()
+                AppBackground()
                 
                 VStack(spacing: 0) {
                     // Header
@@ -56,11 +57,11 @@ struct ExportFormatSelector: View {
                         Text("Choose Export Format")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         
                         Text("Select how you'd like to share")
                             .font(.subheadline)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     .padding(.top, 30)
                     .padding(.bottom, 40)
@@ -86,14 +87,7 @@ struct ExportFormatSelector: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                }
-            }
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
         }
         .sheet(isPresented: $showShareSheet) {
             ShareSheet(items: shareItems)
@@ -116,6 +110,7 @@ struct ExportFormatSelector: View {
 
 // MARK: - Format Option Button
 struct FormatOptionButton: View {
+    @Environment(\.colorScheme) var colorScheme
     let format: ExportFormat
     let isSelected: Bool
     let action: () -> Void
@@ -139,23 +134,23 @@ struct FormatOptionButton: View {
                 // Icon
                 ZStack {
                     RoundedRectangle(cornerRadius: 12)
-                        .fill(isSelected ? COLOR_WARM_AMBER.opacity(0.2) : COLOR_CHARCOAL_LIGHT)
+                        .fill(isSelected ? COLOR_WARM_AMBER.opacity(0.2) : AdaptiveColors.cardBackground(for: colorScheme))
                         .frame(width: 56, height: 56)
                     
                     Image(systemName: format.icon)
                         .font(.iconMini)
-                        .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                        .foregroundColor(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
                 }
                 
                 // Text
                 VStack(alignment: .leading, spacing: 4) {
                     Text(format.rawValue)
                         .font(.headline)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     Text(description)
                         .font(.caption)
-                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         .lineLimit(2)
                 }
                 
@@ -171,7 +166,7 @@ struct FormatOptionButton: View {
             .padding(16)
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
                     .overlay(
                         RoundedRectangle(cornerRadius: 12)
                             .stroke(isSelected ? COLOR_WARM_AMBER : Color.clear, lineWidth: 2)
@@ -207,6 +202,7 @@ struct QuickShareButton: View {
 
 // MARK: - Share Success Toast
 struct ShareSuccessToast: View {
+    @Environment(\.colorScheme) var colorScheme
     let message: String
     @Binding var isPresented: Bool
     
@@ -222,14 +218,14 @@ struct ShareSuccessToast: View {
                 Text(message)
                     .font(.subheadline)
                     .fontWeight(.medium)
-                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                 
                 Spacer()
             }
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .fill(AdaptiveColors.cardBackground(for: colorScheme))
                     .shadow(color: .black.opacity(0.3), radius: 10, x: 0, y: 5)
             )
             .padding(.horizontal, 20)
@@ -248,6 +244,7 @@ struct ShareSuccessToast: View {
 
 // MARK: - Batch Share View (for multiple cocktails)
 struct BatchShareView: View {
+    @Environment(\.colorScheme) var colorScheme
     let cocktails: [DrinkDetails]
     @Binding var isPresented: Bool
     @State private var selectedCocktails: Set<String> = []
@@ -257,7 +254,7 @@ struct BatchShareView: View {
     var body: some View {
         NavigationView {
             ZStack {
-                COLOR_CHARCOAL.ignoresSafeArea()
+                AppBackground()
                 
                 VStack(spacing: 0) {
                     // Header
@@ -269,11 +266,11 @@ struct BatchShareView: View {
                         Text("Share Multiple Recipes")
                             .font(.title2)
                             .fontWeight(.bold)
-                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                         
                         Text("Select cocktails to share together")
                             .font(.subheadline)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                     .padding(.top, 24)
                     .padding(.bottom, 30)
@@ -292,7 +289,7 @@ struct BatchShareView: View {
                         
                         Text("\(selectedCocktails.count) selected")
                             .font(.subheadline)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         
                         Spacer()
                         
@@ -301,7 +298,7 @@ struct BatchShareView: View {
                         }) {
                             Text("Clear")
                                 .font(.subheadline)
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
                     }
                     .padding(.horizontal, 20)
@@ -329,14 +326,8 @@ struct BatchShareView: View {
                 }
             }
             .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        isPresented = false
-                    }
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Share") {
                         showFormatSelector = true
@@ -360,6 +351,7 @@ struct BatchShareView: View {
 
 // MARK: - Cocktail Select Row
 struct CocktailSelectRow: View {
+    @Environment(\.colorScheme) var colorScheme
     let cocktail: DrinkDetails
     let isSelected: Bool
     let onToggle: () -> Void
@@ -370,18 +362,18 @@ struct CocktailSelectRow: View {
                 // Selection Indicator
                 Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                     .font(.iconMini)
-                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    .foregroundColor(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
                 
                 // Cocktail Info
                 VStack(alignment: .leading, spacing: 4) {
                     Text(cocktail.strDrink)
                         .font(.headline)
-                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
                     
                     if let category = cocktail.strCategory {
                         Text(category)
                             .font(.caption)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                     }
                 }
                 
@@ -390,7 +382,7 @@ struct CocktailSelectRow: View {
             .padding()
             .background(
                 RoundedRectangle(cornerRadius: 12)
-                    .fill(isSelected ? COLOR_WARM_AMBER.opacity(0.1) : COLOR_CHARCOAL_LIGHT)
+                    .fill(isSelected ? COLOR_WARM_AMBER.opacity(0.1) : AdaptiveColors.cardBackground(for: colorScheme))
             )
         }
     }

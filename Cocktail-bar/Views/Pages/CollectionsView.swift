@@ -404,13 +404,6 @@ struct CreateCollectionView: View {
             .navigationTitle("New Collection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Create") {
                         collectionManager.createCollection(
@@ -564,13 +557,6 @@ struct TagManagerView: View {
             .navigationTitle("Manage Tags")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button(action: { showCreateTag = true }) {
                         Image(systemName: "plus.circle.fill")
@@ -645,13 +631,6 @@ struct CreateTagView: View {
             .navigationTitle("New Tag")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Create") {
                         collectionManager.createTag(name: name, color: selectedColor)

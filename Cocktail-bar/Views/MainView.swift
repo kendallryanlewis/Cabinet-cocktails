@@ -1,6 +1,6 @@
 //
 //  MainView.swift
-//  VisAG
+//  Cabinet Cocktails
 //
 //  Created by Kendall Lewis on 10/10/23.
 //
@@ -30,303 +30,228 @@ enum pages: String, Codable {
     case logout
 }
 
+// MARK: - Tab identifiers
+
+enum MainTab: Int {
+    case discover = 0
+    case search    = 1
+    case mix       = 2
+    case shopping  = 3
+    case profile   = 4
+}
+
+// MARK: - MainView
+
 struct MainView: View {
-    @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var session: SessionStore
     @EnvironmentObject var premiumManager: PremiumManager
-    @State private var isMenuOpen = true
-    @State var showWelcomePopup = false
-    @State var showFirstTimeCabinet = false
-    @State var openPopover = false
-    @State var viewPage: pages = .home
-    
-    // Sheet presentation states
-    @State private var showCabinet = false
-    @State private var showSignatures = false
-    @State private var showMixology = false
-    @State private var showQuick = false
-    @State private var showSettings = false
-    @State private var showAbout = false
-    @State private var showContact = false
-    @State private var showShoppingList = false
-    @State private var showHistory = false
+
+    @State private var selectedTab: MainTab = .discover
+
+    // Modals triggered from tab content (Profile tab, etc.)
+    @State private var showHistory      = false
     @State private var showRecommendations = false
-    @State private var showEducational = false
-    @State private var showSeasonal = false
-    @State private var showPreferences = false
+    @State private var showEducational  = false
+    @State private var showSeasonal     = false
+    @State private var showPreferences  = false
     @State private var showCustomRecipes = false
     @State private var showCostTracking = false
     @State private var showBarEquipment = false
-    @State private var showHelp = false
-    @State private var showTutorial = false
-    @State private var showPremium = false
+    @State private var showHelp         = false
+    @State private var showAbout        = false
+    @State private var showContact      = false
+    @State private var showCollections  = false
+    @State private var showPremium      = false
+    @State private var showExpiration   = false
+
+    // First-run flows
+    @State private var showWelcomePopup       = false
+    @State private var showFirstTimeCabinet   = false
+    @State private var showTutorial           = false
     @AppStorage("hasCompletedTutorial") private var hasCompletedTutorial = false
-    
+
     var body: some View {
         ZStack {
-            LinearGradient(gradient: colorScheme == .dark ? Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) : Gradient(colors: [ LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]), startPoint: .topTrailing, endPoint: .leading)
-                .edgesIgnoringSafeArea(.all)
-                .ignoresSafeArea()
-            GenericBackground()
-                .opacity(!isMenuOpen ? 0.05 : 1)
-            // Main content view
-            switch viewPage {
-                case .home, .cabinet, .signatures, .mixology, .quick, .contact, .about, .settings, .shoppingList, .history, .recommendations, .educational, .seasonal, .preferences, .customRecipes, .costTracking, .barEquipment, .help, .premium:
-                    MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
-                        .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
-                        .zIndex(1)
-                        .opacity(isMenuOpen ? 1 : 0)
-                default:
-                    MenuView(isOpen: $isMenuOpen, viewPage: $viewPage)
-                        .offset(x: isMenuOpen ? 0 : -UIScreen.main.bounds.size.width)
-                        .zIndex(1)
-                        .opacity(isMenuOpen ? 1 : 0)
-            }
-        }
-        .onAppear(){
-            // set all drinks in initial set up
-            DrinkManager.shared.setUp()
-            // Show welcome popup for new users
-            if !session.hasCompletedWelcome() {
-                showWelcomePopup = true
-            }
-            // Show first-time cabinet prompt if cabinet is empty
-            if LocalStorageManager.shared.retrieveTopShelfItems().isEmpty && session.hasCompletedWelcome() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) {
-                    showFirstTimeCabinet = true
+            COLOR_BACKGROUND.ignoresSafeArea()
+
+            // ── Tab Content ─────────────────────────────────────────────────
+            Group {
+                switch selectedTab {
+                case .discover:
+                    DashboardView()
+                case .search:
+                    SearchView(isMenuOpen: .constant(false))
+                case .mix:
+                    MixologyView(isMenuOpen: .constant(false), viewPage: .constant(.home))
+                case .shopping:
+                    ShoppingListView()
+                case .profile:
+                    ProfileTabView(
+                        showHistory:       $showHistory,
+                        showRecommendations: $showRecommendations,
+                        showEducational:   $showEducational,
+                        showSeasonal:      $showSeasonal,
+                        showPreferences:   $showPreferences,
+                        showCustomRecipes: $showCustomRecipes,
+                        showCostTracking:  $showCostTracking,
+                        showBarEquipment:  $showBarEquipment,
+                        showHelp:          $showHelp,
+                        showAbout:         $showAbout,
+                        showContact:       $showContact,
+                        showCollections:   $showCollections,
+                        showPremium:       $showPremium,
+                        showExpiration:    $showExpiration
+                    )
                 }
             }
-            // Show tutorial for first-time users
-            if !hasCompletedTutorial && session.hasCompletedWelcome() {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
-                    showTutorial = true
-                }
-            }
-         }
-        .onChange(of: viewPage) { newPage in
-            // Handle page changes and trigger sheet presentations
-            switch newPage {
-            case .cabinet:
-                showCabinet = true
-                viewPage = .home
-            case .signatures:
-                showSignatures = true
-                viewPage = .home
-            case .mixology:
-                showMixology = true
-                viewPage = .home
-            case .quick:
-                showQuick = true
-                viewPage = .home
-            case .settings:
-                showSettings = true
-                viewPage = .home
-            case .about:
-                showAbout = true
-                viewPage = .home
-            case .contact:
-                showContact = true
-                viewPage = .home
-            case .shoppingList:
-                showShoppingList = true
-                viewPage = .home
-            case .history:
-                showHistory = true
-                viewPage = .home
-            case .recommendations:
-                showRecommendations = true
-                viewPage = .home
-            case .educational:
-                showEducational = true
-                viewPage = .home
-            case .seasonal:
-                showSeasonal = true
-                viewPage = .home
-            case .preferences:
-                showPreferences = true
-                viewPage = .home
-            case .customRecipes:
-                showCustomRecipes = true
-                viewPage = .home
-            case .costTracking:
-                showCostTracking = true
-                viewPage = .home
-            case .barEquipment:
-                showBarEquipment = true
-                viewPage = .home
-            case .help:
-                showHelp = true
-                viewPage = .home
-            case .premium:
-                showPremium = true
-                viewPage = .home
-            default:
-                break
-            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
-        .sheet(isPresented: $showCabinet) {
-            TopShelfView(isMenuOpen: .constant(false))
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            BottomTabBar(selectedTab: $selectedTab)
+                .padding(.bottom, 16)
         }
-        .onChange(of: showCabinet) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showSignatures) {
-            SignaturesView(isMenuOpen: .constant(false), viewPage: $viewPage)
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showSignatures) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showMixology) {
-            MixologyView(isMenuOpen: .constant(false), viewPage: $viewPage)
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showMixology) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showQuick) {
-            SearchView(isMenuOpen: .constant(false))
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showQuick) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showSettings) {
-            SettingsView(isMenuOpen: .constant(false))
-        }
-        .onChange(of: showSettings) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showAbout) {
-            AboutView(isMenuOpen: .constant(false))
-        }
-        .onChange(of: showAbout) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showContact) {
-            ContactView(isMenuOpen: .constant(false))
-        }
-        .onChange(of: showContact) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showShoppingList) {
-            ShoppingListView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showShoppingList) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showHistory) {
-            HistoryView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showHistory) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showRecommendations) {
-            RecommendationsView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showRecommendations) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showEducational) {
-            EducationalContentView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showEducational) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showSeasonal) {
-            SeasonalCocktailsView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showSeasonal) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showPreferences) {
-            UserPreferencesView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showPreferences) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showCustomRecipes) {
-            CustomRecipesListView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showCustomRecipes) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showCostTracking) {
-            CostTrackingView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showCostTracking) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showBarEquipment) {
-            BarEquipmentView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showBarEquipment) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showHelp) {
-            HelpView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showHelp) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
-        .sheet(isPresented: $showTutorial) {
-            TutorialView()
-        }
-        .sheet(isPresented: $showPremium) {
-            SubscriptionManagementView()
-                .presentationDragIndicator(.visible)
-                .transition(.move(edge: .bottom).combined(with: .opacity))
-        }
-        .onChange(of: showPremium) { isShowing in
-            if !isShowing { isMenuOpen = true }
-        }
+        // ── Sheets from Profile tab ──────────────────────────────────────────
+        .sheet(isPresented: $showHistory)          { HistoryView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showRecommendations)  { RecommendationsView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showEducational)      { EducationalContentView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showSeasonal)         { SeasonalCocktailsView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showPreferences)      { UserPreferencesView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showCustomRecipes)    { CustomRecipesListView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showCostTracking)     { CostTrackingView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showBarEquipment)     { BarEquipmentView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showHelp)             { HelpView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showAbout)            { AboutView(isMenuOpen: .constant(false)) }
+        .sheet(isPresented: $showContact)          { ContactView(isMenuOpen: .constant(false)) }
+        .sheet(isPresented: $showCollections)      { CollectionsView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showPremium)          { SubscriptionManagementView().presentationDragIndicator(.visible) }
+        .sheet(isPresented: $showExpiration)        { ExpirationManagementView().presentationDragIndicator(.visible) }
+        // ── First-run flows ─────────────────────────────────────────────────
+        .sheet(isPresented: $showTutorial)         { TutorialView() }
         .fullScreenCover(isPresented: $showWelcomePopup) {
             WelcomePopupView(isPresented: $showWelcomePopup)
         }
         .sheet(isPresented: $showFirstTimeCabinet) {
             ZStack {
-                Color.black.opacity(0.4)
-                    .ignoresSafeArea()
-                
+                Color.black.opacity(0.4).ignoresSafeArea()
                 FirstTimeCabinetPrompt(
                     onOpenCabinet: {
                         showFirstTimeCabinet = false
-                        showCabinet = true
+                        selectedTab = .profile // redirect to cabinet via profile
                     },
-                    onSkip: {
-                        showFirstTimeCabinet = false
-                    }
+                    onSkip: { showFirstTimeCabinet = false }
                 )
+            }
+        }
+        .onAppear {
+            DrinkManager.shared.setUp()
+            if !session.hasCompletedWelcome() { showWelcomePopup = true }
+            if LocalStorageManager.shared.retrieveTopShelfItems().isEmpty && session.hasCompletedWelcome() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.0) { showFirstTimeCabinet = true }
+            }
+            if !hasCompletedTutorial && session.hasCompletedWelcome() {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) { showTutorial = true }
             }
         }
     }
 }
 
+// MARK: - Custom Bottom Tab Bar
+
+struct BottomTabBar: View {
+    @Binding var selectedTab: MainTab
+
+    private let tabs: [(icon: String, activeIcon: String, label: String, tab: MainTab)] = [
+        ("flame",           "flame.fill",        "Discover",  .discover),
+        ("magnifyingglass", "magnifyingglass",    "Search",    .search),
+        ("plus.circle",     "plus.circle.fill",  "Mix",       .mix),
+        ("bag",             "bag.fill",          "Shopping",  .shopping),
+        ("person",          "person.fill",       "Profile",   .profile),
+    ]
+
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(tabs, id: \.tab.rawValue) { item in
+                TabItemButton(
+                    icon: item.icon,
+                    activeIcon: item.activeIcon,
+                    label: item.label,
+                    tab: item.tab,
+                    selectedTab: $selectedTab
+                )
+            }
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 12)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(COLOR_CHARCOAL)
+                .shadow(color: .black.opacity(0.5), radius: 24, x: 0, y: 8)
+        )
+        .padding(.horizontal, 16)
+    }
+
+    private var bottomPadding: CGFloat {
+        let window = UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .first?.windows.first
+        let safeBottom = window?.safeAreaInsets.bottom ?? 0
+        return safeBottom > 0 ? safeBottom : 16
+    }
+}
+
+// Separate struct so SwiftUI diffs the binding independently per tab item
+struct TabItemButton: View {
+    let icon: String
+    let activeIcon: String
+    let label: String
+    let tab: MainTab
+    @Binding var selectedTab: MainTab
+
+    var isActive: Bool { selectedTab == tab }
+    var isMix: Bool { tab == .mix }
+
+    var body: some View {
+        Button {
+            selectedTab = tab
+        } label: {
+            VStack(spacing: 4) {
+                ZStack {
+                    if isMix {
+                        Circle()
+                            .fill(COLOR_WARM_AMBER)
+                            .frame(width: 52, height: 52)
+                        Image(systemName: isActive ? activeIcon : icon)
+                            .font(.system(size: 26, weight: .semibold))
+                            .foregroundColor(COLOR_CHARCOAL)
+                    } else {
+                        if isActive {
+                            RoundedRectangle(cornerRadius: 12)
+                                .fill(COLOR_WARM_AMBER.opacity(0.15))
+                                .frame(width: 48, height: 36)
+                        }
+                        Image(systemName: isActive ? activeIcon : icon)
+                            .font(.system(size: 20, weight: isActive ? .semibold : .regular))
+                            .foregroundColor(isActive ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    }
+                }
+                .frame(height: isMix ? 52 : 36)
+
+                /*Text(label)
+                    .font(.system(size: 10, weight: isActive || isMix ? .semibold : .regular))
+                    .foregroundColor(isActive || isMix ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)*/
+            }
+            .frame(maxWidth: .infinity)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+}
+
 #Preview {
     MainView()
+        .environmentObject(SessionStore())
+        .environmentObject(SystemSettingsManager())
+        .environmentObject(PremiumManager())
 }
+
+

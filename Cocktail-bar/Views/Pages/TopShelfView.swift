@@ -8,18 +8,26 @@
 import SwiftUI
 
 struct TopShelfView: View {
-    @Environment(\.colorScheme) var colorScheme
     @Binding var isMenuOpen: Bool
+    @State private var viewMode: CabinetViewMode = .cabinet
     @State private var searchText = ""
     @State private var selectedAlcoholTypes: [Ingredient] = []
     @State private var selectedCategory: IngredientType? = nil
     @State private var showClearConfirmation = false
     @StateObject private var expirationTracker = ExpirationTracker.shared
     @State private var showExpirationSettings = false
+    @State private var showFilterSheet = false
+
+    enum CabinetViewMode {
+        case cabinet, browse
+    }
     
-    // Filtered list based on search and category
+    // Filtered list based on search and category — excludes items already in cabinet
     var filteredIngredients: [Ingredient] {
-        var ingredients = DrinkManager.shared.allIngredients ?? []
+        var ingredients = (DrinkManager.shared.allIngredients ?? [])
+            .filter { ingredient in
+                !selectedAlcoholTypes.contains(where: { $0.name == ingredient.name })
+            }
         
         // Apply search filter
         if !searchText.isEmpty {
@@ -31,14 +39,7 @@ struct TopShelfView: View {
             ingredients = ingredients.filter { $0.type == category }
         }
         
-        return ingredients.sorted { ingredient1, ingredient2 in
-            let in1 = selectedAlcoholTypes.contains(where: { $0.name == ingredient1.name })
-            let in2 = selectedAlcoholTypes.contains(where: { $0.name == ingredient2.name })
-            if in1 != in2 {
-                return in1
-            }
-            return ingredient1.name < ingredient2.name
-        }
+        return ingredients.sorted { $0.name < $1.name }
     }
     
     var cabinetIngredients: [Ingredient] {
@@ -51,257 +52,80 @@ struct TopShelfView: View {
     
     var body: some View {
         ZStack {
-            AppBackground()
-            
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 24) {
-                    // Header Section
-                    VStack(alignment: .leading, spacing: 8) {
+            COLOR_BACKGROUND.ignoresSafeArea()
+
+            VStack(spacing: 0) {
+                // ── Sticky Header + Segmented Control ──
+                VStack(alignment: .leading, spacing: 0) {
+                    // Title + subtitle
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("YOUR CABINET")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
                         Text("Your Cabinet")
-                            .font(.cocktailTitle)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                        
-                        if !selectedAlcoholTypes.isEmpty {
-                            HStack(spacing: 8) {
-                                Text("\(selectedAlcoholTypes.count) ingredient\(selectedAlcoholTypes.count == 1 ? "" : "s")")
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                if cocktailsAvailable > 0 {
-                                    Text("•")
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    
-                                    Text("\(cocktailsAvailable) cocktail\(cocktailsAvailable == 1 ? "" : "s") ready")
-                                        .font(.bodyText)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                                
-                                if expirationTracker.expiringSoonCount > 0 || expirationTracker.expiredCount > 0 {
-                                    Text("•")
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "exclamationmark.triangle.fill")
-                                            .font(.caption)
-                                        Text("\(expirationTracker.expiringSoonCount + expirationTracker.expiredCount) expiring")
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+
+                        if viewMode == .cabinet {
+                            if !selectedAlcoholTypes.isEmpty {
+                                HStack(spacing: 6) {
+                                    Text("\(selectedAlcoholTypes.count) ingredient\(selectedAlcoholTypes.count == 1 ? "" : "s")")
+                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    if cocktailsAvailable > 0 {
+                                        Text("·").foregroundColor(COLOR_TEXT_SECONDARY)
+                                        Text("\(cocktailsAvailable) cocktails ready")
+                                            .foregroundColor(COLOR_WARM_AMBER)
                                     }
-                                    .font(.bodyText)
-                                    .foregroundColor(expirationTracker.expiredCount > 0 ? .red : .orange)
                                 }
+                                .font(.system(size: 14))
+                            } else {
+                                Text("Add ingredients to see what you can make")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
                             }
-                        } else {
-                            Text("Add ingredients to see what you can make")
-                                .font(.bodyText)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                         }
                     }
                     .padding(.horizontal, 20)
-                    .padding(.top, 24)
-                    
-                    // Expiring Soon Section
-                    if !expirationTracker.expiringSoonItems.isEmpty || !expirationTracker.expiredItems.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Image(systemName: "exclamationmark.triangle.fill")
-                                    .foregroundColor(expirationTracker.expiredItems.isEmpty ? .orange : .red)
-                                
-                                Text(expirationTracker.expiredItems.isEmpty ? "Expiring Soon" : "Action Needed")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                
-                                Spacer()
-                                
-                                Button(action: { showExpirationSettings = true }) {
-                                    Text("Manage")
-                                        .font(.caption)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(expirationTracker.expiredItems + expirationTracker.expiringSoonItems) { item in
-                                        ExpirationWarningCard(item: item)
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                            }
-                        }
+                    .padding(.top, 28)
+                    .padding(.bottom, 20)
+
+                    // Segmented control
+                    HStack(spacing: 0) {
+                        SearchModeButton(
+                            title: "My Cabinet",
+                            icon: "cabinet",
+                            isSelected: viewMode == .cabinet,
+                            action: { viewMode = .cabinet }
+                        )
+                        SearchModeButton(
+                            title: "Add Ingredients",
+                            icon: "plus.circle",
+                            isSelected: viewMode == .browse,
+                            action: { viewMode = .browse }
+                        )
                     }
-                    
-                    // Active Cabinet Section
-                    if !cabinetIngredients.isEmpty {
-                        VStack(alignment: .leading, spacing: 12) {
-                            HStack {
-                                Text("In Your Cabinet")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                
-                                Spacer()
-                                
-                                Button(action: { showExpirationSettings = true }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "calendar.badge.clock")
-                                            .font(.bodySmall)
-                                        Text("Track Expiration")
-                                            .font(.caption)
-                                            .fontWeight(.semibold)
-                                    }
-                                    .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                                
-                                Button(action: {
-                                    showClearConfirmation = true
-                                }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "trash")
-                                            .font(.bodySmall)
-                                        Text("Clear All")
-                                            .font(.caption)
-                                            .fontWeight(.semibold)
-                                    }
-.foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    ForEach(cabinetIngredients, id: \.id) { ingredient in
-                                        CabinetIngredientChip(
-                                            ingredient: ingredient,
-                                            expirationInfo: expirationTracker.getExpirationInfo(for: ingredient.name),
-                                            onRemove: {
-                                                removeIngredient(ingredient)
-                                            }
-                                        )
-                                    }
-                                }
-                                .padding(.horizontal, 20)
-                            }
-                        }
+                    .padding(3)
+                    .background(Color.white.opacity(0.06))
+                    .cornerRadius(12)
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 20)
+                }
+                .background(COLOR_BACKGROUND)
+
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+
+                // ── Scrollable content ──
+                ScrollView(showsIndicators: false) {
+                    if viewMode == .cabinet {
+                        cabinetContent
+                    } else {
+                        browseContent
                     }
-                    
-                    // Search Bar
-                    HStack {
-                        Image(systemName: "magnifyingglass")
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                        
-                        TextField("Search ingredients", text: $searchText)
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                            .tint(COLOR_WARM_AMBER)
-                            .placeholder(when: searchText.isEmpty) {
-                                Text("Search ingredients")
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            }
-                        
-                        if !searchText.isEmpty {
-                            Button(action: { searchText = "" }) {
-                                Image(systemName: "xmark.circle.fill")
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            }
-                        }
-                    }
-                    .padding(12)
-                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                    // Category Filter
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        HStack(spacing: 12) {
-                            CategoryFilterButton(
-                                title: "All",
-                                isSelected: selectedCategory == nil,
-                                action: { selectedCategory = nil }
-                            )
-                            
-                            CategoryFilterButton(
-                                title: "Alcohol",
-                                isSelected: selectedCategory == .alcohol,
-                                action: { selectedCategory = .alcohol }
-                            )
-                            
-                            CategoryFilterButton(
-                                title: "Mixers",
-                                isSelected: selectedCategory == .mixer,
-                                action: { selectedCategory = .mixer }
-                            )
-                            
-                            CategoryFilterButton(
-                                title: "Garnish",
-                                isSelected: selectedCategory == .garnish,
-                                action: { selectedCategory = .garnish }
-                            )
-                            
-                            CategoryFilterButton(
-                                title: "Non-Alcoholic",
-                                isSelected: selectedCategory == .nonAlcohol,
-                                action: { selectedCategory = .nonAlcohol }
-                            )
-                        }
-                        .padding(.horizontal, 20)
-                    }
-                    
-                    // Browse All Ingredients
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack {
-                            Text("Browse Ingredients")
-                                .font(.sectionHeader)
-                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                            
-                            Spacer()
-                            
-                            Text("\(filteredIngredients.count)")
-                                .font(.caption)
-                                .fontWeight(.semibold)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                        }
-                        .padding(.horizontal, 20)
-                        
-                        if filteredIngredients.isEmpty {
-                            VStack(spacing: 12) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.displayLarge)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                Text("No ingredients found")
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                Button(action: {
-                                    searchText = ""
-                                    selectedCategory = nil
-                                }) {
-                                    Text("Clear Filters")
-                                        .font(.buttonText)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                                .padding(.top, 8)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 40)
-                        } else {
-                            LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
-                                ForEach(filteredIngredients, id: \.id) { ingredient in
-                                    ModernCabinetCard(
-                                        ingredient: ingredient,
-                                        isInCabinet: selectedAlcoholTypes.contains(where: { $0.name == ingredient.name }),
-                                        onTap: {
-                                            toggleIngredient(ingredient)
-                                        }
-                                    )
-                                }
-                            }
-                            .padding(.horizontal, 20)
-                        }
-                    }
-                    
-                    Spacer(minLength: 40)
                 }
             }
-        }
         .onAppear {
             if DrinkManager.shared.allIngredients == nil {
                 DrinkManager.shared.getAllUniqueIngredients()
@@ -331,6 +155,205 @@ struct TopShelfView: View {
         .sheet(isPresented: $showExpirationSettings) {
             ExpirationManagementView()
         }
+        .sheet(isPresented: $showFilterSheet) {
+            TopShelfFilterSheet(selectedCategory: $selectedCategory)
+        }
+    }
+    }
+
+    // MARK: - Cabinet Tab
+    @ViewBuilder
+    private var cabinetContent: some View {
+        VStack(alignment: .leading, spacing: 32) {
+            // Expiration warnings
+            if !expirationTracker.expiringSoonItems.isEmpty || !expirationTracker.expiredItems.isEmpty {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Image(systemName: "exclamationmark.triangle.fill")
+                            .foregroundColor(expirationTracker.expiredItems.isEmpty ? .orange : .red)
+                        Text(expirationTracker.expiredItems.isEmpty ? "EXPIRING SOON" : "ACTION NEEDED")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
+                        Spacer()
+                        Button(action: { showExpirationSettings = true }) {
+                            Text("Manage")
+                                .font(.system(size: 13, weight: .semibold))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        HStack(spacing: 12) {
+                            ForEach(expirationTracker.expiredItems + expirationTracker.expiringSoonItems) { item in
+                                ExpirationWarningCard(item: item)
+                            }
+                        }
+                        .padding(.horizontal, 20)
+                    }
+                }
+            }
+
+            // Cabinet grid
+            if cabinetIngredients.isEmpty {
+                VStack(spacing: 16) {
+                    Image(systemName: "cabinet")
+                        .font(.system(size: 44))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                    Text("Your cabinet is empty")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                    Text("Switch to Add Ingredients to stock\nyour cabinet")
+                        .font(.system(size: 14))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .multilineTextAlignment(.center)
+                    Button(action: { viewMode = .browse }) {
+                        HStack(spacing: 8) {
+                            Image(systemName: "plus.circle.fill")
+                            Text("Add Ingredients")
+                        }
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_CHARCOAL)
+                        .padding(.horizontal, 24)
+                        .padding(.vertical, 14)
+                        .background(COLOR_WARM_AMBER)
+                        .cornerRadius(12)
+                    }
+                    .padding(.top, 4)
+                }
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 60)
+            } else {
+                VStack(alignment: .leading, spacing: 14) {
+                    HStack {
+                        Text("IN YOUR CABINET")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
+                        Spacer()
+                        Button(action: { showExpirationSettings = true }) {
+                            Image(systemName: "calendar.badge.clock")
+                                .font(.system(size: 16))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
+                        Button(action: { showClearConfirmation = true }) {
+                            Image(systemName: "trash")
+                                .font(.system(size: 16))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())],
+                        spacing: 16
+                    ) {
+                        ForEach(cabinetIngredients, id: \.id) { ingredient in
+                            CabinetImageCard(
+                                ingredient: ingredient,
+                                onRemove: { removeIngredient(ingredient) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+
+            Spacer(minLength: 48)
+        }
+        .padding(.top, 8)
+    }
+
+    // MARK: - Browse Tab
+    @ViewBuilder
+    private var browseContent: some View {
+        VStack(alignment: .leading, spacing: 24) {
+            // Search + Filter button
+            HStack(spacing: 12) {
+                HStack(spacing: 10) {
+                    Image(systemName: "magnifyingglass")
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .font(.system(size: 15, weight: .medium))
+                    TextField("Search ingredients...", text: $searchText)
+                        .font(.system(size: 16))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .tint(COLOR_WARM_AMBER)
+                    if !searchText.isEmpty {
+                        Button(action: { searchText = "" }) {
+                            Image(systemName: "xmark.circle.fill")
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                        }
+                    }
+                }
+                .padding(.horizontal, 16)
+                .padding(.vertical, 16)
+                .background(Color.white.opacity(0.07))
+                .cornerRadius(13)
+
+                Button(action: { showFilterSheet = true }) {
+                    ZStack {
+                        (selectedCategory != nil ? COLOR_WARM_AMBER : Color.white.opacity(0.07))
+                        Image(systemName: "slider.horizontal.3")
+                            .font(.system(size: 16, weight: .medium))
+                            .foregroundColor(selectedCategory != nil ? COLOR_CHARCOAL : COLOR_TEXT_SECONDARY)
+                    }
+                    .frame(width: 50, height: 50)
+                    .cornerRadius(13)
+                }
+            }
+            .padding(.horizontal, 20)
+
+            // Browse grid
+            VStack(alignment: .leading, spacing: 14) {
+                HStack {
+                    Text("BROWSE INGREDIENTS")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .kerning(1)
+                    Spacer()
+                    Text("\(filteredIngredients.count)")
+                        .font(.system(size: 13, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                }
+                .padding(.horizontal, 20)
+
+                if filteredIngredients.isEmpty {
+                    VStack(spacing: 12) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 36))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                        Text("No ingredients found")
+                            .font(.system(size: 16, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        Button(action: { searchText = ""; selectedCategory = nil }) {
+                            Text("Clear Filters")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(COLOR_WARM_AMBER)
+                        }
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 60)
+                } else {
+                    LazyVGrid(
+                        columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())],
+                        spacing: 12
+                    ) {
+                        ForEach(filteredIngredients, id: \.id) { ingredient in
+                            ModernCabinetCard(
+                                ingredient: ingredient,
+                                isInCabinet: selectedAlcoholTypes.contains(where: { $0.name == ingredient.name }),
+                                onTap: { toggleIngredient(ingredient) }
+                            )
+                        }
+                    }
+                    .padding(.horizontal, 20)
+                }
+            }
+
+            Spacer(minLength: 48)
+        }
+        .padding(.top, 8)
     }
     
     private func toggleIngredient(_ ingredient: Ingredient) {
@@ -367,605 +390,579 @@ struct TopShelfView: View {
     }
 }
 
-// MARK: - Cabinet Ingredient Chip
-struct CabinetIngredientChip: View {
-    @Environment(\.colorScheme) var colorScheme
+// MARK: - Cabinet Image Card
+struct CabinetImageCard: View {
     let ingredient: Ingredient
-    let expirationInfo: ExpirationInfo?
     let onRemove: () -> Void
-    
+
     var body: some View {
-        HStack(spacing: 8) {
-            // Small thumbnail
-            if UIImage(named: ingredient.name) != nil {
-                Image(ingredient.name)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: 32, height: 32)
-                    .clipShape(Circle())
-            } else {
-                ZStack {
-                    Circle()
-                        .fill(AdaptiveColors.cardBackground(for: colorScheme))
-                        .frame(width: 32, height: 32)
-                    
-                    Image(systemName: "drop.fill")
-                        .font(.bodySmall)
-                        .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(ingredient.name)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                    .lineLimit(1)
-                
-                // Expiration badge
-                if let info = expirationInfo {
-                    HStack(spacing: 3) {
-                        Circle()
-                            .fill(info.isExpired ? Color.red : (info.isExpiringSoon ? Color.orange : Color.green))
-                            .frame(width: 6, height: 6)
-                        
-                        Text(info.isExpired ? "Expired" : "\\(abs(info.daysUntilExpiration))d")
-                            .font(.system(size: 9))
-                            .foregroundColor(info.isExpired ? .red : (info.isExpiringSoon ? .orange : AdaptiveColors.textSecondary(for: colorScheme)))
+        ZStack(alignment: .topTrailing) {
+            // Full-bleed image with gradient overlay
+            ZStack(alignment: .bottomLeading) {
+                Group {
+                    if UIImage(named: ingredient.name) != nil {
+                        Image(ingredient.name)
+                            .resizable()
+                            .aspectRatio(contentMode: .fill)
+                    } else {
+                        ZStack {
+                            COLOR_CHARCOAL_LIGHT
+                            Image("GenericAlcohol")
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .opacity(0.35)
+                        }
                     }
                 }
+                .frame(height: 160)
+                .clipped()
+
+                LinearGradient(
+                    colors: [.clear, .clear, Color.black.opacity(0.82)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(ingredient.type.rawValue.uppercased())
+                        .font(.system(size: 10, weight: .semibold))
+                        .foregroundColor(COLOR_WARM_AMBER)
+                        .kerning(0.8)
+                    Text(ingredient.name)
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .lineLimit(2)
+                }
+                .padding(10)
             }
-            
+            .frame(height: 160)
+            .cornerRadius(14)
+            .clipped()
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(COLOR_WARM_AMBER.opacity(0.5), lineWidth: 1.5)
+            )
+
+            // Remove badge
             Button(action: onRemove) {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.navTitle)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                ZStack {
+                    Circle().fill(COLOR_CHARCOAL).frame(width: 24, height: 24)
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 24))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                }
             }
+            .padding(6)
         }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
-        .cornerRadius(20)
     }
 }
 
 // MARK: - Modern Cabinet Card
 struct ModernCabinetCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let ingredient: Ingredient
     let isInCabinet: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Image with checkmark overlay
-                ZStack(alignment: .topTrailing) {
+            HStack(spacing: 10) {
+                // Thumbnail
+                Group {
                     if UIImage(named: ingredient.name) != nil {
                         Image(ingredient.name)
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 120)
-                            .clipped()
                     } else {
                         ZStack {
-                            AdaptiveColors.cardBackground(for: colorScheme)
+                            Color.white.opacity(0.05)
                             Image("GenericAlcohol")
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(height: 120)
-                                .clipped()
-                                .opacity(0.3)
+                                .opacity(0.5)
                         }
-                        .frame(height: 120)
-                    }
-                    
-                    // Status indicator
-                    if isInCabinet {
-                        ZStack {
-                            Circle()
-                                .fill(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                .frame(width: 28, height: 28)
-                            
-                            Image(systemName: "checkmark.circle.fill")
-                                .foregroundColor(COLOR_WARM_AMBER)
-                                .font(.iconMini)
-                        }
-                        .padding(6)
-                    } else {
-                        ZStack {
-                            Circle()
-                                .fill(AdaptiveColors.secondaryCardBackground(for: colorScheme).opacity(0.8))
-                                .frame(width: 28, height: 28)
-                            
-                            Image(systemName: "plus.circle")
-                                .foregroundColor(COLOR_TEXT_SECONDARY)
-                                .font(.iconMini)
-                        }
-                        .padding(6)
                     }
                 }
-                
-                // Info section
-                VStack(alignment: .leading, spacing: 6) {
+                .frame(width: 56, height: 56)
+                .cornerRadius(8)
+                .clipped()
+
+                // Name + type
+                VStack(alignment: .leading, spacing: 3) {
                     Text(ingredient.name)
-                        .font(.ingredientText)
-                        .fontWeight(.semibold)
-                        .foregroundColor(isInCabinet ? AdaptiveColors.textPrimary(for: colorScheme) : AdaptiveColors.textSecondary(for: colorScheme))
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
                         .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
-                    Text(ingredient.type.rawValue.capitalized)
-                        .font(.caption)
-                        .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : AdaptiveColors.textSecondary(for: colorScheme))
-                        .textCase(.uppercase)
+                    Text(ingredient.type.rawValue)
+                        .font(.system(size: 11))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(10)
-                .background(AdaptiveColors.cardBackground(for: colorScheme))
+
+                // Add / added indicator
+                Image(systemName: isInCabinet ? "checkmark.circle.fill" : "plus.circle")
+                    .font(.system(size: 22))
+                    .foregroundColor(isInCabinet ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
             }
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(isInCabinet ? 0.4 : 0.2), radius: isInCabinet ? 10 : 6, x: 0, y: isInCabinet ? 5 : 3)
+            .padding(10)
+            .background(COLOR_CHARCOAL_LIGHT)
+            .cornerRadius(14)
+            .overlay(
+                RoundedRectangle(cornerRadius: 14)
+                    .strokeBorder(isInCabinet ? COLOR_WARM_AMBER.opacity(0.4) : Color.clear, lineWidth: 1)
+            )
         }
         .buttonStyle(PlainButtonStyle())
     }
 }
+// MARK: - Filter Sheet
+struct TopShelfFilterSheet: View {
+    @Binding var selectedCategory: IngredientType?
+    @Environment(\.presentationMode) var presentationMode
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                COLOR_CHARCOAL.ignoresSafeArea()
+                List {
+                    Section {
+                        filterRow(title: "All Ingredients", isSelected: selectedCategory == nil) {
+                            selectedCategory = nil
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        filterRow(title: "Alcohol", isSelected: selectedCategory == .alcohol) {
+                            selectedCategory = .alcohol
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        filterRow(title: "Mixers", isSelected: selectedCategory == .mixer) {
+                            selectedCategory = .mixer
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        filterRow(title: "Garnish", isSelected: selectedCategory == .garnish) {
+                            selectedCategory = .garnish
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        filterRow(title: "Non-Alcoholic", isSelected: selectedCategory == .nonAlcohol) {
+                            selectedCategory = .nonAlcohol
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+            }
+            .navigationTitle("Filter Ingredients")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Clear") {
+                        selectedCategory = nil
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .opacity(selectedCategory != nil ? 1 : 0)
+                    .disabled(selectedCategory == nil)
+                }
+            }
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .presentationDetents([.medium])
+    }
+
+    private func filterRow(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title).foregroundColor(COLOR_TEXT_PRIMARY)
+                Spacer()
+                if isSelected {
+                    Image(systemName: "checkmark")
+                        .foregroundColor(COLOR_WARM_AMBER)
+                        .font(.system(size: 14, weight: .semibold))
+                }
+            }
+        }
+        .listRowBackground(COLOR_CHARCOAL_LIGHT)
+    }
+}
+
 // MARK: - Expiration Warning Card
 struct ExpirationWarningCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let item: ExpirationInfo
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            HStack(spacing: 6) {
                 Circle()
                     .fill(item.isExpired ? Color.red : Color.orange)
                     .frame(width: 8, height: 8)
-                
                 Text(item.ingredientName)
-                    .font(.bodyText)
-                    .fontWeight(.semibold)
-                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_PRIMARY)
                     .lineLimit(1)
             }
-            
-            Text(item.isExpired ? "Expired \(abs(item.daysUntilExpiration)) days ago" : "Expires in \(item.daysUntilExpiration) day\(item.daysUntilExpiration == 1 ? "" : "s")")
-                .font(.caption)
+            Text(item.isExpired
+                 ? "Expired \(abs(item.daysUntilExpiration))d ago"
+                 : "Expires in \(item.daysUntilExpiration)d")
+                .font(.system(size: 11))
                 .foregroundColor(item.isExpired ? .red : .orange)
         }
         .padding(12)
         .frame(width: 160)
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
+        .background(COLOR_CHARCOAL_LIGHT)
         .cornerRadius(12)
         .overlay(
             RoundedRectangle(cornerRadius: 12)
-                .stroke(item.isExpired ? Color.red.opacity(0.5) : Color.orange.opacity(0.5), lineWidth: 1)
+                .stroke(item.isExpired ? Color.red.opacity(0.4) : Color.orange.opacity(0.4), lineWidth: 1)
         )
+    }
+}
+
+// MARK: - Expiration Item Row
+struct ExpirationItemRow: View {
+    let item: ExpirationInfo
+    let color: Color
+    var isLast: Bool = false
+    @StateObject private var expirationTracker = ExpirationTracker.shared
+
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 12) {
+                Circle()
+                    .fill(color)
+                    .frame(width: 10, height: 10)
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(item.ingredientName)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                    Text(dateString(item.expirationDate))
+                        .font(.system(size: 12))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                    if let notes = item.notes, !notes.isEmpty {
+                        Text(notes)
+                            .font(.system(size: 12))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .italic()
+                    }
+                }
+                Spacer()
+                Text(item.isExpired ? "Expired" : "\(item.daysUntilExpiration)d")
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(color)
+                Button(action: { expirationTracker.removeExpirationInfo(for: item.id) }) {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 18))
+                        .foregroundColor(COLOR_TEXT_SECONDARY.opacity(0.5))
+                }
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+            if !isLast {
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+                    .padding(.leading, 38)
+            }
+        }
+    }
+
+    private func dateString(_ date: Date) -> String {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .medium
+        return formatter.string(from: date)
+    }
+}
+
+// MARK: - Expiration Section
+struct ExpirationSection: View {
+    let title: String
+    let items: [ExpirationInfo]
+    let color: Color
+    let icon: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(color)
+                Text(title.uppercased())
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .kerning(1)
+                Spacer()
+                Text("\(items.count)")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+            }
+            .padding(.horizontal, 20)
+            VStack(spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.element.id) { index, item in
+                    ExpirationItemRow(item: item, color: color, isLast: index == items.count - 1)
+                }
+            }
+            .background(COLOR_CHARCOAL_LIGHT)
+            .cornerRadius(14)
+            .padding(.horizontal, 20)
+        }
+    }
+}
+
+// MARK: - Add Expiration View
+struct AddExpirationView: View {
+    @Binding var isPresented: Bool
+    @StateObject private var expirationTracker = ExpirationTracker.shared
+    @State private var selectedIngredient: String = ""
+    @State private var selectedDate = Date().addingTimeInterval(30 * 24 * 60 * 60)
+    @State private var notes = ""
+    @State private var showCustomIngredient = false
+    @State private var customIngredient = ""
+
+    var cabinetIngredients: [String] {
+        LocalStorageManager.shared.retrieveTopShelfItems().sorted()
+    }
+
+    var canAdd: Bool {
+        showCustomIngredient ? !customIngredient.isEmpty : !selectedIngredient.isEmpty
+    }
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                COLOR_BACKGROUND.ignoresSafeArea()
+                ScrollView(showsIndicators: false) {
+                    VStack(alignment: .leading, spacing: 24) {
+
+                        // Ingredient
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("INGREDIENT")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .kerning(1)
+                            if cabinetIngredients.isEmpty {
+                                Text("Your cabinet is empty. Add ingredients first.")
+                                    .font(.system(size: 14))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .padding(16)
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .cornerRadius(14)
+                            } else {
+                                Menu {
+                                    ForEach(cabinetIngredients, id: \.self) { ingredient in
+                                        Button(ingredient) { selectedIngredient = ingredient }
+                                    }
+                                    Button("Custom Ingredient...") { showCustomIngredient = true }
+                                } label: {
+                                    HStack {
+                                        Text(selectedIngredient.isEmpty ? "Select ingredient" : selectedIngredient)
+                                            .font(.system(size: 15))
+                                            .foregroundColor(selectedIngredient.isEmpty ? COLOR_TEXT_SECONDARY : COLOR_TEXT_PRIMARY)
+                                        Spacer()
+                                        Image(systemName: "chevron.down")
+                                            .font(.system(size: 12))
+                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    }
+                                    .padding(.horizontal, 16)
+                                    .padding(.vertical, 14)
+                                    .background(COLOR_CHARCOAL_LIGHT)
+                                    .cornerRadius(14)
+                                }
+                            }
+                        }
+
+                        // Date
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("EXPIRATION DATE")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .kerning(1)
+                            DatePicker("", selection: $selectedDate, displayedComponents: .date)
+                                .datePickerStyle(.graphical)
+                                .tint(COLOR_WARM_AMBER)
+                                .padding(16)
+                                .background(COLOR_CHARCOAL_LIGHT)
+                                .cornerRadius(14)
+                        }
+
+                        // Notes
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("NOTES (OPTIONAL)")
+                                .font(.system(size: 12, weight: .semibold))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
+                                .kerning(1)
+                            ZStack(alignment: .topLeading) {
+                                if notes.isEmpty {
+                                    Text("Add any notes...")
+                                        .font(.system(size: 15))
+                                        .foregroundColor(COLOR_TEXT_SECONDARY.opacity(0.6))
+                                        .padding(14)
+                                }
+                                TextEditor(text: $notes)
+                                    .font(.system(size: 15))
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    .tint(COLOR_WARM_AMBER)
+                                    .scrollContentBackground(.hidden)
+                                    .padding(8)
+                            }
+                            .frame(minHeight: 100)
+                            .background(COLOR_CHARCOAL_LIGHT)
+                            .cornerRadius(14)
+                        }
+
+                        // Add button
+                        Button(action: {
+                            let ingredient = showCustomIngredient ? customIngredient : selectedIngredient
+                            if !ingredient.isEmpty {
+                                expirationTracker.addExpirationInfo(
+                                    ingredientName: ingredient,
+                                    expirationDate: selectedDate,
+                                    notes: notes.isEmpty ? nil : notes
+                                )
+                                isPresented = false
+                            }
+                        }) {
+                            Text("Add Expiration Date")
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundColor(canAdd ? COLOR_CHARCOAL : COLOR_TEXT_SECONDARY)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 16)
+                                .background(canAdd ? COLOR_WARM_AMBER : Color.white.opacity(0.07))
+                                .cornerRadius(14)
+                        }
+                        .disabled(!canAdd)
+
+                        Spacer(minLength: 48)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 24)
+                }
+            }
+            .navigationTitle("Track Expiration")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
+            .alert("Custom Ingredient", isPresented: $showCustomIngredient) {
+                TextField("Ingredient name", text: $customIngredient)
+                Button("Add") { selectedIngredient = customIngredient; showCustomIngredient = false }
+                Button("Cancel", role: .cancel) { showCustomIngredient = false }
+            }
+        }
     }
 }
 
 // MARK: - Expiration Management View
 struct ExpirationManagementView: View {
-    @Environment(\.colorScheme) var colorScheme
     @Environment(\.dismiss) var dismiss
     @StateObject private var expirationTracker = ExpirationTracker.shared
     @State private var showAddExpiration = false
-    @State private var selectedIngredient: String = ""
-    @State private var selectedDate = Date().addingTimeInterval(30 * 24 * 60 * 60) // 30 days from now
-    @State private var notes = ""
-    
-    var cabinetIngredients: [String] {
-        LocalStorageManager.shared.retrieveTopShelfItems()
-    }
-    
+
     var body: some View {
         NavigationView {
             ZStack {
-                LinearGradient(
-                    gradient: colorScheme == .dark ?
-                    Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                        Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                    startPoint: .topTrailing,
-                    endPoint: .leading
-                )
-                .edgesIgnoringSafeArea(.all)
-                
+                COLOR_BACKGROUND.ignoresSafeArea()
                 ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Header Stats
-                        VStack(alignment: .leading, spacing: 16) {
-                            HStack(spacing: 20) {
-                                StatCard(
-                                    title: "Tracked",
-                                    value: "\\(expirationTracker.totalTrackedIngredients)",
-                                    color: COLOR_WARM_AMBER
-                                )
-                                
-                                StatCard(
-                                    title: "Expiring Soon",
-                                    value: "\\(expirationTracker.expiringSoonCount)",
-                                    color: .orange
-                                )
-                                
-                                StatCard(
-                                    title: "Expired",
-                                    value: "\\(expirationTracker.expiredCount)",
-                                    color: .red
-                                )
-                            }
+                    VStack(alignment: .leading, spacing: 28) {
+
+                        // Stats
+                        HStack(spacing: 12) {
+                            expirationStat(value: expirationTracker.totalTrackedIngredients, label: "Tracked", color: COLOR_WARM_AMBER)
+                            expirationStat(value: expirationTracker.expiringSoonCount, label: "Expiring Soon", color: .orange)
+                            expirationStat(value: expirationTracker.expiredCount, label: "Expired", color: .red)
                         }
                         .padding(.horizontal, 20)
                         .padding(.top, 24)
-                        
-                        // Notifications Toggle
-                        VStack(alignment: .leading, spacing: 12) {
-                            Toggle(isOn: Binding(
-                                get: { expirationTracker.notificationsEnabled },
-                                set: { expirationTracker.toggleNotifications($0) }
-                            )) {
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Expiration Reminders")
-                                        .font(.bodyText)
-                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    
-                                    Text("Get notified 3 days before ingredients expire")
-                                        .font(.caption)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
+
+                        // Notifications toggle
+                        Toggle(isOn: Binding(
+                            get: { expirationTracker.notificationsEnabled },
+                            set: { expirationTracker.toggleNotifications($0) }
+                        )) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Expiration Reminders")
+                                    .font(.system(size: 15, weight: .semibold))
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                Text("Get notified 3 days before ingredients expire")
+                                    .font(.system(size: 12))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
                             }
-                            .tint(COLOR_WARM_AMBER)
-                            .padding(16)
-                            .background(AdaptiveColors.cardBackground(for: colorScheme))
-                            // Add Expiration Button
-                            Button(action: { showAddExpiration = true }) {
-                                HStack {
-                                    Image(systemName: "calendar.badge.plus")
-                                        .font(.bodyLarge)
-                                    Text("Track New Expiration Date")
-                                        .font(.bodyText)
-                                        .fontWeight(.semibold)
+                        }
+                        .tint(COLOR_WARM_AMBER)
+                        .padding(16)
+                        .background(COLOR_CHARCOAL_LIGHT)
+                        .cornerRadius(14)
+                        .padding(.horizontal, 20)
+
+                        // Track button
+                        Button(action: { showAddExpiration = true }) {
+                            HStack(spacing: 8) {
+                                Image(systemName: "calendar.badge.plus")
+                                    .font(.system(size: 15, weight: .semibold))
+                                Text("Track New Expiration Date")
+                                    .font(.system(size: 15, weight: .semibold))
+                            }
+                            .foregroundColor(COLOR_CHARCOAL)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 16)
+                            .background(COLOR_WARM_AMBER)
+                            .cornerRadius(14)
+                        }
+                        .padding(.horizontal, 20)
+
+                        // Lists
+                        if !expirationTracker.expiredItems.isEmpty {
+                            ExpirationSection(title: "Expired", items: expirationTracker.expiredItems, color: .red, icon: "xmark.circle.fill")
+                        }
+                        if !expirationTracker.expiringSoonItems.isEmpty {
+                            ExpirationSection(title: "Expiring Soon", items: expirationTracker.expiringSoonItems, color: .orange, icon: "exclamationmark.triangle.fill")
+                        }
+                        if !expirationTracker.freshItems.isEmpty {
+                            ExpirationSection(title: "Fresh", items: expirationTracker.freshItems, color: .green, icon: "checkmark.circle.fill")
+                        }
+
+                        // Clear expired
+                        if !expirationTracker.expiredItems.isEmpty {
+                            Button(action: { expirationTracker.clearExpiredItems() }) {
+                                HStack(spacing: 8) {
+                                    Image(systemName: "trash")
+                                    Text("Clear Expired Items")
                                 }
-                                .foregroundColor(COLOR_CHARCOAL)
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundColor(.red)
                                 .frame(maxWidth: .infinity)
-                                .padding(.vertical, 16)
-                                .background(COLOR_WARM_AMBER)
+                                .padding(.vertical, 14)
+                                .background(COLOR_CHARCOAL_LIGHT)
                                 .cornerRadius(12)
                             }
                             .padding(.horizontal, 20)
-                            
-                            // Expired Items
-                            if !expirationTracker.expiredItems.isEmpty {
-                                ExpirationSection(
-                                    title: "Expired",
-                                    items: expirationTracker.expiredItems,
-                                    color: .red,
-                                    icon: "xmark.circle.fill"
-                                )
-                            }
-                            
-                            // Expiring Soon Items
-                            if !expirationTracker.expiringSoonItems.isEmpty {
-                                ExpirationSection(
-                                    title: "Expiring Soon",
-                                    items: expirationTracker.expiringSoonItems,
-                                    color: .orange,
-                                    icon: "exclamationmark.triangle.fill"
-                                )
-                            }
-                            
-                            // Fresh Items
-                            if !expirationTracker.freshItems.isEmpty {
-                                ExpirationSection(
-                                    title: "Fresh",
-                                    items: expirationTracker.freshItems,
-                                    color: .green,
-                                    icon: "checkmark.circle.fill"
-                                )
-                            }
-                            
-                            // Clear Expired Button
-                            if !expirationTracker.expiredItems.isEmpty {
-                                Button(action: {
-                                    expirationTracker.clearExpiredItems()
-                                }) {
-                                    HStack {
-                                        Image(systemName: "trash")
-                                        Text("Clear Expired Items")
-                                            .font(.bodyText)
-                                    }
-                                    .foregroundColor(.red)
-                                    .frame(maxWidth: .infinity)
-                                    .padding(.vertical, 12)
-                                    .background(COLOR_CHARCOAL_LIGHT)
-                                    .cornerRadius(12)
-                                }
-                                .padding(.horizontal, 20)
-                            }
-                            
-                            Spacer(minLength: 40)
                         }
+
+                        Spacer(minLength: 48)
                     }
                 }
-                .navigationTitle("Expiration Tracking")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .navigationBarLeading) {
-                        Button("Done") {
-                            dismiss()
-                        }
-                        .foregroundColor(COLOR_WARM_AMBER)
-                    }
-                }
-                .sheet(isPresented: $showAddExpiration) {
-                    AddExpirationView(isPresented: $showAddExpiration)
-                }
+            }
+            .navigationTitle("Expiration Tracking")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
+            .sheet(isPresented: $showAddExpiration) {
+                AddExpirationView(isPresented: $showAddExpiration)
             }
         }
     }
-    
-    // MARK: - Stat Card
-    struct StatCard: View {
-        @Environment(\.colorScheme) var colorScheme
-        let title: String
-        let value: String
-        let color: Color
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 4) {
-                Text(value)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundColor(color)
-                
-                Text(title)
-                    .font(.caption)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(12)
-            .background(AdaptiveColors.cardBackground(for: colorScheme))
-            .cornerRadius(12)
+
+    @ViewBuilder
+    private func expirationStat(value: Int, label: String, color: Color) -> some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("\(value)")
+                .font(.system(size: 28, weight: .bold))
+                .foregroundColor(color)
+            Text(label)
+                .font(.system(size: 11))
+                .foregroundColor(COLOR_TEXT_SECONDARY)
+                .lineLimit(2)
+                .minimumScaleFactor(0.8)
         }
-    }
-    
-    // MARK: - Expiration Section
-    struct ExpirationSection: View {
-        @Environment(\.colorScheme) var colorScheme
-        let title: String
-        let items: [ExpirationInfo]
-        let color: Color
-        let icon: String
-        @StateObject private var expirationTracker = ExpirationTracker.shared
-        
-        var body: some View {
-            VStack(alignment: .leading, spacing: 12) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundColor(color)
-                    Text(title)
-                        .font(.sectionHeader)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                    
-                    Spacer()
-                    
-                    Text("\\(items.count)")
-                        .font(.caption)
-                        .fontWeight(.semibold)
-                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                }
-                .padding(.horizontal, 20)
-                
-                VStack(spacing: 8) {
-                    ForEach(items) { item in
-                        ExpirationItemRow(item: item, color: color)
-                    }
-                }
-                .padding(.horizontal, 20)
-            }
-        }
-    }
-    
-    // MARK: - Expiration Item Row
-    struct ExpirationItemRow: View {
-        @Environment(\.colorScheme) var colorScheme
-        let item: ExpirationInfo
-        let color: Color
-        @StateObject private var expirationTracker = ExpirationTracker.shared
-        @State private var showEditSheet = false
-        
-        var body: some View {
-            HStack(spacing: 12) {
-                Circle()
-                    .fill(color)
-                    .frame(width: 12, height: 12)
-                
-                VStack(alignment: .leading, spacing: 4) {
-                    Text(item.ingredientName)
-                        .font(.bodyText)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                    
-                    Text(dateString(item.expirationDate))
-                        .font(.caption)
-                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                    
-                    if let notes = item.notes, !notes.isEmpty {
-                        Text(notes)
-                            .font(.caption)
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            .italic()
-                    }
-                }
-                
-                Spacer()
-                
-                Text(item.isExpired ? "Expired" : "\\(item.daysUntilExpiration)d")
-                    .font(.caption)
-                    .fontWeight(.semibold)
-                    .foregroundColor(color)
-                
-                Button(action: {
-                    expirationTracker.removeExpirationInfo(for: item.id)
-                }) {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                }
-            }
-            .padding(12)
-            .background(AdaptiveColors.cardBackground(for: colorScheme))
-            .cornerRadius(12)
-        }
-        
-        private func dateString(_ date: Date) -> String {
-            let formatter = DateFormatter()
-            formatter.dateStyle = .medium
-            return formatter.string(from: date)
-        }
-    }
-    
-    // MARK: - Add Expiration View
-    struct AddExpirationView: View {
-        @Environment(\.colorScheme) var colorScheme
-        @Binding var isPresented: Bool
-        @StateObject private var expirationTracker = ExpirationTracker.shared
-        @State private var selectedIngredient: String = ""
-        @State private var selectedDate = Date().addingTimeInterval(30 * 24 * 60 * 60)
-        @State private var notes = ""
-        @State private var showCustomIngredient = false
-        @State private var customIngredient = ""
-        
-        var cabinetIngredients: [String] {
-            LocalStorageManager.shared.retrieveTopShelfItems().sorted()
-        }
-        
-        var body: some View {
-            NavigationView {
-                ZStack {
-                    LinearGradient(
-                        gradient: colorScheme == .dark ?
-                        Gradient(colors: [LINEAR_BOTTOM, LINEAR_BOTTOM]) :
-                            Gradient(colors: [LIGHT_LINEAR_BOTTOM, LIGHT_LINEAR_BOTTOM]),
-                        startPoint: .topTrailing,
-                        endPoint: .leading
-                    )
-                    .edgesIgnoringSafeArea(.all)
-                    
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 24) {
-                            // Ingredient Selection
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text("Ingredient")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                
-                                if cabinetIngredients.isEmpty {
-                                    Text("Your cabinet is empty. Add ingredients first.")
-                                        .font(.bodyText)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        .padding()
-                                        .frame(maxWidth: .infinity)
-                                        .background(COLOR_CHARCOAL_LIGHT)
-                                        .cornerRadius(12)
-                                } else {
-                                    Menu {
-                                        ForEach(cabinetIngredients, id: \.self) { ingredient in
-                                            Button(ingredient) {
-                                                selectedIngredient = ingredient
-                                            }
-                                        }
-                                        
-                                        Button("Custom Ingredient...") {
-                                            showCustomIngredient = true
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Text(selectedIngredient.isEmpty ? "Select ingredient" : selectedIngredient)
-                                                .font(.bodyText)
-                                                .foregroundColor(selectedIngredient.isEmpty ? AdaptiveColors.textSecondary(for: colorScheme) : AdaptiveColors.textPrimary(for: colorScheme))
-                                            
-                                            Spacer()
-                                            
-                                            Image(systemName: "chevron.down")
-                                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                        }
-                                        .padding(12)
-                                        .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                    }
-                                }
-                                
-                                // Date Picker
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Text("Expiration Date")
-                                        .font(.sectionHeader)
-                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    
-                                    DatePicker("", selection: $selectedDate, displayedComponents: .date)
-                                        .datePickerStyle(.graphical)
-                                        .tint(COLOR_WARM_AMBER)
-                                        .padding(12)
-                                        .background(AdaptiveColors.cardBackground(for: colorScheme))
-                                    
-                                    // Notes
-                                    VStack(alignment: .leading, spacing: 12) {
-                                        Text("Notes (Optional)")
-                                            .font(.sectionHeader)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        
-                                        TextEditor(text: $notes)
-                                            .font(.bodyText)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                            .frame(height: 80)
-                                            .padding(8)
-                                            .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                        
-                                        // Add Button
-                                        Button(action: {
-                                            let ingredient = showCustomIngredient ? customIngredient : selectedIngredient
-                                            if !ingredient.isEmpty {
-                                                expirationTracker.addExpirationInfo(
-                                                    ingredientName: ingredient,
-                                                    expirationDate: selectedDate,
-                                                    notes: notes.isEmpty ? nil : notes
-                                                )
-                                                isPresented = false
-                                            }
-                                        }) {
-                                            Text("Add Expiration Date")
-                                                .font(.bodyText)
-                                                .fontWeight(.semibold)
-                                                .foregroundColor(selectedIngredient.isEmpty && !showCustomIngredient ? COLOR_TEXT_SECONDARY : COLOR_CHARCOAL)
-                                                .frame(maxWidth: .infinity)
-                                                .padding(.vertical, 16)
-                                                .background((selectedIngredient.isEmpty && !showCustomIngredient) ? COLOR_CHARCOAL : COLOR_WARM_AMBER)
-                                                .cornerRadius(12)
-                                        }
-                                        .disabled(selectedIngredient.isEmpty && !showCustomIngredient)
-                                    }
-                                    .padding()
-                                }
-                            }
-                            .navigationTitle("Track Expiration")
-                            .navigationBarTitleDisplayMode(.inline)
-                            .toolbar {
-                                ToolbarItem(placement: .navigationBarLeading) {
-                                    Button("Cancel") {
-                                        isPresented = false
-                                    }
-                                    .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                            }
-                            .alert("Custom Ingredient", isPresented: $showCustomIngredient) {
-                                TextField("Ingredient name", text: $customIngredient)
-                                Button("Add") {
-                                    selectedIngredient = customIngredient
-                                    showCustomIngredient = false
-                                }
-                                Button("Cancel", role: .cancel) {
-                                    showCustomIngredient = false
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(14)
+        .background(COLOR_CHARCOAL_LIGHT)
+        .cornerRadius(12)
     }
 }

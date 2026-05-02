@@ -49,14 +49,6 @@ struct SubscriptionManagementView: View {
             .navigationTitle("Premium Status")
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(AdaptiveColors.background(for: colorScheme), for: .navigationBar)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Done") {
-                        dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
         }
         .sheet(isPresented: $showPaywall) {
             PaywallView()

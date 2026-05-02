@@ -192,14 +192,6 @@ struct OfflineSettingsView: View {
             }
             .navigationTitle("Offline Mode")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-            }
             .alert("Clear Cache", isPresented: $showClearCacheAlert) {
                 Button("Cancel", role: .cancel) {}
                 Button("Clear", role: .destructive) {

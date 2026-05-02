@@ -53,13 +53,6 @@ struct CollectionDetailView: View {
             .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Done") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if currentCollection != nil {
                         Menu {
@@ -463,13 +456,6 @@ struct EditCollectionView: View {
             .navigationTitle("Edit Collection")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(COLOR_WARM_AMBER)
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         var updated = collection

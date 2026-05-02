@@ -89,6 +89,15 @@ class DrinkManager: ObservableObject {
        return filteredDrinks
     }
     
+    // Fuzzy match: checks if a recipe ingredient is satisfied by any cabinet item.
+    // e.g. recipe needs "Vodka", cabinet has "Absolut Vodka" → "absolut vodka".contains("vodka") → true
+    private func isCovered(_ drinkIngredient: String, by cabinet: Set<String>) -> Bool {
+        if cabinet.contains(drinkIngredient) { return true }
+        return cabinet.contains { cab in
+            cab.contains(drinkIngredient) || drinkIngredient.contains(cab)
+        }
+    }
+
     // Function to get drinks that can be made with your ingredients - optimized
     func onlyYourIngredients() {
         let ingredients = LocalStorageManager.shared.retrieveTopShelfItems()
@@ -110,11 +119,10 @@ class DrinkManager: ObservableObject {
             } else {
                 drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
             }
-            return drinkIngredients.isSubset(of: targetIngredientsSet)
+            return drinkIngredients.allSatisfy { isCovered($0, by: targetIngredientsSet) }
         }
         
         myDrinkPossibilities = matchingDrinks
-        //print(matchingDrinks.map { $0.strDrink }) // Print drink names for readability
     }
     
     func getQuickDrinkPossibilities(ingredients: [Ingredient]) -> [DrinkDetails]? {
@@ -130,7 +138,7 @@ class DrinkManager: ObservableObject {
             } else {
                 drinkIngredients = Set(drink.getIngredients().map { $0.lowercased() })
             }
-            return drinkIngredients.isSubset(of: targetIngredientsSet)
+            return drinkIngredients.allSatisfy { isCovered($0, by: targetIngredientsSet) }
         }
         
         return matchingDrinks.isEmpty ? nil : matchingDrinks

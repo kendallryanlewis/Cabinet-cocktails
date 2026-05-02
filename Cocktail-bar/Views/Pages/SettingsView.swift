@@ -13,8 +13,6 @@ struct SettingsView: View {
     @StateObject private var preferencesManager = UserPreferencesManager.shared
     @Binding var isMenuOpen: Bool
     
-    @State private var username: String = ""
-    @State private var email: String = ""
     @State private var showSavedAlert = false
     
     var body: some View {
@@ -34,62 +32,6 @@ struct SettingsView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.top, 24)
-                    .padding(.horizontal, 20)
-                    
-                    // Profile Section
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Profile")
-                            .font(.sectionHeader)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                        
-                        VStack(spacing: 16) {
-                            // Username field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Name")
-                                    .font(.ingredientText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                TextField("Enter your name", text: $username)
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    .padding(12)
-                                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                    .cornerRadius(8)
-                                    .autocapitalization(.words)
-                            }
-                            
-                            // Email field
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Email")
-                                    .font(.ingredientText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                TextField("your@email.com", text: $email)
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    .padding(12)
-                                    .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
-                                    .cornerRadius(8)
-                                    .autocapitalization(.none)
-                                    .keyboardType(.emailAddress)
-                            }
-                        }
-                        .padding(20)
-                        .background(AdaptiveColors.cardBackground(for: colorScheme))
-                        .cornerRadius(12)
-                        
-                        // Save button
-                        Button(action: {
-                            saveProfile()
-                        }) {
-                            Text("Save Changes")
-                                .font(.bodyText)
-                                .fontWeight(.semibold)
-                                .foregroundColor(COLOR_CHARCOAL)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .background(COLOR_WARM_AMBER)
-                                .cornerRadius(12)
-                        }
-                    }
                     .padding(.horizontal, 20)
                     
                     // Preferences Section
@@ -240,22 +182,11 @@ struct SettingsView: View {
                 }
             }
         }
-        .onAppear {
-            // Load current values
-            username = session.username
-            email = session.email
-        }
         .alert("Profile Updated", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) { }
         } message: {
             Text("Your profile has been saved successfully.")
         }
-    }
-    
-    private func saveProfile() {
-        let finalUsername = username.isEmpty ? "Guest" : username
-        session.saveProfile(username: finalUsername, email: email)
-        showSavedAlert = true
     }
 }
 

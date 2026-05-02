@@ -194,12 +194,6 @@ struct CustomRecipeEditorView: View {
             .navigationTitle("New Recipe")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         saveRecipe()

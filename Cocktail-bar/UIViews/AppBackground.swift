@@ -7,17 +7,11 @@
 
 import SwiftUI
 
-/// A unified background view that automatically adapts to light/dark mode
-/// Use this in all views to ensure consistent theming throughout the app
+/// A unified background view — clean dark gradient
 struct AppBackground: View {
-    @Environment(\.colorScheme) var colorScheme
-    
     var body: some View {
-        
         LinearGradient(
-            gradient: colorScheme == .dark ?
-            Gradient(colors: [.clear, COLOR_CHARCOAL.opacity(0.3), COLOR_CHARCOAL]) :
-                Gradient(colors: [.clear, COLOR_LIGHT_BACKGROUND.opacity(0.3), COLOR_LIGHT_BACKGROUND]),
+            gradient: Gradient(colors: [.clear, COLOR_CHARCOAL.opacity(0.3), COLOR_CHARCOAL]),
             startPoint: .topTrailing,
             endPoint: .bottomLeading
         )
@@ -25,14 +19,13 @@ struct AppBackground: View {
     }
 }
 
-/// A card background that adapts to light/dark mode
+/// A card background — always dark
 struct CardBackground: View {
-    @Environment(\.colorScheme) var colorScheme
     var cornerRadius: CGFloat = 16
     
     var body: some View {
         RoundedRectangle(cornerRadius: cornerRadius)
-            .fill(colorScheme == .dark ? COLOR_CHARCOAL_LIGHT : COLOR_LIGHT_CARD)
+            .fill(COLOR_CHARCOAL_LIGHT)
     }
 }
 
@@ -63,13 +56,10 @@ extension View {
     }
 }
 
-/// A menu-specific background with a darker gradient that works well with light text
+/// A menu-specific background
 struct MenuBackground: View {
-    @Environment(\.colorScheme) var colorScheme
-    
     var body: some View {
         ZStack {
-            // Base background
             AppBackground().opacity(0.7)
         }
     }

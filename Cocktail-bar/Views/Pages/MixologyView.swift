@@ -7,17 +7,32 @@
 
 import SwiftUI
 
+enum MixologySheet: Identifiable {
+    case cocktailDetail(DrinkDetails)
+    case cabinet
+    case filter
+
+    var id: String {
+        switch self {
+        case .cocktailDetail(let d): return "detail-\(d.strDrink)"
+        case .cabinet: return "cabinet"
+        case .filter: return "filter"
+        }
+    }
+}
+
 struct MixologyView: View {
     @Environment(\.colorScheme) var colorScheme
     @EnvironmentObject var session: SessionStore
     @Binding var isMenuOpen: Bool
     @Binding var viewPage: pages
     
-    @State private var selectedCocktail: DrinkDetails? = nil
+    @State private var activeSheet: MixologySheet? = nil
     @State private var searchText = ""
     @State private var filterCategory: String? = nil
     @State private var showAlmostThere = false
     @State private var isLoading = false
+    @State private var cabinetItems: [String] = []
     
     // Performance: Cache expensive computations
     @State private var cachedAlmostThere: [DrinkDetails] = []
@@ -76,337 +91,411 @@ struct MixologyView: View {
         return Array(cats).sorted()
     }
     
+    var ingredientSearchResults: [Ingredient] {
+        guard !searchText.isEmpty, let all = DrinkManager.shared.allIngredients else { return [] }
+        return all
+            .filter { $0.name.lowercased().contains(searchText.lowercased()) }
+            .sorted { $0.name < $1.name }
+    }
+    
     var body: some View {
         ZStack {
-            AppBackground()
+            COLOR_BACKGROUND.ignoresSafeArea()
             
             if LocalStorageManager.shared.retrieveTopShelfItems().isEmpty {
                 EmptyMixologyView(viewPage: $viewPage, colorScheme: colorScheme)
             } else {
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
+                VStack(spacing: 0) {
+                    // ── Fixed Header ──
+                    VStack(alignment: .leading, spacing: 0) {
                         // Hero Stats Section
                         MixologyHeroSection(
                             perfectCount: perfectMatches.count,
                             almostCount: almostThereMatches.count,
-                            cabinetCount: LocalStorageManager.shared.retrieveTopShelfItems().count
+                            cabinetCount: LocalStorageManager.shared.retrieveTopShelfItems().count,
+                            onAddIngredients: { activeSheet = .cabinet }
                         )
                         .padding(.top, 24)
                         .padding(.horizontal, 20)
+                        .padding(.bottom, 16)
                         
-                        // Toggle: Perfect vs Almost There
+                        // Mode toggle — segmented control (only when both modes have content)
                         if !almostThereMatches.isEmpty {
-                            HStack(spacing: 12) {
-                                ToggleButton(
+                            HStack(spacing: 0) {
+                                SearchModeButton(
                                     title: "Perfect Matches",
-                                    count: perfectMatches.count,
+                                    icon: "checkmark.circle",
                                     isSelected: !showAlmostThere,
                                     action: { showAlmostThere = false }
                                 )
-                                
-                                ToggleButton(
+                                SearchModeButton(
                                     title: "Almost There",
-                                    count: almostThereMatches.count,
+                                    icon: "sparkles",
                                     isSelected: showAlmostThere,
                                     action: { showAlmostThere = true }
                                 )
                             }
+                            .padding(3)
+                            .background(Color.white.opacity(0.06))
+                            .cornerRadius(12)
                             .padding(.horizontal, 20)
+                            .padding(.bottom, 16)
                         }
-                        
-                        // Search Bar
-                        if !perfectMatches.isEmpty || !almostThereMatches.isEmpty {
-                            HStack {
+
+                        // Search + Filter row
+                        HStack(spacing: 12) {
+                            HStack(spacing: 10) {
                                 Image(systemName: "magnifyingglass")
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                TextField("Search cocktails", text: $searchText)
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                                    .font(.system(size: 15, weight: .medium))
+                                TextField("Search cocktails & ingredients...", text: $searchText)
+                                    .font(.system(size: 16))
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
                                     .tint(COLOR_WARM_AMBER)
-                                    .placeholder(when: searchText.isEmpty) {
-                                        Text("Search cocktails")
-                                            .font(.bodyText)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    }
-                                
                                 if !searchText.isEmpty {
                                     Button(action: { searchText = "" }) {
                                         Image(systemName: "xmark.circle.fill")
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                            .foregroundColor(COLOR_TEXT_SECONDARY)
                                     }
                                 }
                             }
-                            .padding(12)
-                            .background(COLOR_CHARCOAL_LIGHT)
-                            .cornerRadius(12)
-                            .padding(.horizontal, 20)
-                        }
-                        
-                        // Category Filter
-                        if !categories.isEmpty {
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack(spacing: 12) {
-                                    CategoryFilterButton(
-                                        title: "All",
-                                        isSelected: filterCategory == nil,
-                                        action: { filterCategory = nil }
-                                    )
-                                    
-                                    ForEach(categories, id: \.self) { category in
-                                        CategoryFilterButton(
-                                            title: category,
-                                            isSelected: filterCategory == category,
-                                            action: { filterCategory = category }
-                                        )
-                                    }
+                            .padding(.horizontal, 16)
+                            .padding(.vertical, 16)
+                            .background(Color.white.opacity(0.07))
+                            .cornerRadius(13)
+
+                            // Filter button — opens category sheet
+                            Button(action: { activeSheet = .filter }) {
+                                ZStack {
+                                    (filterCategory != nil ? COLOR_WARM_AMBER : Color.white.opacity(0.07))
+                                    Image(systemName: "slider.horizontal.3")
+                                        .font(.system(size: 16, weight: .medium))
+                                        .foregroundColor(filterCategory != nil ? COLOR_CHARCOAL : COLOR_TEXT_SECONDARY)
                                 }
-                                .padding(.horizontal, 20)
+                                .frame(width: 50, height: 50)
+                                .cornerRadius(13)
                             }
                         }
-                        
-                        // Results Section
-                        if displayedCocktails.isEmpty && (perfectMatches.isEmpty && almostThereMatches.isEmpty) {
-                            NoMatchesYetView()
-                                .padding(.vertical, 40)
-                        } else if displayedCocktails.isEmpty {
-                            // Filtered out all results
-                            VStack(spacing: 12) {
-                                Image(systemName: "magnifyingglass")
-                                    .font(.iconMedium)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                Text("No cocktails found")
-                                    .font(.sectionHeader)
-                                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                
-                                Text("Try adjusting your search or filters")
-                                    .font(.bodyText)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                
-                                Button(action: {
-                                    searchText = ""
-                                    filterCategory = nil
-                                }) {
-                                    Text("Clear Filters")
-                                        .font(.buttonText)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                }
-                                .padding(.top, 8)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 60)
-                        } else {
-                            // Cocktail Grid
-                            LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
-                                ForEach(displayedCocktails, id: \.id) { cocktail in
-                                    MixologyCocktailCard(
-                                        cocktail: cocktail,
-                                        showMissing: showAlmostThere,
-                                        cabinetIngredients: Set(LocalStorageManager.shared.retrieveTopShelfItems().map { $0.lowercased() }),
-                                        onTap: {
-                                            selectedCocktail = cocktail
+                        .padding(.horizontal, 20)
+                        .padding(.bottom, 20)
+                    }
+                    .background(COLOR_BACKGROUND)
+                    
+                    Rectangle()
+                        .fill(Color.white.opacity(0.08))
+                        .frame(height: 1)
+                    
+                    // ── Scrollable content ──
+                    ScrollView(showsIndicators: false) {
+                        VStack(alignment: .leading, spacing: 28) {
+
+                            // ── Ingredient search results ──
+                            if !searchText.isEmpty && !ingredientSearchResults.isEmpty {
+                                VStack(alignment: .leading, spacing: 14) {
+                                    Text("INGREDIENTS")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .kerning(1)
+                                        .padding(.horizontal, 20)
+
+                                    LazyVGrid(
+                                        columns: [GridItem(.flexible(), spacing: 12), GridItem(.flexible())],
+                                        spacing: 12
+                                    ) {
+                                        ForEach(ingredientSearchResults, id: \.id) { ingredient in
+                                            ModernCabinetCard(
+                                                ingredient: ingredient,
+                                                isInCabinet: cabinetItems.contains(ingredient.name),
+                                                onTap: { toggleCabinetIngredient(ingredient) }
+                                            )
                                         }
-                                    )
+                                    }
+                                    .padding(.horizontal, 20)
                                 }
                             }
-                            .padding(.horizontal, 20)
+
+                            // ── Cocktail results ──
+                            VStack(alignment: .leading, spacing: 14) {
+                                if !searchText.isEmpty {
+                                    Text("COCKTAILS")
+                                        .font(.system(size: 11, weight: .semibold))
+                                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        .kerning(1)
+                                        .padding(.horizontal, 20)
+                                }
+
+                                if displayedCocktails.isEmpty && (perfectMatches.isEmpty && almostThereMatches.isEmpty) {
+                                    NoMatchesYetView()
+                                        .padding(.vertical, 40)
+                                } else if displayedCocktails.isEmpty {
+                                    VStack(spacing: 12) {
+                                        Image(systemName: "magnifyingglass")
+                                            .font(.iconMedium)
+                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        Text("No cocktails found")
+                                            .font(.sectionHeader)
+                                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                                        Text("Try adjusting your search or filters")
+                                            .font(.bodyText)
+                                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                                        Button(action: {
+                                            searchText = ""
+                                            filterCategory = nil
+                                        }) {
+                                            Text("Clear Filters")
+                                                .font(.buttonText)
+                                                .foregroundColor(COLOR_WARM_AMBER)
+                                        }
+                                        .padding(.top, 8)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 60)
+                                } else {
+                                    LazyVGrid(columns: [GridItem(.flexible(), spacing: 16), GridItem(.flexible())], spacing: 16) {
+                                        ForEach(displayedCocktails, id: \.id) { cocktail in
+                                            MixologyCocktailCard(
+                                                cocktail: cocktail,
+                                                showMissing: showAlmostThere,
+                                                cabinetIngredients: Set(LocalStorageManager.shared.retrieveTopShelfItems().map { $0.lowercased() }),
+                                                onTap: { activeSheet = .cocktailDetail(cocktail) }
+                                            )
+                                        }
+                                    }
+                                    .padding(.horizontal, 20)
+                                }
+                            }
+
+                            Spacer(minLength: 48)
                         }
-                        
-                        Spacer(minLength: 40)
+                        .padding(.top, 24)
                     }
                 }
             }
         }
-        .onAppear(perform: DrinkManager.shared.onlyYourIngredients)
-        .sheet(item: $selectedCocktail) { cocktail in
-            DetailsView(cocktail: cocktail.strDrink, hideCloseButton: false, dismiss: {
-                selectedCocktail = nil
-            })
+        .onAppear {
+            DrinkManager.shared.onlyYourIngredients()
+            if DrinkManager.shared.allIngredients == nil {
+                DrinkManager.shared.getAllUniqueIngredients()
+            }
+            cabinetItems = LocalStorageManager.shared.retrieveTopShelfItems()
         }
+        .sheet(item: $activeSheet) { sheet in
+            switch sheet {
+            case .cocktailDetail(let cocktail):
+                DetailsView(cocktail: cocktail.strDrink, hideCloseButton: false, dismiss: {
+                    activeSheet = nil
+                })
+            case .cabinet:
+                TopShelfView(isMenuOpen: .constant(false))
+                    .onDisappear {
+                        DrinkManager.shared.onlyYourIngredients()
+                        cabinetItems = LocalStorageManager.shared.retrieveTopShelfItems()
+                    }
+            case .filter:
+                MixologyFilterSheet(categories: categories, selectedCategory: $filterCategory)
+            }
+        }
+    }
+
+    private func toggleCabinetIngredient(_ ingredient: Ingredient) {
+        if let idx = cabinetItems.firstIndex(of: ingredient.name) {
+            cabinetItems.remove(at: idx)
+            if let storageIdx = LocalStorageManager.shared.retrieveTopShelfItems().firstIndex(of: ingredient.name) {
+                LocalStorageManager.shared.removeTopShelfItem(at: storageIdx)
+            }
+        } else {
+            cabinetItems.append(ingredient.name)
+            LocalStorageManager.shared.addTopShelfItem(newItem: ingredient.name)
+        }
+        DrinkManager.shared.onlyYourIngredients()
     }
 }
 
 // MARK: - Hero Section
 struct MixologyHeroSection: View {
-    @Environment(\.colorScheme) var colorScheme
     let perfectCount: Int
     let almostCount: Int
     let cabinetCount: Int
-    
+    let onAddIngredients: () -> Void
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("Your Mixology")
-                .font(.cocktailTitle)
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-            
-            if perfectCount > 0 {
-                HStack(spacing: 8) {
-                    Text("\(perfectCount)")
-                        .font(.displayLarge)
-                        .foregroundColor(COLOR_WARM_AMBER)
-                    
-                    VStack(alignment: .leading, spacing: 2) {
-                        Text("cocktail\(perfectCount == 1 ? "" : "s")")
-                            .font(.sectionHeader)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                        Text("you can make right now")
-                            .font(.bodyText)
-                            .foregroundColor(COLOR_TEXT_SECONDARY)
+        VStack(alignment: .leading, spacing: 20) {
+
+            // Title row
+            HStack(alignment: .center) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text("YOUR MIXOLOGY")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                        .kerning(1)
+                    Text("Your Cabinet")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                }
+                Spacer()
+                Button(action: onAddIngredients) {
+                    HStack(spacing: 5) {
+                        Image(systemName: "cabinet")
+                            .font(.system(size: 12, weight: .semibold))
+                        Text("My Cabinet")
+                            .font(.system(size: 13, weight: .semibold))
                     }
+                    .foregroundColor(COLOR_CHARCOAL)
+                    .padding(.horizontal, 14)
+                    .padding(.vertical, 8)
+                    .background(COLOR_WARM_AMBER)
+                    .cornerRadius(20)
                 }
             }
-            
-            if almostCount > 0 {
-                HStack(spacing: 8) {
-                    Image(systemName: "sparkles")
-                        .foregroundColor(COLOR_WARM_AMBER)
-                        .font(.bodyText)
-                    
-                    Text("\(almostCount) more with 1-2 ingredients")
-                        .font(.bodyText)
+
+            // Stat card
+            HStack(alignment: .center, spacing: 0) {
+                // Left — cocktails ready
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("\(perfectCount)")
+                        .font(.system(size: 52, weight: .bold))
+                        .foregroundColor(perfectCount > 0 ? COLOR_WARM_AMBER : COLOR_TEXT_SECONDARY)
+                    Text("cocktail\(perfectCount == 1 ? "" : "s") ready")
+                        .font(.system(size: 13, weight: .medium))
                         .foregroundColor(COLOR_TEXT_SECONDARY)
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
+
+                // Divider
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(width: 1, height: 56)
+                    .padding(.horizontal, 16)
+
+                // Right — almost there
+                VStack(alignment: .leading, spacing: 4) {
+                    HStack(spacing: 4) {
+                        Image(systemName: "sparkles")
+                            .font(.system(size: 14, weight: .semibold))
+                            .foregroundColor(COLOR_WARM_AMBER)
+                        Text("\(almostCount)")
+                            .font(.system(size: 52, weight: .bold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                    }
+                    Text("1–2 away")
+                        .font(.system(size: 13, weight: .medium))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
-            
-            HStack(spacing: 8) {
-                Image(systemName: "cabinet")
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
-                    .font(.bodySmall)
-                
-                Text("\(cabinetCount) ingredients in your cabinet")
-                    .font(.caption)
-                    .foregroundColor(COLOR_TEXT_SECONDARY)
+            .padding(20)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(COLOR_CHARCOAL_LIGHT)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .strokeBorder(COLOR_WARM_AMBER.opacity(0.15), lineWidth: 1)
+                    )
+            )
+
+            // Cabinet count — tappable to open cabinet
+            Button(action: onAddIngredients) {
+                HStack(spacing: 6) {
+                    Image(systemName: "cabinet")
+                        .font(.system(size: 12))
+                    Text("\(cabinetCount) ingredient\(cabinetCount == 1 ? "" : "s") stocked")
+                        .font(.system(size: 12))
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 11, weight: .semibold))
+                }
+                .foregroundColor(COLOR_TEXT_SECONDARY)
             }
         }
     }
 }
 
-// MARK: - Toggle Button
-struct ToggleButton: View {
-    @Environment(\.colorScheme) var colorScheme
-    let title: String
-    let count: Int
-    let isSelected: Bool
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            VStack(spacing: 4) {
-                Text("\(count)")
-                    .font(.sectionHeader)
-                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textPrimary(for: colorScheme))
-                
-                Text(title)
-                    .font(.caption)
-                    .fontWeight(.medium)
-                    .foregroundColor(isSelected ? COLOR_CHARCOAL : AdaptiveColors.textSecondary(for: colorScheme))
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 16)
-            .background(isSelected ? COLOR_WARM_AMBER : AdaptiveColors.cardBackground(for: colorScheme))
-            .cornerRadius(12)
-        }
-    }
-}
+// ToggleButton removed — replaced by SearchModeButton segmented control
 
 // MARK: - Cocktail Card
 struct MixologyCocktailCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let cocktail: DrinkDetails
     let showMissing: Bool
     let cabinetIngredients: Set<String>
     let onTap: () -> Void
-    
-    var missingIngredients: [String] {
+
+    var missingCount: Int {
         let drinkIngredients = Set(cocktail.getIngredients().map { $0.lowercased() })
-        let missing = drinkIngredients.subtracting(cabinetIngredients)
-        return Array(missing)
+        return drinkIngredients.subtracting(cabinetIngredients).count
     }
-    
+
     var body: some View {
         Button(action: onTap) {
-            VStack(spacing: 0) {
-                // Image
-                ZStack(alignment: .topTrailing) {
+            ZStack(alignment: .bottomLeading) {
+                // Full-bleed image
+                Group {
                     if let imageURL = cocktail.strDrinkThumb, let url = URL(string: imageURL) {
                         CachedAsyncImage(url: url) { image in
                             image
                                 .resizable()
                                 .aspectRatio(contentMode: .fill)
-                                .frame(height: 140)
-                                .clipped()
                         } placeholder: {
                             ZStack {
-                                Color.gray.opacity(0.2)
-                                SwiftUI.ProgressView()
-                                    .tint(COLOR_WARM_AMBER)
+                                COLOR_CHARCOAL_LIGHT
+                                SwiftUI.ProgressView().tint(COLOR_WARM_AMBER)
                             }
-                            .frame(height: 140)
                         }
                     } else {
                         Image("GenericAlcohol")
                             .resizable()
                             .aspectRatio(contentMode: .fill)
-                            .frame(height: 140)
-                            .clipped()
-                    }
-                    
-                    // Missing ingredients badge
-                    if showMissing && !missingIngredients.isEmpty {
-                        HStack(spacing: 4) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.captionSmall)
-                            Text("\(missingIngredients.count)")
-                                .font(.caption).fontWeight(.bold)
-                        }
-                        .foregroundColor(COLOR_CHARCOAL)
-                        .padding(.horizontal, 8)
-                        .padding(.vertical, 4)
-                        .background(COLOR_WARM_AMBER)
-                        .cornerRadius(12)
-                        .padding(8)
                     }
                 }
-                
-                // Content
-                VStack(alignment: .leading, spacing: 8) {
-                    Text(cocktail.strDrink)
-                        .font(.cardTitle)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                        .lineLimit(2)
-                        .multilineTextAlignment(.leading)
-                    
+                .frame(height: 200)
+                .clipped()
+
+                // Gradient overlay
+                LinearGradient(
+                    colors: [.clear, .clear, Color.black.opacity(0.85)],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+
+                // Text at bottom
+                VStack(alignment: .leading, spacing: 4) {
                     if let category = cocktail.strCategory {
-                        Text(category)
-                            .font(.caption)
-                            .foregroundColor(showMissing ? AdaptiveColors.textSecondary(for: colorScheme) : COLOR_WARM_AMBER)
-                            .textCase(.uppercase)
+                        Text(category.uppercased())
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(COLOR_WARM_AMBER)
+                            .kerning(0.8)
                     }
-                    
-                    // Show missing ingredients for "Almost There"
-                    if showMissing && !missingIngredients.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Need:")
-                                .font(.captionSmall).fontWeight(.semibold)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            
-                            ForEach(missingIngredients.prefix(2), id: \.self) { ingredient in
-                                Text("• \(ingredient.capitalized)")
-                                    .font(.captionSmall)
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    .lineLimit(1)
+                    Text(cocktail.strDrink)
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                        .lineLimit(2)
+                }
+                .padding(12)
+
+                // "Almost There" badge — top right
+                if showMissing && missingCount > 0 {
+                    VStack {
+                        HStack {
+                            Spacer()
+                            HStack(spacing: 3) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.system(size: 9))
+                                Text("+\(missingCount)")
+                                    .font(.system(size: 11, weight: .bold))
                             }
+                            .foregroundColor(COLOR_CHARCOAL)
+                            .padding(.horizontal, 7)
+                            .padding(.vertical, 4)
+                            .background(COLOR_WARM_AMBER)
+                            .cornerRadius(10)
+                            .padding(8)
                         }
-                        .padding(.top, 4)
+                        Spacer()
                     }
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(12)
-                .background(AdaptiveColors.cardBackground(for: colorScheme))
             }
-            .cornerRadius(12)
-            .shadow(color: Color.black.opacity(0.3), radius: 8, x: 0, y: 4)
+            .frame(height: 200)
+            .cornerRadius(14)
+            .clipped()
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -414,21 +503,20 @@ struct MixologyCocktailCard: View {
 
 // MARK: - No Matches Yet
 struct NoMatchesYetView: View {
-    @Environment(\.colorScheme) var colorScheme
     var body: some View {
         VStack(spacing: 16) {
             Image(systemName: "questionmark.circle")
                 .font(.iconMedium)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                .foregroundColor(COLOR_TEXT_SECONDARY)
             
             VStack(spacing: 8) {
                 Text("No matches yet")
                     .font(.sectionHeader)
-                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                    .foregroundColor(COLOR_TEXT_PRIMARY)
                 
                 Text("Add a few more ingredients to unlock cocktail recipes")
                     .font(.bodyText)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 40)
             }
@@ -437,11 +525,84 @@ struct NoMatchesYetView: View {
     }
 }
 
+// MARK: - Filter Sheet
+struct MixologyFilterSheet: View {
+    let categories: [String]
+    @Binding var selectedCategory: String?
+    @Environment(\.presentationMode) var presentationMode
+
+    var body: some View {
+        NavigationView {
+            ZStack {
+                COLOR_CHARCOAL.ignoresSafeArea()
+                List {
+                    Section {
+                        Button(action: {
+                            selectedCategory = nil
+                            presentationMode.wrappedValue.dismiss()
+                        }) {
+                            HStack {
+                                Text("All Cocktails")
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                Spacer()
+                                if selectedCategory == nil {
+                                    Image(systemName: "checkmark")
+                                        .foregroundColor(COLOR_WARM_AMBER)
+                                        .font(.system(size: 14, weight: .semibold))
+                                }
+                            }
+                        }
+                        .listRowBackground(COLOR_CHARCOAL_LIGHT)
+
+                        ForEach(categories, id: \.self) { category in
+                            Button(action: {
+                                selectedCategory = category
+                                presentationMode.wrappedValue.dismiss()
+                            }) {
+                                HStack {
+                                    Text(category)
+                                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                                    Spacer()
+                                    if selectedCategory == category {
+                                        Image(systemName: "checkmark")
+                                            .foregroundColor(COLOR_WARM_AMBER)
+                                            .font(.system(size: 14, weight: .semibold))
+                                    }
+                                }
+                            }
+                            .listRowBackground(COLOR_CHARCOAL_LIGHT)
+                        }
+                    }
+                }
+                .listStyle(.insetGrouped)
+                .scrollContentBackground(.hidden)
+            }
+            .navigationTitle("Filter by Category")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Clear") {
+                        selectedCategory = nil
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .opacity(selectedCategory != nil ? 1 : 0)
+                    .disabled(selectedCategory == nil)
+                }
+            }
+            .toolbarBackground(COLOR_CHARCOAL, for: .navigationBar)
+            .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .presentationDetents([.medium, .large])
+    }
+}
+
 // MARK: - Empty State
 struct EmptyMixologyView: View {
     @Binding var viewPage: pages
     let colorScheme: ColorScheme
-    
+    @State private var showCabinet = false
+
     var body: some View {
         VStack(spacing: 24) {
             Spacer()
@@ -468,11 +629,7 @@ struct EmptyMixologyView: View {
                     .padding(.horizontal, 40)
             }
             
-            Button(action: {
-                withAnimation {
-                    viewPage = .cabinet
-                }
-            }) {
+            Button(action: { showCabinet = true }) {
                 HStack(spacing: 8) {
                     Image(systemName: "plus.circle.fill")
                     Text("Stock Your Cabinet")
@@ -488,5 +645,8 @@ struct EmptyMixologyView: View {
             Spacer()
         }
         .padding(.horizontal, 20)
+        .sheet(isPresented: $showCabinet) {
+            TopShelfView(isMenuOpen: .constant(false))
+        }
     }
 }

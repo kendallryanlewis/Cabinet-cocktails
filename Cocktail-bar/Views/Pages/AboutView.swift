@@ -8,160 +8,168 @@
 import SwiftUI
 
 struct AboutView: View {
-    @Environment(\.colorScheme) var colorScheme
     @Binding var isMenuOpen: Bool
-    
+    @Environment(\.presentationMode) var presentationMode
+
     var body: some View {
         ZStack {
-            AppBackground()
-            
+            COLOR_BACKGROUND.ignoresSafeArea()
+
             ScrollView(showsIndicators: false) {
-                VStack(spacing: 32) {
-                    // Header
-                    VStack(alignment: .leading, spacing: 12) {
-                        HStack(spacing: 12) {
-                            Image(systemName: "info.circle.fill")
-                                .font(.iconSmall)
-                                .foregroundColor(COLOR_WARM_AMBER)
-                            Text("About")
-                                .font(.cocktailTitle)
-                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                        }
-                        Text("Your personal bartending companion")
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 24)
-                    .padding(.horizontal, 20)
-                    
-                    // App Name Card
-                    VStack(spacing: 16) {
+                VStack(alignment: .leading, spacing: 32) {
+
+                    // ── Header ──────────────────────────────────────────
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("ABOUT")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
                         Text("Cabinet Cocktails")
-                            .font(.system(size: 28, weight: .bold, design: .serif))
-                            .foregroundColor(COLOR_WARM_AMBER)
-                        
-                        Text("Welcome to Cabinet Cocktails, the innovative iOS app designed to transform your home bartending experience. Whether you're a cocktail aficionado or a newcomer eager to explore the world of mixology, our app is your personal guide to crafting delightful drinks with what you have.")
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        Text("Your personal bartending companion")
+                            .font(.system(size: 14))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                    }
+                    .padding(.top, 28)
+                    .padding(.horizontal, 20)
+
+                    // ── App Intro Card ──────────────────────────────────
+                    VStack(alignment: .leading, spacing: 14) {
+                        HStack(spacing: 12) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(COLOR_WARM_AMBER.opacity(0.14))
+                                    .frame(width: 44, height: 44)
+                                Image(systemName: "wineglass.fill")
+                                    .font(.system(size: 20))
+                                    .foregroundColor(COLOR_WARM_AMBER)
+                            }
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text("Cabinet Cocktails")
+                                    .font(.system(size: 17, weight: .semibold))
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                Text("Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.0")")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                            }
+                        }
+
+                        Text("Cabinet Cocktails transforms your home bartending experience. Whether you're a cocktail aficionado or a newcomer to mixology, we help you craft delightful drinks with what you already have.")
+                            .font(.system(size: 15))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .lineSpacing(5)
+                    }
+                    .padding(20)
+                    .background(COLOR_CHARCOAL_LIGHT)
+                    .cornerRadius(14)
+                    .padding(.horizontal, 20)
+
+                    // ── What We Offer ───────────────────────────────────
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("WHAT WE OFFER")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 1) {
+                            AboutFeatureRow(icon: "magnifyingglass",              title: "Discover Cocktails",         subtitle: "Browse 600+ recipes from classics to modern creations")
+                            AboutFeatureRow(icon: "sparkles",                     title: "Personalized Picks",         subtitle: "Get recommendations based on your cabinet")
+                            AboutFeatureRow(icon: "chart.line.uptrend.xyaxis",    title: "Expand Your Skills",         subtitle: "Find cocktails just one or two ingredients away")
+                            AboutFeatureRow(icon: "cart.fill",                    title: "Smart Shopping Lists",       subtitle: "Build lists from the recipes you want to make")
+                            AboutFeatureRow(icon: "clock.fill",                   title: "Cocktail History",           subtitle: "Track what you've mixed and when", isLast: true)
+                        }
+                        .background(COLOR_CHARCOAL_LIGHT)
+                        .cornerRadius(14)
+                        .padding(.horizontal, 20)
+                    }
+
+                    // ── Closing ─────────────────────────────────────────
+                    VStack(spacing: 6) {
+                        Text("Cheers 🥃")
+                            .font(.system(size: 20, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        Text("Thanks for using Cabinet Cocktails. Here's to your next unforgettable cocktail.")
+                            .font(.system(size: 14))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
                             .multilineTextAlignment(.center)
-                            .lineSpacing(4)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(24)
-                    .background(AdaptiveColors.cardBackground(for: colorScheme))
-                    .cornerRadius(16)
-                    
-                    // Features Section
-                    VStack(alignment: .leading, spacing: 20) {
-                        Text("What We Offer")
-                            .font(.sectionHeader)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                            .padding(.horizontal, 20)
-                        
-                        VStack(spacing: 16) {
-                            AboutFeatureCard(
-                                icon: "magnifyingglass.circle.fill",
-                                title: "Discover New Cocktails",
-                                description: "Explore an extensive database of cocktail recipes from classic favorites to modern concoctions, ensuring there's something for every taste and occasion."
-                            )
-                            
-                            AboutFeatureCard(
-                                icon: "star.circle.fill",
-                                title: "Personalized Recommendations",
-                                description: "Tell us what ingredients you have, and we'll provide a curated list of cocktails you can make without needing to step out for additional supplies."
-                            )
-                            
-                            AboutFeatureCard(
-                                icon: "chart.line.uptrend.xyaxis.circle.fill",
-                                title: "Expand Your Skills",
-                                description: "Discover cocktails that are just one or two ingredients away, helping you gradually build your bar and skills."
-                            )
-                        }
-                    }
-                    
-                    // Key Features List
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Key Features")
-                            .font(.sectionHeader)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                        
-                        VStack(alignment: .leading, spacing: 12) {
-                            FeaturePoint(icon: "checkmark.circle.fill", text: "Ingredient-based cocktail discovery")
-                            FeaturePoint(icon: "checkmark.circle.fill", text: "Detailed recipes and instructions")
-                            FeaturePoint(icon: "checkmark.circle.fill", text: "Save your favorite cocktails")
-                            FeaturePoint(icon: "checkmark.circle.fill", text: "Track your ingredient cabinet")
-                            FeaturePoint(icon: "checkmark.circle.fill", text: "Smart mixology suggestions")
-                        }
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(20)
-                    .background(AdaptiveColors.cardBackground(for: colorScheme))
-                    .cornerRadius(12)
-                    
-                    // Closing Message
-                    VStack(spacing: 8) {
-                        Text("Cheers! 🥃")
-                            .font(.sectionHeader)
-                            .foregroundColor(COLOR_WARM_AMBER)
-                        Text("Thanks for using Cabinet Cocktails. Here's to your next unforgettable cocktail!")
-                            .font(.bodyText)
-                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            .multilineTextAlignment(.center)
-                    }
                     .padding(.horizontal, 20)
-                    
-                    Spacer(minLength: 60)
+
+                    Spacer(minLength: 48)
                 }
             }
         }
     }
 }
 
+// MARK: - Feature Row
+struct AboutFeatureRow: View {
+    let icon: String
+    let title: String
+    let subtitle: String
+    var isLast: Bool = false
 
-// MARK: - About Feature Card
+    var body: some View {
+        VStack(spacing: 0) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(COLOR_WARM_AMBER.opacity(0.14))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: icon)
+                        .font(.system(size: 15))
+                        .foregroundColor(COLOR_WARM_AMBER)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .medium))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                    Text(subtitle)
+                        .font(.system(size: 12))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                }
+                Spacer()
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+
+            if !isLast {
+                Divider()
+                    .background(Color.white.opacity(0.06))
+                    .padding(.leading, 66)
+            }
+        }
+    }
+}
+
+// MARK: - Legacy sub-views kept for any remaining references
 struct AboutFeatureCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let title: String
     let description: String
-    
     var body: some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: icon)
-                .font(.cocktailTitle)
-                .foregroundColor(COLOR_WARM_AMBER)
-                .frame(width: 40)
-            
-            VStack(alignment: .leading, spacing: 8) {
-                Text(title)
-                    .font(.cardTitle)
-                    .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                Text(description)
-                    .font(.ingredientText)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                    .lineSpacing(4)
-            }
-        }
-        .padding(16)
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
-        .cornerRadius(12)
+        AboutFeatureRow(icon: icon, title: title, subtitle: description)
     }
 }
 
 struct FeaturePoint: View {
-    @Environment(\.colorScheme) var colorScheme
     let icon: String
     let text: String
-    
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             Image(systemName: icon)
-                .font(.bodyText)
+                .font(.system(size: 14))
                 .foregroundColor(COLOR_WARM_AMBER)
             Text(text)
-                .font(.bodyText)
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                .font(.system(size: 15))
+                .foregroundColor(COLOR_TEXT_PRIMARY)
         }
     }
+}
+
+#Preview {
+    AboutView(isMenuOpen: .constant(false))
 }

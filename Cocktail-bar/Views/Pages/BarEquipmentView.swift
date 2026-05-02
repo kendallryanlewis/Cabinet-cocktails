@@ -447,12 +447,6 @@ struct AddEquipmentView: View {
             .navigationTitle("Add Equipment")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                }
-                
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button("Save") {
                         saveEquipment()

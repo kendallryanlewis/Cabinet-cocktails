@@ -8,10 +8,9 @@
 import SwiftUI
 
 struct HelpView: View {
-    @Environment(\.colorScheme) var colorScheme
     @State private var showTutorial = false
     @State private var expandedSection: HelpSection? = nil
-    
+
     enum HelpSection: String, CaseIterable {
         case gettingStarted = "Getting Started"
         case quickMix = "Quick Mix"
@@ -19,227 +18,205 @@ struct HelpView: View {
         case features = "Advanced Features"
         case troubleshooting = "Troubleshooting"
     }
-    
+
     var body: some View {
-        NavigationView {
-            ZStack {
-                AppBackground()
-                
-                ScrollView(showsIndicators: false) {
-                    VStack(alignment: .leading, spacing: 24) {
-                        // Header
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Help & Support")
-                                .font(.cocktailTitle)
-                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                            
-                            Text("Learn how to make the most of your cocktail experience")
-                                .font(.subheadline)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                        }
-                        .padding(.horizontal, 20)
-                        .padding(.top, 24)
-                        
-                        // Tutorial Button
-                        Button(action: { showTutorial = true }) {
-                            HStack {
+        ZStack {
+            COLOR_BACKGROUND.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(alignment: .leading, spacing: 32) {
+                    // Header
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("HELP")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
+                        Text("Help & Support")
+                            .font(.system(size: 34, weight: .bold))
+                            .foregroundColor(COLOR_TEXT_PRIMARY)
+                        Text("Learn how to make the most of your cocktail experience")
+                            .font(.system(size: 14))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                    }
+                    .padding(.horizontal, 20)
+                    .padding(.top, 28)
+
+                    // Tutorial Button
+                    Button(action: { showTutorial = true }) {
+                        HStack(spacing: 14) {
+                            ZStack {
+                                RoundedRectangle(cornerRadius: 10)
+                                    .fill(COLOR_WARM_AMBER.opacity(0.14))
+                                    .frame(width: 44, height: 44)
                                 Image(systemName: "graduationcap.fill")
-                                    .font(.title2)
+                                    .font(.system(size: 18, weight: .semibold))
                                     .foregroundColor(COLOR_WARM_AMBER)
-                                
-                                VStack(alignment: .leading, spacing: 4) {
-                                    Text("Interactive Tutorial")
-                                        .font(.headline)
-                                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                    
-                                    Text("Take a guided tour of all features")
-                                        .font(.caption)
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                
-                                Spacer()
-                                
-                                Image(systemName: "chevron.right")
-                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                             }
-                            .padding()
-                            .background(AdaptiveColors.cardBackground(for: colorScheme))
-                            .cornerRadius(12)
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("Interactive Tutorial")
+                                    .font(.system(size: 16, weight: .semibold))
+                                    .foregroundColor(COLOR_TEXT_PRIMARY)
+                                Text("Take a guided tour of all features")
+                                    .font(.system(size: 13))
+                                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                            }
+                            Spacer()
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 13, weight: .medium))
+                                .foregroundColor(COLOR_TEXT_SECONDARY)
                         }
-                        .padding(.horizontal, 20)
-                        
-                        // Help Sections
-                        ForEach(HelpSection.allCases, id: \.self) { section in
+                        .padding(16)
+                        .background(COLOR_CHARCOAL_LIGHT)
+                        .cornerRadius(14)
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 20)
+
+                    // Help Sections
+                    VStack(alignment: .leading, spacing: 0) {
+                        let sections = HelpSection.allCases
+                        ForEach(Array(sections.enumerated()), id: \.offset) { index, section in
                             HelpSectionCard(
                                 section: section,
                                 isExpanded: expandedSection == section,
+                                isLast: index == sections.count - 1,
                                 onTap: {
-                                    withAnimation {
+                                    withAnimation(.easeInOut(duration: 0.2)) {
                                         expandedSection = expandedSection == section ? nil : section
                                     }
                                 }
                             )
                         }
-                        
-                        // Contact Support
-                        VStack(alignment: .leading, spacing: 16) {
-                            Text("Contact & Support")
-                                .font(.title2.bold())
-                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                            
-                            Text("We're here to help! Choose your preferred way to reach us.")
-                                .font(.subheadline)
-                                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                            
-                            // Email Support
-                            Button(action: {
-                                if let url = URL(string: "mailto:support@cocktailapp.com?subject=Cocktail%20App%20Support") {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: "envelope.fill")
-                                        .font(.title3)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Email Support")
-                                            .font(.headline)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        Text("support@cocktailapp.com")
-                                            .font(.caption)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                .padding()
-                                .background(AdaptiveColors.cardBackground(for: colorScheme))
-                                .cornerRadius(12)
-                            }
-                            
-                            // Feedback
-                            Button(action: {
-                                if let url = URL(string: "mailto:feedback@cocktailapp.com?subject=App%20Feedback") {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: "bubble.left.and.bubble.right.fill")
-                                        .font(.title3)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Send Feedback")
-                                            .font(.headline)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        Text("Help us improve the app")
-                                            .font(.caption)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                .padding()
-                                .background(AdaptiveColors.cardBackground(for: colorScheme))
-                                .cornerRadius(12)
-                            }
-                            
-                            // Report Bug
-                            Button(action: {
-                                if let url = URL(string: "mailto:bugs@cocktailapp.com?subject=Bug%20Report") {
-                                    UIApplication.shared.open(url)
-                                }
-                            }) {
-                                HStack {
-                                    Image(systemName: "exclamationmark.triangle.fill")
-                                        .font(.title3)
-                                        .foregroundColor(COLOR_WARM_AMBER)
-                                    
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("Report a Bug")
-                                            .font(.headline)
-                                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                                        Text("Let us know about issues")
-                                            .font(.caption)
-                                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Image(systemName: "chevron.right")
-                                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                                }
-                                .padding()
-                                .background(AdaptiveColors.cardBackground(for: colorScheme))
-                                .cornerRadius(12)
-                            }
-                        }
-                        .padding()
-                        .background(AdaptiveColors.cardBackground(for: colorScheme))
-                        .cornerRadius(16)
-                        .padding(.horizontal, 20)
-                        .padding(.bottom, 40)
                     }
+                    .background(COLOR_CHARCOAL_LIGHT)
+                    .cornerRadius(14)
+                    .padding(.horizontal, 20)
+
+                    // Contact & Support
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("CONTACT & SUPPORT")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(COLOR_TEXT_SECONDARY)
+                            .kerning(1)
+                            .padding(.horizontal, 20)
+
+                        VStack(spacing: 0) {
+                            contactRow(icon: "envelope.fill", title: "Email Support", subtitle: "support@cabinetcocktails.com", urlString: "mailto:support@cabinetcocktails.com?subject=Cabinet%20Cocktails%20Support", isLast: false)
+                            contactRow(icon: "bubble.left.and.bubble.right.fill", title: "Send Feedback", subtitle: "Help us improve the app", urlString: "mailto:feedback@cabinetcocktails.com?subject=App%20Feedback", isLast: false)
+                            contactRow(icon: "exclamationmark.triangle.fill", title: "Report a Bug", subtitle: "Let us know about issues", urlString: "mailto:bugs@cabinetcocktails.com?subject=Bug%20Report", isLast: true)
+                        }
+                        .background(COLOR_CHARCOAL_LIGHT)
+                        .cornerRadius(14)
+                        .padding(.horizontal, 20)
+                    }
+
+                    Spacer(minLength: 48)
                 }
             }
-            .navigationBarTitleDisplayMode(.inline)
-            .sheet(isPresented: $showTutorial) {
-                TutorialView()
+        }
+        .sheet(isPresented: $showTutorial) {
+            TutorialView()
+        }
+    }
+
+    @ViewBuilder
+    private func contactRow(icon: String, title: String, subtitle: String, urlString: String, isLast: Bool) -> some View {
+        Button(action: {
+            if let url = URL(string: urlString) {
+                UIApplication.shared.open(url)
             }
+        }) {
+            HStack(spacing: 14) {
+                ZStack {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(COLOR_WARM_AMBER.opacity(0.14))
+                        .frame(width: 36, height: 36)
+                    Image(systemName: icon)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_WARM_AMBER)
+                }
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(title)
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
+                    Text(subtitle)
+                        .font(.system(size: 13))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
+                }
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 14)
+        }
+        .buttonStyle(.plain)
+
+        if !isLast {
+            Rectangle()
+                .fill(Color.white.opacity(0.08))
+                .frame(height: 1)
+                .padding(.leading, 66)
         }
     }
 }
 
 // MARK: - Help Section Card
 struct HelpSectionCard: View {
-    @Environment(\.colorScheme) var colorScheme
     let section: HelpView.HelpSection
     let isExpanded: Bool
+    let isLast: Bool
     let onTap: () -> Void
-    
+
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             Button(action: onTap) {
-                HStack {
-                    Image(systemName: iconForSection(section))
-                        .font(.title3)
-                        .foregroundColor(COLOR_WARM_AMBER)
-                        .frame(width: 30)
-                    
+                HStack(spacing: 14) {
+                    ZStack {
+                        RoundedRectangle(cornerRadius: 8)
+                            .fill(COLOR_WARM_AMBER.opacity(0.14))
+                            .frame(width: 36, height: 36)
+                        Image(systemName: iconForSection(section))
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundColor(COLOR_WARM_AMBER)
+                    }
                     Text(section.rawValue)
-                        .font(.headline)
-                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                    
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundColor(COLOR_TEXT_PRIMARY)
                     Spacer()
-                    
                     Image(systemName: isExpanded ? "chevron.up" : "chevron.down")
-                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(COLOR_TEXT_SECONDARY)
                 }
-                .padding()
+                .padding(.horizontal, 16)
+                .padding(.vertical, 14)
             }
-            
+            .buttonStyle(.plain)
+
             if isExpanded {
-                VStack(alignment: .leading, spacing: 16) {
-                    ForEach(contentForSection(section), id: \.title) { item in
-                        HelpItemView(item: item)
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+
+                let items = contentForSection(section)
+                VStack(alignment: .leading, spacing: 0) {
+                    ForEach(Array(items.enumerated()), id: \.offset) { index, item in
+                        HelpItemView(item: item, isLast: index == items.count - 1)
                     }
                 }
-                .padding()
-                .background(AdaptiveColors.secondaryCardBackground(for: colorScheme))
+                .padding(.vertical, 4)
+            }
+
+            if !isLast {
+                Rectangle()
+                    .fill(Color.white.opacity(0.08))
+                    .frame(height: 1)
+                    .padding(.leading, 66)
             }
         }
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
-        .cornerRadius(12)
-        .padding(.horizontal, 20)
     }
-    
+
     func iconForSection(_ section: HelpView.HelpSection) -> String {
         switch section {
         case .gettingStarted: return "play.circle.fill"
@@ -249,7 +226,7 @@ struct HelpSectionCard: View {
         case .troubleshooting: return "wrench.and.screwdriver.fill"
         }
     }
-    
+
     func contentForSection(_ section: HelpView.HelpSection) -> [HelpItem] {
         switch section {
         case .gettingStarted:
@@ -296,20 +273,29 @@ struct HelpItem {
 }
 
 struct HelpItemView: View {
-    @Environment(\.colorScheme) var colorScheme
     let item: HelpItem
-    
+    let isLast: Bool
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(item.title)
-                .font(.subheadline)
-                .fontWeight(.semibold)
-                .foregroundColor(COLOR_WARM_AMBER)
-            
-            Text(item.description)
-                .font(.body)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                .fixedSize(horizontal: false, vertical: true)
+        VStack(alignment: .leading, spacing: 0) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text(item.title)
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(COLOR_WARM_AMBER)
+                Text(item.description)
+                    .font(.system(size: 13))
+                    .foregroundColor(COLOR_TEXT_SECONDARY)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(.horizontal, 16)
+            .padding(.vertical, 12)
+
+            if !isLast {
+                Rectangle()
+                    .fill(Color.white.opacity(0.06))
+                    .frame(height: 1)
+                    .padding(.leading, 16)
+            }
         }
     }
 }

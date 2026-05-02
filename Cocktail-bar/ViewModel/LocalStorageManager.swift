@@ -155,7 +155,7 @@ class LocalStorageManager {
                 return decodedItems
             }
         }
-        let defaultUser = User(uid: "", email: "", profileImageUrl: "", username: "", password: "", isLoggedIn: false)
+        let defaultUser = User(uid: "", profileImageUrl: "", password: "", isLoggedIn: false)
         userCache = defaultUser
         return defaultUser
     }

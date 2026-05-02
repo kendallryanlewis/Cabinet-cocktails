@@ -74,6 +74,7 @@
 		5CCOLLDETAIL001 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CCOLLDETAIL002 /* CollectionDetailView.swift */; };
 		5CCOLLMGR001 /* CollectionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CCOLLMGR002 /* CollectionManager.swift */; };
 		5CCOLLVIEW001 /* CollectionsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CCOLLVIEW002 /* CollectionsView.swift */; };
+		5CPROFTAB001 /* ProfileTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CPROFTAB002 /* ProfileTabView.swift */; };
 		5CEXPTRACK001 /* ExpirationTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CEXPTRACK002 /* ExpirationTracker.swift */; };
 		5CHISTORY001 /* CocktailHistory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CHISTORY002 /* CocktailHistory.swift */; };
 		5CHISTVIEW001 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CHISTVIEW002 /* HistoryView.swift */; };
@@ -184,6 +185,7 @@
 		5CCOLLDETAIL002 /* CollectionDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		5CCOLLMGR002 /* CollectionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionManager.swift; sourceTree = "<group>"; };
 		5CCOLLVIEW002 /* CollectionsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CollectionsView.swift; sourceTree = "<group>"; };
+		5CPROFTAB002 /* ProfileTabView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileTabView.swift; sourceTree = "<group>"; };
 		5CEXPTRACK002 /* ExpirationTracker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExpirationTracker.swift; sourceTree = "<group>"; };
 		5CHISTORY002 /* CocktailHistory.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CocktailHistory.swift; sourceTree = "<group>"; };
 		5CHISTVIEW002 /* HistoryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
@@ -396,6 +398,7 @@
 				5CBATCHVIEW002 /* BatchCalculatorView.swift */,
 				5CCOLLVIEW002 /* CollectionsView.swift */,
 				5CCOLLDETAIL002 /* CollectionDetailView.swift */,
+				5CPROFTAB002 /* ProfileTabView.swift */,
 			);
 			path = Pages;
 			sourceTree = "<group>";
@@ -631,6 +634,7 @@
 				5CCOLLMGR001 /* CollectionManager.swift in Sources */,
 				5CCOLLVIEW001 /* CollectionsView.swift in Sources */,
 				5CCOLLDETAIL001 /* CollectionDetailView.swift in Sources */,
+				5CPROFTAB001 /* ProfileTabView.swift in Sources */,
 				5CADDCOLL001 /* AddToCollectionView.swift in Sources */,
 				5CSRCHFILT001 /* SearchFilterManager.swift in Sources */,
 				5CSRCHVIEW001 /* SearchFilterViews.swift in Sources */,
