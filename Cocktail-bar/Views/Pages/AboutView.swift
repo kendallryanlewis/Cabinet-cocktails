@@ -10,6 +10,7 @@ import SwiftUI
 struct AboutView: View {
     @Binding var isMenuOpen: Bool
     @Environment(\.presentationMode) var presentationMode
+    @State private var showPremiumSheet = false
 
     var body: some View {
         ZStack {
@@ -65,6 +66,22 @@ struct AboutView: View {
                     .cornerRadius(14)
                     .padding(.horizontal, 20)
 
+                    // ── Upgrade to Premium Button ───────────────────────
+                    Button(action: { showPremiumSheet = true }) {
+                        HStack {
+                            Image(systemName: "star.fill")
+                                .foregroundColor(.white)
+                            Text("Upgrade to Premium")
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(COLOR_WARM_AMBER)
+                        .cornerRadius(12)
+                    }
+                    .padding(.horizontal, 20)
+
                     // ── What We Offer ───────────────────────────────────
                     VStack(alignment: .leading, spacing: 14) {
                         Text("WHAT WE OFFER")
@@ -101,6 +118,9 @@ struct AboutView: View {
                     Spacer(minLength: 48)
                 }
             }
+        }
+        .sheet(isPresented: $showPremiumSheet) {
+            SubscriptionManagementView()
         }
     }
 }
