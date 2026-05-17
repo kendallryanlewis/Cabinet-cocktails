@@ -13,7 +13,6 @@ struct PaywallView: View {
     @Environment(\.dismiss) var dismiss
     @Environment(\.colorScheme) var colorScheme
     
-    @State private var selectedProduct: Product?
     @State private var isPurchasing = false
     @State private var showError = false
     @State private var errorMessage = ""
@@ -29,36 +28,122 @@ struct PaywallView: View {
     
     var body: some View {
         ZStack {
-            // Background — adapts to light/dark mode
             AppBackground()
                 .ignoresSafeArea()
             
             ScrollView {
-                VStack(spacing: 30) {
-                    // Header
-                    headerSection
+                VStack(spacing: 20) {
+                    // Header Title
+                    Text("Cabinet Cocktails Premium")
+                        .font(.largeTitle.bold())
+                        .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                        .multilineTextAlignment(.center)
+                        .padding(.top, 24)
                     
-                    // Feature Highlights
-                    featuresSection
-                    
-                    // Pricing Options
-                    if !premiumManager.products.isEmpty {
-                        pricingSection
-                    } else {
-                        SwiftUI.ProgressView()
-                            .tint(COLOR_WARM_AMBER)
+                    // Plans Section
+                    VStack(spacing: 30) {
+                        // Monthly Plan
+                        VStack(spacing: 4) {
+                            Text("Monthly Plan")
+                                .font(.title2.bold())
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                            HStack(alignment: .bottom, spacing: 2) {
+                                Text(monthlyPrice)
+                                    .font(.system(size: 40, weight: .bold))
+                                    .foregroundColor(COLOR_WARM_AMBER)
+                                Text("/ month")
+                                    .font(.title3)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    .padding(.bottom, 6)
+                            }
+                        }
+                        
+                        // Yearly Plan
+                        VStack(spacing: 4) {
+                            Text("Yearly Plan")
+                                .font(.title2.bold())
+                                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                            HStack(alignment: .bottom, spacing: 2) {
+                                Text(yearlyPrice)
+                                    .font(.system(size: 40, weight: .bold))
+                                    .foregroundColor(COLOR_WARM_AMBER)
+                                Text("/ year")
+                                    .font(.title3)
+                                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                                    .padding(.bottom, 6)
+                            }
+                        }
                     }
                     
-                    // Feature Comparison
-                    comparisonSection
+                    // Includes Section
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Includes:")
+                            .font(.title3.bold())
+                            .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
+                        
+                        Text("• Unlimited cabinet items")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Unlimited favorites")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Unlimited collections")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Offline mode")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Custom recipes")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Cost tracking")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Batch calculator")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        Text("• Export features")
+                            .font(.body)
+                            .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                    }
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal, 20)
                     
-                    // Restore Purchases
-                    restoreButton
+                    // Legal Disclaimer
+                    Text("Subscriptions automatically renew unless canceled at least 24 hours before the end of the current period. Payment is charged to your Apple ID account at confirmation of purchase.")
+                        .font(.caption)
+                        .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
+                        .multilineTextAlignment(.leading)
+                        .padding(.horizontal, 20)
                     
-                    // Footer
-                    footerSection
+                    // Links and Restore Purchases
+                    HStack(spacing: 20) {
+                        Link("Terms of Use", destination: URL(string: "https://www.kndl-inc.com/terms")!)
+                            .font(.caption)
+                            .foregroundColor(COLOR_WARM_AMBER)
+                            .underline()
+                        
+                        Link("Privacy Policy", destination: URL(string: "https://kndl-inc.com/privacy")!)
+                            .font(.caption)
+                            .foregroundColor(COLOR_WARM_AMBER)
+                            .underline()
+                        
+                        Button {
+                            Task {
+                                await restorePurchases()
+                            }
+                        } label: {
+                            Text("Restore Purchases")
+                                .font(.caption)
+                                .foregroundColor(COLOR_WARM_AMBER)
+                                .underline()
+                        }
+                        .disabled(isPurchasing)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.bottom, 30)
                 }
-                .padding()
+                .padding(.horizontal)
             }
         }
         .alert("Purchase Successful! 🎉", isPresented: $showSuccess) {
@@ -85,192 +170,18 @@ struct PaywallView: View {
         }
     }
     
-    // MARK: - Header Section
-    private var headerSection: some View {
-        VStack(spacing: 16) {
-            // Icon
-            Image(systemName: "crown.fill")
-                .font(.iconLarge)
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [COLOR_WARM_AMBER, COLOR_WARM_AMBER.opacity(0.7)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
-            
-            // Title
-            Text("Upgrade to Premium")
-                .font(.cocktailTitle)
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-            
-            // Subtitle
-            if let feature = feature {
-                Text(featureMessage(for: feature))
-                    .font(.body)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-            } else {
-                Text("Unlock all features and master the art of mixology")
-                    .font(.body)
-                    .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal, 20)
-            }
+    private var monthlyPrice: String {
+        if let monthly = premiumManager.sortedProducts.first(where: { $0.subscription?.subscriptionPeriod.unit == .month }) {
+            return monthly.displayPrice
         }
-        .padding(.top, 24)
+        return "$2.99"
     }
     
-    // MARK: - Features Section
-    private var featuresSection: some View {
-        VStack(spacing: 16) {
-            FeatureRow(icon: "infinity", title: "Unlimited Everything", description: "Cabinet, favorites, and collections")
-            FeatureRow(icon: "wifi.slash", title: "Offline Mode", description: "Access recipes anywhere, anytime")
-            FeatureRow(icon: "pencil.and.list.clipboard", title: "Custom Recipes", description: "Create and share your cocktails")
-            FeatureRow(icon: "dollarsign.circle", title: "Cost Tracking", description: "Budget your bar expenses")
-            FeatureRow(icon: "scalemass", title: "Batch Calculator", description: "Scale recipes for parties")
-            FeatureRow(icon: "square.and.arrow.up", title: "Export Features", description: "Share recipes as PDFs")
-            FeatureRow(icon: "graduationcap", title: "Educational Content", description: "Learn bartending techniques")
-            FeatureRow(icon: "sparkles", title: "Smart Substitutions", description: "AI-powered alternatives")
+    private var yearlyPrice: String {
+        if let yearly = premiumManager.sortedProducts.first(where: { $0.subscription?.subscriptionPeriod.unit == .year }) {
+            return yearly.displayPrice
         }
-        .padding()
-        .background(AdaptiveColors.cardBackground(for: colorScheme))
-        .cornerRadius(16)
-    }
-    
-    // MARK: - Pricing Section
-    private var pricingSection: some View {
-        VStack(spacing: 16) {
-            Text("Choose Your Plan")
-                .font(.title3.bold())
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            ForEach(premiumManager.sortedProducts, id: \.id) { product in
-                ProductCard(
-                    product: product,
-                    isSelected: selectedProduct?.id == product.id,
-                    isPurchasing: isPurchasing,
-                    onSelect: {
-                        selectedProduct = product
-                    },
-                    onPurchase: {
-                        Task {
-                            await purchaseProduct(product)
-                        }
-                    }
-                )
-            }
-        }
-    }
-    
-    // MARK: - Comparison Section
-    private var comparisonSection: some View {
-        VStack(spacing: 16) {
-            Text("Free vs Premium")
-                .font(.title3.bold())
-                .foregroundColor(AdaptiveColors.textPrimary(for: colorScheme))
-                .frame(maxWidth: .infinity, alignment: .leading)
-            
-            VStack(spacing: 12) {
-                ComparisonRow(feature: "Browse Recipes", free: true, premium: true)
-                ComparisonRow(feature: "Cabinet Items", free: "20", premium: "Unlimited")
-                ComparisonRow(feature: "Favorites", free: "10", premium: "Unlimited")
-                ComparisonRow(feature: "Collections", free: "1", premium: "Unlimited")
-                ComparisonRow(feature: "Offline Mode", free: false, premium: true)
-                ComparisonRow(feature: "Custom Recipes", free: false, premium: true)
-                ComparisonRow(feature: "Cost Tracking", free: false, premium: true)
-                ComparisonRow(feature: "Batch Calculator", free: false, premium: true)
-                ComparisonRow(feature: "Export Features", free: false, premium: true)
-                ComparisonRow(feature: "Educational Content", free: "Basic", premium: "Full Access")
-            }
-            .padding()
-            .background(AdaptiveColors.cardBackground(for: colorScheme))
-            .cornerRadius(16)
-        }
-    }
-    
-    // MARK: - Restore Button
-    private var restoreButton: some View {
-        Button {
-            Task {
-                await restorePurchases()
-            }
-        } label: {
-            Text("Restore Purchases")
-                .font(.callout)
-                .foregroundColor(COLOR_WARM_AMBER)
-        }
-        .disabled(isPurchasing)
-    }
-    
-    // MARK: - Footer Section
-    private var footerSection: some View {
-        VStack(spacing: 8) {
-            Text("✓ All future updates included")
-                .font(.caption)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-            Text("✓ Subscriptions cancel anytime from App Store settings")
-                .font(.caption)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-            Text("✓ Lifetime plan — one-time purchase, no renewal")
-                .font(.caption)
-                .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
-        }
-        .padding(.bottom, 20)
-    }
-    
-    // MARK: - Helper Functions
-    
-    private func featureMessage(for feature: PremiumFeature) -> String {
-        switch feature {
-        case .unlimitedCabinet:
-            return "Upgrade to add unlimited ingredients to your cabinet"
-        case .unlimitedFavorites:
-            return "Upgrade to save unlimited favorite cocktails"
-        case .unlimitedCollections:
-            return "Upgrade to create unlimited collections"
-        case .offlineMode:
-            return "Upgrade to access recipes offline"
-        case .customRecipes:
-            return "Upgrade to create custom recipes"
-        case .costTracking:
-            return "Upgrade to track ingredient costs"
-        case .batchCalculator:
-            return "Upgrade to scale recipes for parties"
-        case .advancedSearch:
-            return "Upgrade for advanced search filters"
-        case .exportFeatures:
-            return "Upgrade to export recipes and collections"
-        case .educationalContent:
-            return "Upgrade to access all educational content"
-        case .ingredientSubstitutions:
-            return "Upgrade for smart ingredient substitutions"
-        case .seasonalContent:
-            return "Upgrade to access exclusive seasonal cocktails"
-        case .shoppingList:
-            return "Upgrade to use the shopping list"
-        case .expirationTracking:
-            return "Upgrade to track ingredient expiration"
-        }
-    }
-    
-    private func purchaseProduct(_ product: Product) async {
-        isPurchasing = true
-        
-        do {
-            let transaction = try await premiumManager.purchase(product)
-            
-            if transaction != nil {
-                showSuccess = true
-            }
-        } catch {
-            errorMessage = error.localizedDescription
-            showError = true
-        }
-        
-        isPurchasing = false
+        return "$19.99"
     }
     
     private func restorePurchases() async {
