@@ -56,6 +56,19 @@ struct PaywallView: View {
                                     .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     .padding(.bottom, 6)
                             }
+                            if let monthlyProduct = premiumManager.sortedProducts.first(where: { $0.subscription?.subscriptionPeriod.unit == .month }) {
+                                Button(action: { Task { await purchase(monthlyProduct) } }) {
+                                    Text(isPurchasing ? "Processing..." : "Subscribe Monthly")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(COLOR_WARM_AMBER)
+                                        .foregroundColor(COLOR_CHARCOAL)
+                                        .cornerRadius(12)
+                                }
+                                .disabled(isPurchasing)
+                                .padding(.top, 6)
+                            }
                         }
                         
                         // Yearly Plan
@@ -71,6 +84,19 @@ struct PaywallView: View {
                                     .font(.title3)
                                     .foregroundColor(AdaptiveColors.textSecondary(for: colorScheme))
                                     .padding(.bottom, 6)
+                            }
+                            if let yearlyProduct = premiumManager.sortedProducts.first(where: { $0.subscription?.subscriptionPeriod.unit == .year }) {
+                                Button(action: { Task { await purchase(yearlyProduct) } }) {
+                                    Text(isPurchasing ? "Processing..." : "Subscribe Yearly")
+                                        .font(.headline)
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(COLOR_WARM_AMBER)
+                                        .foregroundColor(COLOR_CHARCOAL)
+                                        .cornerRadius(12)
+                                }
+                                .disabled(isPurchasing)
+                                .padding(.top, 6)
                             }
                         }
                     }
@@ -196,6 +222,21 @@ struct PaywallView: View {
             showError = true
         }
         
+        isPurchasing = false
+    }
+    
+    private func purchase(_ product: Product) async {
+        guard !isPurchasing else { return }
+        isPurchasing = true
+        do {
+            let transaction = try await premiumManager.purchase(product)
+            if transaction != nil {
+                showSuccess = true
+            }
+        } catch {
+            errorMessage = error.localizedDescription
+            showError = true
+        }
         isPurchasing = false
     }
 }
